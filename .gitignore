@@ -1,0 +1,49 @@
+### IntelliJ IDEA ###
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+#
+/out/
+/target/
+*.iml
+
+# Ignore setting files for IntelliJ IDEA
+.idea/
+*.ipr
+*.iws
+
+# Ignore exec file + lib
+*.class
+*.jar
+*.war
+*.ear
+
+# Ignore file log and MacOS file
+*.log
+*.tmp
+*.swp
+*.bak
+*.DS_Store
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
