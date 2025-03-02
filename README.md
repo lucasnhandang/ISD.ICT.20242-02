@@ -23,7 +23,7 @@ This section outlines the tasks assigned to each team member on a weekly basis.
 - Assigned tasks:
     - Use case: Add/Update product (Product Manager)
     - Review use case: View product detail (Customer/Product Manager) & Cancel order (Customer/VNPay)
-    - Requirements: UC Diagram + Business Process
+    - Requirements: UC Diagram
 
 </details>
 
@@ -43,7 +43,7 @@ This section outlines the tasks assigned to each team member on a weekly basis.
 - Assigned tasks:
     - Use case: Place order (Customer/VNPay) & Reject order (Product Manager)
     - Review use case: Add/Update product (Product Manager)
-    - Requirements: Reliability & Usability
+    - Requirements: UC Diagram + Business Process
 
 </details>
 
@@ -63,7 +63,7 @@ This section outlines the tasks assigned to each team member on a weekly basis.
 - Assigned tasks:
     - Use case: Place rush order (Customer) & Approve order (Product Manager)
     - Review use case: Pay order (Customer/VNPay) & Create new users (Administrator)
-    - Requirements: UC Diagram
+    - Requirements: Reliability & Usability
 
 </details>
 
