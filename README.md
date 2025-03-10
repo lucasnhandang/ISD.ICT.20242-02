@@ -16,10 +16,10 @@ This section outlines the tasks assigned to each team member on a weekly basis.
 
 ### W1: 24/02/2025 - 02/03/2025
 
-| **Name**          | **Assigned Tasks**                                | **Review Use Case**                                                               | **Requirements**                |
-|------------------|---------------------------------------------------|-----------------------------------------------------------------------------------|---------------------------------|
-| **Dang Van Nhan** | - Add/Update product (Product Manager)            | - View product details (Customer/Product Manager) & Cancel order (Customer/VNPay) | - UC Diagram                    |
-| **Ha Viet Khanh** | Pay order (Customer/VNPay) & Create user (Administrator)                      | - Place order (Customer/VNPay)                                                    | - Introduction                  |
-| **Ho Bao Thu**    | - Place order (Customer/VNPay)                    | - Add/Update product (Product Manager)                                            | - UC Diagram + Business Process |
-| **Tran Cao Phong**| - View product details (Customer/Product Manager) & Cancel order (Customer/VNPay)  | Place rush order (Customer) & Approve order (Product Manager) & Reject order (Product Manager)                                                     | - Performance & Supportability  |
-| **Nguyen Lan Nhi**| Place rush order (Customer) & Approve order (Product Manager) & Reject order (Product Manager)                     | Pay order (Customer/VNPay) & Create user (Administrator)                                                      | - Reliability & Usability       |
+| **Name**          | **Assigned Tasks**                            | **Review Use Case**                                                                          | **Requirements**          |
+|------------------|-----------------------------------------------|----------------------------------------------------------------------------------------------|---------------------------|
+| **Dang Van Nhan** | Add/Update product (Product Manager)          | View product details (Customer/Product Manager) & Cancel order (Customer/VNPay)              | UC Diagram                |
+| **Ha Viet Khanh** | Pay order (Customer/VNPay) & Create user (Administrator)                  | Place order (Customer) & Reject order (Product Manager)                                                                 | Introduction              |
+| **Ho Bao Thu**    | Place order (Customer) & Reject order (Product Manager)         | Add/Update product (Product Manager)                                                         | UC Diagram + Business Process |
+| **Tran Cao Phong**| View product details (Customer/Product Manager) & Cancel order (Customer/VNPay) | Place rush order (Customer) & Approve order (Product Manager) | Performance & Supportability |
+| **Nguyen Lan Nhi**| Place rush order (Customer) & Approve order (Product Manager)               | Pay order (Customer/VNPay) & Create user (Administrator)                                     | Reliability & Usability   |
