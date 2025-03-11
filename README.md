@@ -23,3 +23,13 @@ This section outlines the tasks assigned to each team member on a weekly basis.
 | **Ho Bao Thu**    | Place order (Customer) & Reject order (Product Manager)         | Add/Update product (Product Manager)                                                         | UC Diagram + Business Process |
 | **Tran Cao Phong**| View product details (Customer/Product Manager) & Cancel order (Customer/VNPay) | Place rush order (Customer) & Approve order (Product Manager) | Performance & Supportability |
 | **Nguyen Lan Nhi**| Place rush order (Customer) & Approve order (Product Manager)               | Pay order (Customer/VNPay) & Create user (Administrator)                                     | Reliability & Usability   |
+
+### W2: 03/03/2025 - 10/03/2025
+
+| **Name**          | **Assigned Tasks: Draw Sequence Diagram for UC**                                | 
+|------------------|---------------------------------------------------------------------------------|
+| **Dang Van Nhan** | Add/Update product (Product Manager)                                            | 
+| **Ha Viet Khanh** | Pay order (Customer/VNPay) & Create user (Administrator)                        |
+| **Ho Bao Thu**    | Place order (Customer) & Reject order (Product Manager)                         | 
+| **Tran Cao Phong**| View product details (Customer/Product Manager) & Cancel order (Customer/VNPay) |
+| **Nguyen Lan Nhi**| Place rush order (Customer) & Approve order (Product Manager)                   | 
