@@ -13,18 +13,21 @@ Capstone Project: AIMS Software for ITSS Software Development course in 20242 se
 
 ## Report content
 This section outlines the tasks assigned to each team member on a weekly basis.
-
-### W1: 24/02/2025 - 02/03/2025
+<details>
+  <summary> W1: 24/02/2025 - 02/03/2025 </summary>
 
 | **Name**          | **Assigned Tasks**                            | **Review Use Case**                                                                          | **Requirements**          |
 |------------------|-----------------------------------------------|----------------------------------------------------------------------------------------------|---------------------------|
 | **Dang Van Nhan** | Add/Update product (Product Manager)          | View product details (Customer/Product Manager) & Cancel order (Customer/VNPay)              | UC Diagram                |
-| **Ha Viet Khanh** | Pay order (Customer/VNPay) & Create user (Administrator)                  | Place order (Customer) & Reject order (Product Manager)                                                                 | Introduction              |
+| **Ha Viet Khanh** | Pay order (Customer/VNPay) & Create user (Administrator)                  | Place order (Customer) & Reject order (Product Manager)                                      | Introduction              |
 | **Ho Bao Thu**    | Place order (Customer) & Reject order (Product Manager)         | Add/Update product (Product Manager)                                                         | UC Diagram + Business Process |
 | **Tran Cao Phong**| View product details (Customer/Product Manager) & Cancel order (Customer/VNPay) | Place rush order (Customer) & Approve order (Product Manager) | Performance & Supportability |
 | **Nguyen Lan Nhi**| Place rush order (Customer) & Approve order (Product Manager)               | Pay order (Customer/VNPay) & Create user (Administrator)                                     | Reliability & Usability   |
 
-### W2: 03/03/2025 - 10/03/2025
+</details>
+
+<details>
+  <summary> W2: 03/03/2025 - 09/03/2025 </summary>
 
 | **Name**          | **Assigned Tasks: Draw Sequence Diagram for UC**                                | 
 |------------------|---------------------------------------------------------------------------------|
@@ -32,4 +35,19 @@ This section outlines the tasks assigned to each team member on a weekly basis.
 | **Ha Viet Khanh** | Pay order (Customer/VNPay) & Create user (Administrator)                        |
 | **Ho Bao Thu**    | Place order (Customer) & Reject order (Product Manager)                         | 
 | **Tran Cao Phong**| View product details (Customer/Product Manager) & Cancel order (Customer/VNPay) |
-| **Nguyen Lan Nhi**| Place rush order (Customer) & Approve order (Product Manager)                   | 
+| **Nguyen Lan Nhi**| Place rush order (Customer) & Approve order (Product Manager)                   |
+
+</details>
+
+<details>
+  <summary> W3: 10/03/2025 - 16/03/2025 </summary>
+
+| **Name**          | **Communication Diagram + Analysis Class Diagram for UC**                       |
+|------------------|---------------------------------------------------------------------------------|
+| **Dang Van Nhan** | Add/Update product (Product Manager)                                            |     
+| **Ha Viet Khanh** | Pay order (Customer/VNPay) & Create user (Administrator)                        |  
+| **Ho Bao Thu**    | Place order (Customer) & Reject order (Product Manager)                         |  
+| **Tran Cao Phong**| View product details (Customer/Product Manager) & Cancel order (Customer/VNPay) |   
+| **Nguyen Lan Nhi**| Place rush order (Customer) & Approve order (Product Manager)                   |  
+
+</details>
