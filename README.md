@@ -14,7 +14,7 @@ Capstone Project: AIMS Software for ITSS Software Development course in 20242 se
 ## Report content
 This section outlines the tasks assigned to each team member on a weekly basis.
 <details>
-  <summary> W1: 24/02/2025 - 02/03/2025 </summary>
+  <summary> W3: 24/02/2025 - 02/03/2025 </summary>
 
 | **Name**          | **Assigned Tasks**                            | **Review Use Case**                                                                          | **Requirements**          |
 |------------------|-----------------------------------------------|----------------------------------------------------------------------------------------------|---------------------------|
@@ -27,7 +27,7 @@ This section outlines the tasks assigned to each team member on a weekly basis.
 </details>
 
 <details>
-  <summary> W2: 03/03/2025 - 09/03/2025 </summary>
+  <summary> W4: 03/03/2025 - 09/03/2025 </summary>
 
 | **Name**          | **Assigned Tasks: Draw Sequence Diagram for UC**                                | 
 |------------------|---------------------------------------------------------------------------------|
@@ -40,9 +40,22 @@ This section outlines the tasks assigned to each team member on a weekly basis.
 </details>
 
 <details>
-  <summary> W3: 10/03/2025 - 16/03/2025 </summary>
+  <summary> W5: 10/03/2025 - 16/03/2025 </summary>
 
 | **Name**          | **Communication Diagram + Analysis Class Diagram for UC**                       |
+|------------------|---------------------------------------------------------------------------------|
+| **Dang Van Nhan** | Add/Update product (Product Manager)                                            |     
+| **Ha Viet Khanh** | Pay order (Customer/VNPay) & Create user (Administrator)                        |  
+| **Ho Bao Thu**    | Place order (Customer) & Reject order (Product Manager)                         |  
+| **Tran Cao Phong**| View product details (Customer/Product Manager) & Cancel order (Customer/VNPay) |   
+| **Nguyen Lan Nhi**| Place rush order (Customer) & Approve order (Product Manager)                   |  
+
+</details>
+
+<details>
+  <summary> W6: 17/03/2025 - 23/03/2025 </summary>
+
+| **Name**          | **Detailed Class Diagram for UC**                                               |
 |------------------|---------------------------------------------------------------------------------|
 | **Dang Van Nhan** | Add/Update product (Product Manager)                                            |     
 | **Ha Viet Khanh** | Pay order (Customer/VNPay) & Create user (Administrator)                        |  
