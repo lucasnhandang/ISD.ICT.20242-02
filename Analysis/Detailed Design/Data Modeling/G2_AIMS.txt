@@ -1,0 +1,171 @@
+-- User Table
+CREATE TABLE User (
+    userID INT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(32) NOT NULL ,
+    phoneNumber CHAR(10) NOT NULL UNIQUE,
+    userRole VARCHAR(50) NOT NULL CHECK (userRole IN ('admin', 'productManager'))
+);
+
+-- Product Table
+CREATE TABLE Product (
+    id INT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    genre VARCHAR(100),
+    dimension VARCHAR(50) NOT NULL,
+    weight NUMERIC(10, 2) NOT NULL,
+    stock INT NOT NULL CHECK (stock >= 0),
+    barcode VARCHAR(100) NOT NULL,
+    currentPrice INT NOT NULL,
+    rushOrderSupported BOOLEAN NOT NULL,
+    value INT NOT NULL CHECK (value >= 0),
+    category VARCHAR(20) NOT NULL CHECK (category IN ('book', 'lp', 'cd', 'dvd'))
+);
+
+-- DVD Table
+CREATE TABLE DVD (
+    id INT PRIMARY KEY,
+    releaseDate DATE,
+    subtitles VARCHAR(255) NOT NULL,
+    language VARCHAR(50) NOT NULL,
+    studio VARCHAR(100) NOT NULL,
+    runtime INT NOT NULL CHECK (runtime >= 0),
+    director VARCHAR(100) NOT NULL,
+    discType VARCHAR(50) NOT NULL,
+    FOREIGN KEY (id) REFERENCES Product(id) ON DELETE CASCADE
+);
+
+-- CD Table
+CREATE TABLE CD (
+    id INT PRIMARY KEY,
+    releaseDate DATE,
+    musicCollection VARCHAR(255) NOT NULL,
+    artist VARCHAR(100) NOT NULL,
+    totalTrack INT CHECK (totalTrack >= 0),
+    recordLabel VARCHAR(100) NOT NULL,
+    FOREIGN KEY (id) REFERENCES Product(id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE cdTrack (
+    trackID INT PRIMARY KEY,
+    cdID INT,
+    trackNo INT CHECK (trackNo >= 0),
+    title VARCHAR(255) NOT NULL,
+    FOREIGN KEY (cdID) REFERENCES CD(id) ON DELETE CASCADE
+);
+
+-- LP Table
+CREATE TABLE LP (
+    id INT PRIMARY KEY,
+    releaseDate DATE,
+    musicCollection VARCHAR(255) NOT NULL,
+    artist VARCHAR(100) NOT NULL,
+    totalTrack INT CHECK (totalTrack >= 0),
+    recordLabel VARCHAR(100) NOT NULL,
+    FOREIGN KEY (id) REFERENCES Product(id) ON DELETE CASCADE
+
+);
+
+CREATE TABLE lpTrack (
+    trackID INT PRIMARY KEY,
+    lpID INT,
+    trackNo INT CHECK (trackNo >= 0),
+    title VARCHAR(255) NOT NULL,
+    FOREIGN KEY (lpID) REFERENCES LP(id) ON DELETE CASCADE
+);
+
+-- Book Table
+CREATE TABLE Book (
+    id INT PRIMARY KEY,
+    author VARCHAR(100) NOT NULL,
+    publisher VARCHAR(100) NOT NULL,
+    coverType VARCHAR(50) NOT NULL,
+    publicationDate DATE NOT NULL,
+    numPages INT CHECK (numPages >= 0),
+    language VARCHAR(50),
+    FOREIGN KEY (id) REFERENCES Product(id) ON DELETE CASCADE
+
+);
+
+-- Order Table
+CREATE TABLE Orders (
+    orderID INT PRIMARY KEY,
+    totalItem INT NOT NULL CHECK (totalItem > 0),
+    totalPrice INT NOT NULL CHECK (totalPrice >= 0),
+    currency VARCHAR(10) NOT NULL DEFAULT 'VND',
+    invoiceID INT NULL DEFAULT NULL, 
+    deliveryInfoID INT NOT NULL,
+    orderDate DATE NOT NULL,
+    orderStatus VARCHAR(50) NOT NULL DEFAULT 'new' CHECK (
+        orderStatus IN (
+            'new', 
+            'pending', 
+            'approved', 
+            'delivered', 
+            'rejectedNotRefunded', 
+            'refunded', 
+            'canceled'
+        )
+    ),
+    isRushOrder BOOLEAN NOT NULL,
+    FOREIGN KEY (invoiceID) REFERENCES Invoice(invoiceID) ON DELETE SET NULL,
+    FOREIGN KEY (deliveryInfoID) REFERENCES DeliveryInformation(deliveryInfoID) ON DELETE RESTRICT
+);
+
+CREATE TABLE OrderItem (
+    orderID INT NOT NULL,
+    productID INT NOT NULL,
+    quantity INT NOT NULL CHECK (quantity > 0),
+    price INT NOT NULL CHECK (price >= 0),
+    PRIMARY KEY (orderID, productID),
+    FOREIGN KEY (orderID) REFERENCES Orders(orderID) ON DELETE CASCADE,
+    FOREIGN KEY (productID) REFERENCES Product(id) ON DELETE RESTRICT
+);
+
+
+-- DeliveryInformation Table
+CREATE TABLE DeliveryInformation (
+    deliveryInfoID INT PRIMARY KEY,
+    customerName VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    phoneNumber VARCHAR(20) NOT NULL,
+    deliveryAddress TEXT NOT NULL,
+    deliveryProvince VARCHAR(50) NOT NULL,
+    shippingInstruction TEXT,
+    isRushOrder BOOLEAN NOT NULL
+);
+
+-- Invoice Table
+CREATE TABLE Invoice (
+    invoiceID INT PRIMARY KEY,
+    productPriceExVAT INT NOT NULL CHECK (productPriceExVAT > 0),
+    productPriceIncVAT INT NOT NULL CHECK (productPriceIncVAT > 0),
+    shippingFee INT NOT NULL CHECK (shippingFee >= 0),
+    totalAmountDue INT NOT NULL CHECK (totalAmountDue > 0),
+    transactionID INT NOT NULL UNIQUE,
+    refundTransactionID INT NULL UNIQUE,
+    FOREIGN KEY (transactionID) REFERENCES PaymentTransaction(transactionID) ON DELETE RESTRICT,
+    FOREIGN KEY (refundTransactionID) REFERENCES RefundTransaction(refundTransactionID) ON DELETE SET NULL
+);
+
+-- PaymentTransaction Table
+CREATE TABLE PaymentTransaction (
+    transactionID INT PRIMARY KEY,
+    customerName VARCHAR(100) NOT NULL,
+    cardType VARCHAR(50) NOT NULL,
+    transactionContent VARCHAR(100) NOT NULL,
+    totalAmount INT NOT NULL CHECK (totalAmount > 0),
+    currency VARCHAR(10) NOT NULL,
+    date DATE NOT NULL
+);
+
+-- RefundTransaction Table
+CREATE TABLE RefundTransaction (
+    refundTransactionID INT PRIMARY KEY,
+    refundDate DATE NOT NULL,
+    orderAmount INT NOT NULL CHECK (orderAmount > 0),
+    bankTransactionID VARCHAR(100) NOT NULL,
+    currency VARCHAR(10) NOT NULL
+);
