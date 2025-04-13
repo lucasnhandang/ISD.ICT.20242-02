@@ -16,19 +16,28 @@ This repository is organized as follows:
 
 ```
 ISD.ICT.20242-02/
-├── Analysis/                    # Analysis documentation
-│   ├── Business Process/        
+├── .gitignore
+├── README.md                        
+├── AIMS/                           # Source code directory
+├── Analysis/                        
+│   ├── Business Process/ 
+│   │           
 │   ├── Communication Diagram + Analysis Class Diagram/
-│   ├── Sequence Diagram/         # Detailed design documentation
-│   └── Detailed Design/        
-│       └──...
-│       └──InterfaceDesign       # Subsystem + Interface Design for "Pay Order" UC with VNPay
-├── Requirements/                # Project requirements documentation
-│   ├── Group2-SRS.docx          # SRS
-│   └── Group2-SDD.docx          # SDD
-├── src/                         # Source code for project
-├── .gitignore                   
-└── README.md                    # Project documentation
+│   │   └── ... (each member will have their own folder with their assigned UC)
+│   │           
+│   ├── Detailed Design/            
+│   │   ├── Data Modeling/          # Database Design for AIMS
+│   │   ├── Interface Design/       # Subsystem + Interface for "Pay order" UC
+│   │   └── Use Cases/              # Detailed diagrams for each use case
+│   │       │ ...
+│   │       └── General Combined Package.png # Class Diagram of AIMS
+│   │           
+│   └──Sequence Diagram/           # Sequence diagrams for each use case
+│   │       └── ... (each member will have their own folder with their assigned UC)
+│   │           
+└── Requirements/                   
+    ├── Group2-SRS.docx             # Software Requirements Specification
+    └── Group2-SDD.docx             # Software Design Description (will be updated)
 ```
 
 ## Report content
@@ -95,5 +104,18 @@ This section outlines the tasks assigned to each team member on a weekly basis.
 | **Ho Bao Thu**    | Class diagram for subsystem                         |  
 | **Tran Cao Phong**| Operation design for all operations in the interface (Table 2, Parameter, Exception) |   
 | **Nguyen Lan Nhi**| Interaction diagram (recommend sequence diagram) for each operation in the interface                   |  
+
+</details>
+
+<details>
+  <summary>W8: 07/04/2025 - 13/04/2025</summary>
+
+| **Student Name**   | **Task**                                 |
+|--------------------|------------------------------------------|
+| **Ha Viet Khanh**          | ERD for AIMS                             |
+| **Ho Bao Thu**            | DB Schema Script                         |
+| **Dang Van Nhan**           | DB Detail Design (File report)           |
+| **Tran Cao Phong**          | Relational Schema for AIMS               |
+| **Nguyen Lan Nhi**            | Front-end for the UC View Product Detail |
 
 </details>
