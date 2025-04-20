@@ -1,0 +1,85 @@
+---book
+{
+  "_id": 103,
+  "title": "Inception",
+  "currentPrice": 200000,
+  "stock": 10,
+  "category": "book",
+  "genre": ["thriller", "oscar"],
+  "image": "https://example.com/inception.jpg",
+  "details": {
+    "author": "J.K. Rowling",
+    "publisher": "Bloomsbury",
+    "coverType": "Hardcover",
+    "publicationDate": "1997-06-26",
+    "numPages": 320,
+    "language": "English"
+  }
+}
+
+--cd
+{
+  "_id": 102,
+  "title": "Greatest Hits",
+  "currentPrice": 200000,
+  "stock": 10,
+  "category": "cd",
+  "genre": ["thriller", "oscar"],
+  "image": "https://example.com/inception.jpg",
+  "details": {
+    "releaseDate": "2012-10-22",
+    "musicCollection": "Greatest Hits",
+    "artist": "The Beatles",
+    "totalTrack": 2,
+    "recordLabel": "Universal Music",
+    "tracks": [
+      { "trackNo": 1, "title": "Hey Jude" },
+      { "trackNo": 2, "title": "Let It Be" }
+    ]
+  }
+}
+
+
+
+--dvd
+{
+  "_id": 101,
+  "title": "Inception",
+  "currentPrice": 200000,
+  "stock": 10,
+  "category": "dvd",
+  "genre": ["thriller", "oscar"],
+  "image": "https://example.com/inception.jpg",
+  "details": {
+    "releaseDate": "2010-07-16",
+    "subtitles": "English, Spanish",
+    "language": "English",
+    "director": "Christopher Nolan",
+    "studio": "Warner Bros",
+    "runtime": 148,
+    "discType": "Blu-ray"
+  }
+}
+
+--lp
+{
+  "_id": 104,
+  "title": "Classics",
+  "currentPrice": 200000,
+  "stock": 10,
+  "category": "lp",
+  "genre": ["thriller", "oscar"],
+  "image": "https://example.com/inception.jpg",
+  "details": {
+    "releaseDate": "2018-04-05",
+    "musicCollection": "Classics",
+    "artist": "Led Zeppelin",
+    "totalTrack": 2,
+    "recordLabel": "Atlantic Records",
+    "tracks": [
+      { "trackNo": 1, "title": "Stairway to Heaven" },
+      { "trackNo": 2, "title": "Whole Lotta Love" }
+    ]
+  }
+}
+
