@@ -1,0 +1,341 @@
+G2_AIMS_new-- User Table
+CREATE TABLE Users (
+    userID INT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(32) NOT NULL ,
+    phoneNumber CHAR(10) NOT NULL UNIQUE,
+    userRole VARCHAR(50) NOT NULL CHECK (userRole IN ('admin', 'productManager'))
+);
+
+-- Product Table
+CREATE TABLE Product (
+    id INT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    genre VARCHAR(100),
+    dimension VARCHAR(50) NOT NULL,
+    weight NUMERIC(10, 2) NOT NULL,
+    stock INT NOT NULL CHECK (stock >= 0),
+    barcode VARCHAR(100) NOT NULL,
+    currentPrice INT NOT NULL,
+    rushOrderSupported BOOLEAN NOT NULL,
+    value INT NOT NULL CHECK (value >= 0),
+    category VARCHAR(20) NOT NULL 
+);
+
+-- DVD Table
+CREATE TABLE DVD (
+    id INT PRIMARY KEY,
+    releaseDate DATE,
+    subtitles VARCHAR(255) NOT NULL,
+    language VARCHAR(50) NOT NULL,
+    studio VARCHAR(100) NOT NULL,
+    runtime INT NOT NULL CHECK (runtime >= 0),
+    director VARCHAR(100) NOT NULL,
+    discType VARCHAR(50) NOT NULL,
+    FOREIGN KEY (id) REFERENCES Product(id) ON DELETE CASCADE
+);
+
+-- CD Table
+CREATE TABLE CD (
+    id INT PRIMARY KEY,
+    releaseDate DATE,
+    musicCollection VARCHAR(255) NOT NULL,
+    artist VARCHAR(100) NOT NULL,
+    totalTrack INT CHECK (totalTrack >= 0),
+    recordLabel VARCHAR(100) NOT NULL,
+    FOREIGN KEY (id) REFERENCES Product(id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE cdTrack (
+    trackID INT PRIMARY KEY,
+    cdID INT,
+    trackNo INT CHECK (trackNo >= 0),
+    title VARCHAR(255) NOT NULL,
+    FOREIGN KEY (cdID) REFERENCES CD(id) ON DELETE CASCADE
+);
+
+-- LP Table
+CREATE TABLE LP (
+    id INT PRIMARY KEY,
+    releaseDate DATE,
+    musicCollection VARCHAR(255) NOT NULL,
+    artist VARCHAR(100) NOT NULL,
+    totalTrack INT CHECK (totalTrack >= 0),
+    recordLabel VARCHAR(100) NOT NULL,
+    FOREIGN KEY (id) REFERENCES Product(id) ON DELETE CASCADE
+
+);
+
+CREATE TABLE lpTrack (
+    trackID INT PRIMARY KEY,
+    lpID INT,
+    trackNo INT CHECK (trackNo >= 0),
+    title VARCHAR(255) NOT NULL,
+    FOREIGN KEY (lpID) REFERENCES LP(id) ON DELETE CASCADE
+);
+
+-- Book Table
+CREATE TABLE Book (
+    id INT PRIMARY KEY,
+    author VARCHAR(100) NOT NULL,
+    publisher VARCHAR(100) NOT NULL,
+    coverType VARCHAR(50) NOT NULL,
+    publicationDate DATE NOT NULL,
+    numPages INT CHECK (numPages >= 0),
+    language VARCHAR(50),
+    FOREIGN KEY (id) REFERENCES Product(id) ON DELETE CASCADE
+
+);
+-- DeliveryInformation Table
+CREATE TABLE DeliveryInformation (
+    deliveryInfoID INT PRIMARY KEY,
+    customerName VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    phoneNumber VARCHAR(20) NOT NULL,
+    deliveryAddress TEXT NOT NULL,
+    deliveryProvince VARCHAR(50) NOT NULL,
+    shippingInstruction TEXT,
+    isRushOrder BOOLEAN NOT NULL
+);
+
+-- PaymentTransaction Table
+CREATE TABLE PaymentTransaction (
+    transactionID INT PRIMARY KEY,
+    customerName VARCHAR(100) NOT NULL,
+    cardType VARCHAR(50) NOT NULL,
+    transactionContent VARCHAR(100) NOT NULL,
+    totalAmount INT NOT NULL CHECK (totalAmount > 0),
+    currency VARCHAR(10) NOT NULL,
+    date DATE NOT NULL
+);
+
+-- RefundTransaction Table
+CREATE TABLE RefundTransaction (
+    refundTransactionID INT PRIMARY KEY,
+    refundDate DATE NOT NULL,
+    orderAmount INT NOT NULL CHECK (orderAmount > 0),
+    bankTransactionID VARCHAR(100) NOT NULL,
+    currency VARCHAR(10) NOT NULL
+);
+
+
+-- Invoice Table
+CREATE TABLE Invoice (
+    invoiceID INT PRIMARY KEY,
+    productPriceExVAT INT NOT NULL CHECK (productPriceExVAT > 0),
+    productPriceIncVAT INT NOT NULL CHECK (productPriceIncVAT > 0),
+    shippingFee INT NOT NULL CHECK (shippingFee >= 0),
+    totalAmountDue INT NOT NULL CHECK (totalAmountDue > 0),
+    transactionID INT NOT NULL UNIQUE,
+    refundTransactionID INT NULL UNIQUE,
+    FOREIGN KEY (transactionID) REFERENCES PaymentTransaction(transactionID) ON DELETE RESTRICT,
+    FOREIGN KEY (refundTransactionID) REFERENCES RefundTransaction(refundTransactionID) ON DELETE SET NULL
+);
+
+
+-- Order Table
+CREATE TABLE Orders (
+    orderID INT PRIMARY KEY,
+    totalItem INT NOT NULL CHECK (totalItem > 0),
+    totalPrice INT NOT NULL CHECK (totalPrice >= 0),
+    currency VARCHAR(10) NOT NULL DEFAULT 'VND',
+    invoiceID INT NULL DEFAULT NULL, 
+    deliveryInfoID INT NOT NULL,
+    orderDate DATE NOT NULL,
+    orderStatus VARCHAR(50) NOT NULL DEFAULT 'new' CHECK (
+        orderStatus IN (
+            'new', 
+            'pending', 
+            'approved', 
+            'delivered', 
+            'rejectedNotRefunded', 
+            'refunded', 
+            'canceled'
+        )
+    ),
+    isRushOrder BOOLEAN NOT NULL,
+    FOREIGN KEY (invoiceID) REFERENCES Invoice(invoiceID) ON DELETE SET NULL,
+    FOREIGN KEY (deliveryInfoID) REFERENCES DeliveryInformation(deliveryInfoID) ON DELETE RESTRICT
+);
+
+CREATE TABLE OrderItem (
+    orderID INT NOT NULL,
+    productID INT NOT NULL,
+    quantity INT NOT NULL CHECK (quantity > 0),
+    price INT NOT NULL CHECK (price >= 0),
+    productTitle VARCHAR(255) NOT NULL,
+    PRIMARY KEY (orderID, productID),
+    FOREIGN KEY (orderID) REFERENCES Orders(orderID) ON DELETE CASCADE,
+    FOREIGN KEY (productID) REFERENCES Product(id) ON DELETE RESTRICT
+);
+
+
+
+--Indexing on Users
+CREATE INDEX idx_user_email ON Users(email);
+CREATE INDEX idx_user_phone ON Users(phoneNumber);
+
+--Indexing on Orders
+CREATE INDEX idx_order_date ON Orders(orderDate);
+CREATE INDEX idx_order_status ON Orders(orderStatus);
+
+--Indexing on Product
+CREATE INDEX idx_product_barcode ON Product(barcode);
+CREATE INDEX idx_gin ON Product USING GIN (title);
+
+--Indexing on Invoice
+CREATE INDEX idx_invoice_transactionID ON Invoice(transactionID);
+
+--Indexing on OrderItem
+CREATE INDEX idx_orderitem_productID ON OrderItem(productID);
+
+
+---Select query for book
+SELECT 
+    p.id AS _id,
+    p.title,
+    p.currentPrice,
+    p.stock,
+    p.category,
+    b.author,
+    b.publisher,
+    b.coverType,
+    b.publicationDate,
+    b.numPages,
+    b.language
+FROM 
+    Product p
+JOIN 
+    Book b ON p.id = b.id
+WHERE 
+    p.category = 'book';
+
+---Select query for cd
+SELECT 
+    p.id AS _id,
+    p.title,
+    p.currentPrice,
+    p.stock,
+    p.category,
+    c.releaseDate,
+    c.musicCollection,
+    c.artist,
+    c.totalTrack,
+    c.recordLabel,
+    json_agg(json_build_object('trackNo', ct.trackNo, 'title', ct.title)) AS tracks
+FROM 
+    Product p
+JOIN 
+    CD c ON p.id = c.id
+LEFT JOIN 
+    cdTrack ct ON c.id = ct.cdID
+WHERE 
+    p.category = 'cd'
+GROUP BY 
+    p.id, c.releaseDate, c.musicCollection, c.artist, c.totalTrack, c.recordLabel, p.title, p.currentPrice, p.stock, p.category, p.barcode;
+
+---Select query for dvd
+SELECT 
+    p.id AS _id,
+    p.title,
+    p.currentPrice,
+    p.stock,
+    p.category,
+    p.barcode,
+    d.releaseDate,
+    d.subtitles,
+    d.language,
+    d.director,
+    d.studio,
+    d.runtime,
+    d.discType
+FROM 
+    Product p
+JOIN 
+    DVD d ON p.id = d.id
+WHERE 
+    p.category = 'dvd';
+
+---Select query for lp
+SELECT 
+    p.id AS _id,
+    p.title,
+    p.currentPrice,
+    p.stock,
+    p.category,
+    p.barcode,
+    l.releaseDate,
+    l.musicCollection,
+    l.artist,
+    l.totalTrack,
+    l.recordLabel,
+    json_agg(json_build_object('trackNo', lt.trackNo, 'title', lt.title)) AS tracks
+FROM 
+    Product p
+JOIN 
+    LP l ON p.id = l.id
+LEFT JOIN 
+    lpTrack lt ON l.id = lt.lpID
+WHERE 
+    p.category = 'lp'
+GROUP BY 
+    p.id, l.releaseDate, l.musicCollection, l.artist, l.totalTrack, l.recordLabel, p.title, p.currentPrice, p.stock, p.category, p.barcode;
+
+
+-- Insert vào bảng Users
+INSERT INTO Users VALUES 
+(1, 'John Doe', 'john.doe@example.com', 'password123', '1234567890', 'admin');
+
+-- Insert vào bảng Product
+INSERT INTO Product VALUES 
+(1, 'Sample Product', 'Action', '20x10x5 cm', 0.5, 100, '123456789012', 150, TRUE, 100, 'book');
+
+-- Insert vào bảng DVD
+INSERT INTO DVD VALUES 
+(1, '2025-04-01', 'English, Spanish', 'English', 'Warner Bros', 120, 'John Smith', 'Blu-ray');
+
+-- Insert vào bảng CD
+INSERT INTO CD VALUES 
+(1, '2025-04-01', 'Greatest Hits', 'Artist Name', 10, 'Universal Music');
+
+-- Insert vào bảng cdTrack
+INSERT INTO cdTrack VALUES 
+(1, 1, 1, 'Track 1');
+
+-- Insert vào bảng LP
+INSERT INTO LP VALUES 
+(1, '2025-04-01', 'Classic Hits', 'LP Artist', 12, 'Sony Music');
+
+-- Insert vào bảng lpTrack
+INSERT INTO lpTrack VALUES 
+(1, 1, 1, 'LP Track 1');
+
+-- Insert vào bảng Book
+INSERT INTO Book VALUES 
+(1, 'J.K. Rowling', 'Bloomsbury', 'Hardcover', '1997-06-26', 223, 'English');
+
+-- Insert vào bảng DeliveryInformation
+INSERT INTO DeliveryInformation VALUES 
+(1, 'Alice Johnson', 'alice.johnson@example.com', '9876543210', '123 Main St, Springfield, IL', 'Illinois', 'Leave at front door', TRUE);
+
+-- Insert vào bảng PaymentTransaction
+INSERT INTO PaymentTransaction VALUES 
+(1, 'Alice Johnson', 'Visa', 'Purchase of products', 300, 'USD', '2025-04-15');
+
+-- Insert vào bảng RefundTransaction
+INSERT INTO RefundTransaction VALUES 
+(1, '2025-04-17', 150, 'BANK123456', 'USD');
+
+-- Insert vào bảng Invoice
+INSERT INTO Invoice VALUES 
+(1, 100, 120, 10, 130, 1, NULL);
+
+-- Insert vào bảng Orders
+INSERT INTO Orders VALUES 
+(1, 3, 450, 'USD', 1, 1, '2025-04-15', 'new', TRUE);
+
+-- Insert vào bảng OrderItem
+INSERT INTO OrderItem VALUES 
+(1, 1, 2, 150, 'Sample Product');
