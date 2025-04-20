@@ -1,4 +1,4 @@
-G2_AIMS_new-- User Table
+-- User Table
 CREATE TABLE Users (
     userID INT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
