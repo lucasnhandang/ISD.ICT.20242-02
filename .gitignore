@@ -8,6 +8,9 @@ out/
 /target/
 *.iml
 
+#
+Programming/target/
+
 # Ignore setting files for IntelliJ IDEA
 .idea/
 *.ipr
@@ -47,3 +50,11 @@ bin/
 
 ### VS Code ###
 .vscode/
+
+# Node
+node_modules/
+dist/
+
+# Mac
+.DS_Store
+

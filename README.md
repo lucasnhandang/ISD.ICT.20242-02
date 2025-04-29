@@ -40,6 +40,31 @@ ISD.ICT.20242-02/
     └── Group2-SDD.docx             # Software Design Description (will be updated)
 ```
 
+## How to run AIMS?
+This project combines **Spring Boot (Java)** for backend and **Electron (JavaScript)** for desktop UI, enabling a full-stack desktop application experience.
+
+### Requirements
+
+- **Java 17+**
+- **Node.js 16+**
+- **Maven** (build backend)
+- OS: macOS, Windows or Linux
+
+### Run Application (Development Mode)
+
+```bash
+git clone <this-repo-url>
+cd ISD.ICT.20242-02/Programming
+
+npm install # Download Electron dependencies
+
+mvn clean package # Build the backend .jar file
+# After building, you should see the file: 
+# target/aims-0.0.1-SNAPSHOT.jar
+
+npm start # Start the app
+```
+
 ## Report content
 This section outlines the tasks assigned to each team member on a weekly basis.
 <details>
