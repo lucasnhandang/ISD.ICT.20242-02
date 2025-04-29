@@ -119,3 +119,29 @@ This section outlines the tasks assigned to each team member on a weekly basis.
 | **Nguyen Lan Nhi**            | Front-end for the UC View Product Detail |
 
 </details>
+
+<details>
+  <summary>W9: 13/04/2025 - 20/04/2025</summary>
+
+| **Student Name**   | **Task (Continue + Coding)**             |
+|--------------------|------------------------------------------|
+| **Ha Viet Khanh**          | ERD for AIMS                             |
+| **Ho Bao Thu**            | DB Schema Script                         |
+| **Dang Van Nhan**           | DB Detail Design (File report)           |
+| **Tran Cao Phong**          | Relational Schema for AIMS               |
+| **Nguyen Lan Nhi**            | Front-end for the UC View Product Detail |
+
+</details>
+
+<details>
+  <summary>W10: 20/04/2025 - 04/05/2025</summary>
+
+| **Student Name**   | **Task (Unit Test + Test Plan)**        |
+|--------------------|-----------------------------------------|
+| **Ha Viet Khanh**          |                             |
+| **Ho Bao Thu**            |                          |
+| **Dang Van Nhan**           |           |
+| **Tran Cao Phong**          |            |
+| **Nguyen Lan Nhi**            | |
+
+</details>
