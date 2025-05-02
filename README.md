@@ -17,31 +17,46 @@ This repository is organized as follows:
 ```
 ISD.ICT.20242-02/
 ├── .gitignore
-├── README.md                        
-├── AIMS/                           # Source code directory
-├── Analysis/                        
-│   ├── Business Process/ 
-│   │           
+├── AIMS/                             
+├── Analysis/                         # Analysis and design documentation
+│   ├── Business Process/
 │   ├── Communication Diagram + Analysis Class Diagram/
-│   │   └── ... (each member will have their own folder with their assigned UC)
-│   │           
-│   ├── Detailed Design/            
-│   │   ├── Data Modeling/          # Database Design for AIMS
-│   │   ├── Interface Design/       # Subsystem + Interface for "Pay order" UC
-│   │   └── Use Cases/              # Detailed diagrams for each use case
-│   │       │ ...
-│   │       └── General Combined Package.png # Class Diagram of AIMS
-│   │           
-│   └──Sequence Diagram/           # Sequence diagrams for each use case
-│   │       └── ... (each member will have their own folder with their assigned UC)
-│   │           
-└── Requirements/                   
-    ├── Group2-SRS.docx             # Software Requirements Specification
-    └── Group2-SDD.docx             # Software Design Description (will be updated)
+│   │   └── ... (each member has a folder for their assigned use cases)
+│   ├── Detailed Design/
+│   │   ├── Data Modeling/           
+│   │   ├── Interface Design/        
+│   │   └── Use Cases/                          # Detailed use case diagrams
+│   │       └── General Combined Package.png    # Class Diagram for AIMS of Group 2
+│   └── Sequence Diagram/                       # Sequence diagrams for each use case
+│       └── ... (each member has a folder for their assigned use cases)
+├── Programming/              
+│   ├── pom.xml                      # Maven configuration (Java backend)
+│   ├── main.js                      # Entry point (JavaScript frontend)
+│   ├── package.json                 # Node.js project configuration
+│   ├── package-lock.json
+│   ├── frontend/                    # Source code for React
+│   ├── node_modules/                # Frontend dependencies
+│   ├── src/
+│   │   └── java/
+│   │       └── com/
+│   │           └── hustict/
+│   │               └── aims/
+│   │                   ├── controller/   
+│   │                   ├── model/        
+│   │                   ├── repository/   
+│   │                   ├── service/      
+│   │                   ├── utils/        
+│   │                   └── Application.java 
+│   └── target/                     # Compiled output from Maven
+├── Requirements/
+│   ├── Group2-SRS.docx             # Software Requirements Specification
+│   └── Group2-SDD.docx             # Software Design Description (TBD)
+└── Testing/                        # Testing files, unit tests, etc.
+
 ```
 
 ## How to run AIMS?
-This project combines **Spring Boot (Java)** for backend and **Electron (JavaScript)** for desktop UI, enabling a full-stack desktop application experience.
+This project combines **Spring Boot (Java)** for backend and **Electron + React (JavaScript)** for desktop UI, enabling a full-stack desktop application experience.
 
 ### Requirements
 
