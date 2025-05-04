@@ -1,6 +1,7 @@
 package com.hustict.aims.model;
 
 public class Product {
+    private int id;
     private String title;
     private int price;
     private int totalQuantity;
@@ -36,4 +37,6 @@ public class Product {
     public String getBarcode() { return barcode; }
     public String getDescription() { return description; }
     public String getProductDimension() { return productDimension; }
+    public int getId() {return id;}
+
 }
