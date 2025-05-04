@@ -4,7 +4,6 @@ import com.hustict.aims.controller.CreateProductController;
 import com.hustict.aims.exception.*;
 import com.hustict.aims.model.*;
 import com.hustict.aims.repository.ProductRepository;
-import com.hustict.aims.service.validator.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -82,7 +81,7 @@ public class CreateProductControllerTest {
     }
 
     @Test
-    public void testDuplicateBarcodeThrowsException() {
+    public void testDuplicateBarcodeThrowsException() throws DatabaseFailConnectionException {
         Book book = new Book("Clean Code", 100, 10, 0.5, true, "img.jpg", "BOOK001",
                 "Best practices", "10x20x2",
                 Collections.singletonList("Robert C. Martin"), "Hardcover", "Pearson",
@@ -95,7 +94,7 @@ public class CreateProductControllerTest {
     }
 
     @Test
-    public void testInvalidCommonFieldThrowsException() {
+    public void testInvalidCommonFieldThrowsException() throws DatabaseFailConnectionException {
         DVD dvd = new DVD("", 0, 0, -1.0, true, "", "", "", "",
                 "DVD", "Nolan", 148, "WB", "English", "EN", "Sci-Fi", "2010-07-16");
 
@@ -104,7 +103,7 @@ public class CreateProductControllerTest {
     }
 
     @Test
-    public void testInvalidSpecificFieldThrowsException() {
+    public void testInvalidSpecificFieldThrowsException() throws DatabaseFailConnectionException {
         CD cd = new CD("Invalid CD", 50, 5, 0.3, true, "img.jpg", "CD001",
                 "Missing tracklist", "10x10x1",
                 Arrays.asList("Artist A", "Artist B"), "Label", Collections.emptyList(), // <-- Invalid track list
@@ -112,5 +111,47 @@ public class CreateProductControllerTest {
 
         assertThrows(InvalidProductException.class, () -> controller.createProduct(new ProductInfo(cd)));
         verify(repository, never()).saveProduct(any());
+    }
+
+    @Test
+    public void testNullProductInfoThrowsException() {
+        assertThrows(InvalidProductException.class, () -> controller.createProduct(null));
+    }
+
+    @Test
+    public void testNullProductInProductInfoThrowsException() {
+        ProductInfo info = new ProductInfo(null);
+        assertThrows(InvalidProductException.class, () -> controller.createProduct(info));
+    }
+
+    @Test
+    public void testMissingBarcodeThrowsException() throws DatabaseFailConnectionException {
+        Book book = new Book("Book", 100, 10, 0.5, true, "img.jpg", "", "desc", "dim",
+                Collections.singletonList("Author"), "Hard", "Pub", "2020", 100, "EN", "Tech");
+
+        ProductInfo info = new ProductInfo(book);
+
+        assertThrows(InvalidProductException.class, () -> controller.createProduct(info));
+        verify(repository, never()).saveProduct(any());
+    }
+
+    @Test
+    public void testDatabaseFailureThrowsException() throws Exception {
+        Book book = new Book("Book", 100, 10, 0.5, true, "img.jpg", "BOOK999", "desc", "dim",
+                Collections.singletonList("Author"), "Hard", "Pub", "2020", 100, "EN", "Tech");
+
+        ProductInfo info = new ProductInfo(book);
+        when(repository.isProductExists("BOOK999")).thenReturn(false);
+        doThrow(new DatabaseFailConnectionException("DB down")).when(repository).saveProduct(any());
+
+        assertThrows(DatabaseFailConnectionException.class, () -> controller.createProduct(info));
+    }
+
+    @Test
+    public void testUnknownProductTypeThrowsIllegalArgumentException() {
+        Product unknownProduct = new Product("X", 10, 1, 0.1, false, "url", "UNK001", "desc", "dim") {};
+        ProductInfo info = new ProductInfo(unknownProduct);
+
+        assertThrows(IllegalArgumentException.class, () -> controller.createProduct(info));
     }
 }
