@@ -41,4 +41,8 @@ public class Product {
     public String getProductDimension() { return productDimension; }
     public int getId() {return id;}
 
+    //Setter
+    public void setTotalQuantity(int quantity) {
+        this.totalQuantity = quantity;
+    }
 }
