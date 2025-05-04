@@ -13,9 +13,10 @@ public class Product {
     private String productDimension;
 
     // Constructor
-    public Product(String title, int price, int totalQuantity, double weight,
+     public Product(int id, String title, int price, int totalQuantity, double weight,
                    boolean rushOrderSupported, String imageUrl, String barcode,
                    String description, String productDimension) {
+        this.id = id;
         this.title = title;
         this.price = price;
         this.totalQuantity = totalQuantity;
@@ -26,6 +27,7 @@ public class Product {
         this.description = description;
         this.productDimension = productDimension;
     }
+
 
     // Getters
     public String getTitle() { return title; }
