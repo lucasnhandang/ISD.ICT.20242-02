@@ -3,7 +3,7 @@ import com.hustict.aims.exception.*;
 
 import com.hustict.aims.model.cart;
 /* 
-Funtional 
+The ProductAvailabilityService has Funtional cohesion. 
 All methods and fields in the class contribute to a single task: checking the availability of products in the cart using ProductService
 It has only one reason to change: if the structure of order items in Cart change.
  */

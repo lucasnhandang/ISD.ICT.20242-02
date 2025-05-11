@@ -16,8 +16,9 @@ package com.hustict.aims.service;
 import com.hustict.aims.exception.*;
 import com.hustict.aims.model.Product;
 /*
-All methods and fields in the class focus on managing a single product's availability
-Its only reason to change would be if the logic for restocking or checking availability changes. 
+The ProductService has Logical cohesion.
+Its methods perform different actions (restocking, availability checking) that are logically related to product inventory.
+It only changes if any of those specific inventory-related logics change.
  */
 public class ProductService {
 
