@@ -1,7 +1,10 @@
 package com.hustict.aims.model;
 
 import java.util.Objects;
-
+/*
+Functional. All methods and attributes are directly related to managing a user’s data (e.g., name, email, password, role) and behavior (e.g., update role, reset password).
+It only changes if the structure of user data or user-related operations needs to be modified.
+*/
 public class User {
     private int userID;
     private String name;
