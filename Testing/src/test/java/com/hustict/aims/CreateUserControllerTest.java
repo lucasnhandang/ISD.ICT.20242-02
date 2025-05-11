@@ -1,5 +1,6 @@
 package com.hustict.aims;
 
+import com.hustict.aims.controller.CreateUserController;
 import com.hustict.aims.model.User;
 import com.hustict.aims.repository.UserRepository;
 import com.hustict.aims.service.*;
@@ -22,7 +23,7 @@ class CreateUserControllerTest {
         auditLogService = new MockAuditLogService();
         controller = new CreateUserController(validator, emailService, auditLogService);
 
-        // Clear repository before each test
+        // Xóa user giữa các test
         UserRepository.getAllUsers().clear();
     }
 
@@ -37,13 +38,9 @@ class CreateUserControllerTest {
 
     @Test
     void createUser_duplicateEmail() {
-        // Pre-add user
-        controller.createUser("Bob", "duplicate@domain.com", "abc123", "0123456789", "admin");
+        controller.createUser("Bob", "dup@domain.com", "abc123", "0123456789", "admin");
+        controller.createUser("Eve", "dup@domain.com", "xyz456", "0987654321", "admin");
 
-        // Attempt to create another with same email
-        controller.createUser("Charlie", "duplicate@domain.com", "xyz456", "0987654321", "admin");
-
-        // Only 1 user should exist
         assertEquals(1, UserRepository.getAllUsers().size());
     }
 
@@ -64,24 +61,13 @@ class CreateUserControllerTest {
     }
 
     @Test
-    void createUser_invalidRole() {
+    void createUser_invalidRole() 
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> {
-            validator.validate("Frank", "frank@domain.com", "pass", "0123456789", "invalidRole");
+            validator.validate("Frank", "frank@domain.com", "pass", "0123456789", "guest");
         });
         assertEquals("Role must be 'admin' or 'productManager'.", e.getMessage());
     }
 
     static class MockUserEmailService implements UserEmailService {
         boolean wasCalled = false;
-        public void sendWelcomeEmail(User user) {
-            wasCalled = true;
-        }
-    }
-
-    static class MockAuditLogService implements AuditLogService {
-        boolean wasCalled = false;
-        public void logUserCreation(User user) {
-            wasCalled = true;
-        }
-    }
-}
+        public void send
