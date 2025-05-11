@@ -1,8 +1,13 @@
+/*
+ * Cohesion Analysis:
+ * - Functional Cohesion: As it has a single responsibility of validating DVD-specific fields
+ * - SRP Analysis: No violation as it only handles DVD validation
+ */
 package com.hustict.aims.service.validator;
 
 import com.hustict.aims.exception.InvalidProductException;
-import com.hustict.aims.model.Product;
 import com.hustict.aims.model.DVD;
+import com.hustict.aims.model.Product;
 
 public class DVDValidator implements ProductValidator {
     @Override
