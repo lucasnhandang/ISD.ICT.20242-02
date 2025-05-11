@@ -49,21 +49,21 @@ ISD.ICT.20242-02/
 │   │                   └── Application.java 
 │   └── target/                     # Compiled output from Maven
 ├── Requirements/
-│   ├── Group2-SRS.docx             # Software Requirements Specification
-│   └── Group2-SDD.docx             # Software Design Description (TBD)
-└── Testing/                        # Testing files, unit tests, etc.
+│   ├── G2-Cohesion+SRP.pdf     # Submission for W11's task
+│   ├── G2-SRS.docx             # Software Requirements Specification
+│   └── G2-SDD.docx             # Software Design Description
+└── Testing/                    # Testing files, unit tests, etc.
 
 ```
 
 ## How to run AIMS?
-This project combines **Spring Boot (Java)** for backend and **Electron + React (JavaScript)** for desktop UI, enabling a full-stack desktop application experience.
+This project combines **Spring Boot (Java)** for backend and **Electron + React (JavaScript)** for frontend.
 
 ### Requirements
 
 - **Java 17+**
 - **Node.js 16+**
-- **Maven** (build backend)
-- OS: macOS, Windows or Linux
+- **Maven** (to build backend)
 
 ### Run Application (Development Mode)
 
@@ -176,12 +176,25 @@ This section outlines the tasks assigned to each team member on a weekly basis.
 <details>
   <summary>W10: 20/04/2025 - 04/05/2025</summary>
 
-| **Student Name**   | **Task (Unit Test + Test Plan)**        |
-|--------------------|-----------------------------------------|
-| **Ha Viet Khanh**          |                             |
-| **Ho Bao Thu**            |                          |
-| **Dang Van Nhan**           |           |
-| **Tran Cao Phong**          |            |
-| **Nguyen Lan Nhi**            | |
+| **Student Name**   | **Task (Unit Test + Test Plan)** |
+|--------------------|----------------------------------|
+| **Ha Viet Khanh**          | Create users                     |
+| **Ho Bao Thu**            | Pay order                        |
+| **Dang Van Nhan**           | Create products                  |
+| **Tran Cao Phong**          | View product details             |
+| **Nguyen Lan Nhi**            | Place rush order                 |
+
+</details>
+
+<details>
+  <summary>W11: 04/05/2025 - 11/05/2025</summary>
+
+| **Student Name**   | **Task**                    |
+|--------------------|-----------------------------|
+| **Ha Viet Khanh**          | Evaluate Cohesion + Coupling |
+| **Ho Bao Thu**            | Evaluate Cohesion + Coupling                   |
+| **Dang Van Nhan**           | Evaluate Cohesion + Coupling             |
+| **Tran Cao Phong**          | Evaluate Cohesion + Coupling        |
+| **Nguyen Lan Nhi**            | Evaluate Cohesion + Coupling            |
 
 </details>
