@@ -4,7 +4,10 @@ import com.hustict.aims.model.User;
 
 import java.util.ArrayList;
 import java.util.List;
-
+/*
+Functional. Handles all logic related to storing and retrieving user data.
+It only changes if the way user data is stored or retrieved needs to be updated.
+*/
 public class UserRepository {
     private static List<User> users = new ArrayList<>();
     private static int currentId = 1000;
