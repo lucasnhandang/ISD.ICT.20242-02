@@ -52,5 +52,6 @@ public class Order {
     public void setRejectionReason(String reason) {
         this.rejectionReason = reason;
     }
-
+    
 }
+
