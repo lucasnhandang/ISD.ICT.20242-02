@@ -1,5 +1,12 @@
+/*
+ * Cohesion Analysis:
+ * - Informational Cohesion: As it groups related data and behavior for a product
+ * - SRP Analysis: No violation as it only represents a product entity
+ */
 package com.hustict.aims.model;
 
+// The Product class has functional cohesion. 
+// It holds the responsibility of managing the descriptive information of a product in the system, and it should only change when the product description is added, removed, or modified.
 public class Product {
     private int id;
     private String title;
@@ -12,8 +19,13 @@ public class Product {
     private String description;
     private String productDimension;
 
-    // Constructor
-     public Product(int id, String title, int price, int totalQuantity, double weight,
+    // Default constructor
+    public Product() {
+        this.id = 0; // Default id
+    }
+
+    // Constructor with id
+    public Product(int id, String title, int price, int totalQuantity, double weight,
                    boolean rushOrderSupported, String imageUrl, String barcode,
                    String description, String productDimension) {
         this.id = id;
@@ -28,6 +40,20 @@ public class Product {
         this.productDimension = productDimension;
     }
 
+    // Constructor without id
+    public Product(String title, int price, int totalQuantity, double weight,
+                   boolean rushOrderSupported, String imageUrl, String barcode,
+                   String description, String productDimension) {
+        this.title = title;
+        this.price = price;
+        this.totalQuantity = totalQuantity;
+        this.weight = weight;
+        this.rushOrderSupported = rushOrderSupported;
+        this.imageUrl = imageUrl;
+        this.barcode = barcode;
+        this.description = description;
+        this.productDimension = productDimension;
+    }
 
     // Getters
     public String getTitle() { return title; }
@@ -41,8 +67,12 @@ public class Product {
     public String getProductDimension() { return productDimension; }
     public int getId() {return id;}
 
-    //Setter
+    //Setters
     public void setTotalQuantity(int quantity) {
         this.totalQuantity = quantity;
+    }
+    
+    public void setId(int id) {
+        this.id = id;
     }
 }

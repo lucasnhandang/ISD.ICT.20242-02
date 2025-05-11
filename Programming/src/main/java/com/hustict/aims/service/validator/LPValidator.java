@@ -1,8 +1,13 @@
+/*
+ * Cohesion Analysis:
+ * - Functional Cohesion: As it has a single responsibility of validating LP-specific fields
+ * - SRP Analysis: No violation as it only handles LP validation
+ */
 package com.hustict.aims.service.validator;
 
 import com.hustict.aims.exception.InvalidProductException;
-import com.hustict.aims.model.Product;
 import com.hustict.aims.model.LP;
+import com.hustict.aims.model.Product;
 
 public class LPValidator implements ProductValidator {
     @Override

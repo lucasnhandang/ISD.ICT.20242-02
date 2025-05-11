@@ -1,3 +1,9 @@
+/*
+ * Cohesion Analysis:
+ * - Informational Cohesion: As it groups related data and behavior for a Book
+ * - SRP Analysis: No violation as it only represents a Book entity
+ * 
+ */
 package com.hustict.aims.model;
 
 import java.util.List;

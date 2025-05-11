@@ -19,4 +19,8 @@ public class OrderItem {
     public int getProductID() { return productID; }
     public int getQuantity() { return quantity; }
     public int getPrice() { return price; }
+
+    public static void main(String[] args) {
+        System.out.println("hello");
+    }
 }

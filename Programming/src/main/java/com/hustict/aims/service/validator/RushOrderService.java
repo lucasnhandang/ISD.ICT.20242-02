@@ -5,12 +5,21 @@ import com.hustict.aims.model.Product;
 
 import java.util.List;
 
+/**
+ * Cohesion Level: Functional Cohesion
+ * - All methods contribute to a single, clearly defined task: determining if a rush order is allowed
+ * - No unrelated logic exists
+ * SRP: Does NOT violate SRP
+ * - Only handles eligibility checking logic, no unrelated concerns like payment or UI.
+ * Suggested improvement: Consider delegating the address check to a separate class
+ * (e.g., LocationValidator) if more regions are added later.
+ */
+
 public class RushOrderService {
 
     private static final String HANOI_INNER_CITY = "HN";
 
     public boolean isRushOrderEligible(DeliveryInfo deliveryInfo, List<Product> products) {
-        // Input validation - defensive programming
         if (deliveryInfo == null) {
             throw new IllegalArgumentException("DeliveryInfo cannot be null");
         }
@@ -18,28 +27,23 @@ public class RushOrderService {
             throw new IllegalArgumentException("Product list cannot be null");
         }
 
-        // Check if address is in Hanoi inner city
         if (!isAddressInHanoiInnerCity(deliveryInfo)) {
             return false;
         }
 
-        // Check if at least one product supports rush order
         return hasRushOrderEligibleProduct(products);
     }
 
     private boolean isAddressInHanoiInnerCity(DeliveryInfo deliveryInfo) {
         String province = deliveryInfo.getProvince();
-        // Convert province to string and compare
         return String.valueOf(province).equals(HANOI_INNER_CITY);
     }
 
     private boolean hasRushOrderEligibleProduct(List<Product> products) {
-        // If product list is empty, no products are eligible
         if (products.isEmpty()) {
             return false;
         }
 
-        // Check if at least one product supports rush order
         for (Product product : products) {
             if (product.getRushOrderSupported()) {
                 return true;
