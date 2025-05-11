@@ -2,7 +2,10 @@ package com.hustict.aims.service;
 import com.hustict.aims.exception.*;
 
 import com.hustict.aims.model.Product;
-
+/*
+All methods and fields in the class focus on managing a single product's availability
+Its only reason to change would be if the logic for restocking or checking availability changes. 
+ */
 public class ProductService {
 
     public void restock(Product product, int quantity) {
