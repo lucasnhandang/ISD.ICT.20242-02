@@ -5,7 +5,10 @@ import com.hustict.aims.model.User.UserRole;
 import com.hustict.aims.repository.UserRepository;
 
 import java.util.regex.Pattern;
-
+/*
+Functional. All methods are focused on validating different information of a user.
+It only changes if the validation criteria or rules are modified.
+*/
 public class UserValidator {
 
     private static final Pattern EMAIL_PATTERN =
