@@ -1,3 +1,8 @@
+/*
+ * Cohesion Analysis:
+ * - Informational Cohesion: As it groups related data and behavior for a CD
+ * - SRP Analysis: No violation as it only represents a CD entity
+ */
 package com.hustict.aims.model;
 
 import java.util.List;

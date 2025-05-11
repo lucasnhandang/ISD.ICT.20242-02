@@ -1,8 +1,13 @@
+/*
+ * Cohesion Analysis:
+ * - Functional Cohesion: As it has a single responsibility of validating Book-specific fields
+ * - SRP Analysis: No violation as it only handles Book validation
+ */
 package com.hustict.aims.service.validator;
 
 import com.hustict.aims.exception.InvalidProductException;
-import com.hustict.aims.model.Product;
 import com.hustict.aims.model.Book;
+import com.hustict.aims.model.Product;
 
 public class BookValidator implements ProductValidator{
     @Override

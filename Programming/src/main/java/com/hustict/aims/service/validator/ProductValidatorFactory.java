@@ -1,10 +1,15 @@
+/*
+ * Cohesion Analysis:
+ * - Functional Cohesion: As it has a single responsibility of creating appropriate validators
+ * - SRP Analysis: No violation as it follows Factory pattern with single responsibility
+ */
 package com.hustict.aims.service.validator;
 
-import com.hustict.aims.model.Product;
+import com.hustict.aims.model.Book;
 import com.hustict.aims.model.CD;
 import com.hustict.aims.model.DVD;
 import com.hustict.aims.model.LP;
-import com.hustict.aims.model.Book;
+import com.hustict.aims.model.Product;
 
 public class ProductValidatorFactory {
     public static ProductValidator getValidator(Product product) {

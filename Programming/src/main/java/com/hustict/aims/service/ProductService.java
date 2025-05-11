@@ -1,6 +1,19 @@
+/*
+ * Cohesion Analysis:
+ * - Functional Cohesion: It handles multiple product-related operations
+ * - SRP Analysis: Has violation since it handles both stock management and availability checking
+ * 
+ * Improvement Suggestions:
+ * 1. Split into separate services:
+ *    - StockManagementService: Handle restock operations
+ *    - InventoryService: Handle availability checking
+ * 2. Consider adding more stock-related operations:
+ *    - Deduct stock
+ *    - Get stock level
+ *    - Set minimum stock threshold
+ */
 package com.hustict.aims.service;
 import com.hustict.aims.exception.*;
-
 import com.hustict.aims.model.Product;
 
 public class ProductService {

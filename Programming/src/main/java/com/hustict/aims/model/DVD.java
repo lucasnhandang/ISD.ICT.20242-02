@@ -1,3 +1,9 @@
+/*
+ * Cohesion Analysis:
+ * - Informational Cohesion: As it groups related data and behavior for a DVD
+ * - SRP Analysis: No violation as it only represents a DVD entity
+ * 
+ */
 package com.hustict.aims.model;
 
 public class DVD extends Product {
