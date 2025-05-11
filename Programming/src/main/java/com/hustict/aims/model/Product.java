@@ -1,5 +1,7 @@
 package com.hustict.aims.model;
 
+// The Product class has functional cohesion. 
+// It holds the responsibility of managing the descriptive information of a product in the system, and it should only change when the product description is added, removed, or modified.
 public class Product {
     private int id;
     private String title;
