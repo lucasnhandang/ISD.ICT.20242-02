@@ -6,7 +6,10 @@ import com.hustict.aims.service.UserValidator;
 import com.hustict.aims.repository.UserRepository;
 import com.hustict.aims.service.UserEmailService;
 import com.hustict.aims.service.AuditLogService;
-
+/*
+Functional. All the functions in the class work together to support a single responsibility - coordinating the user creation process.
+ It should only change if the flow changes.
+*/
 public class CreateUserController {
 
     private final UserValidator validator;
