@@ -19,6 +19,7 @@ import com.hustict.aims.model.Product;
 The ProductService has Logical cohesion.
 Its methods perform different actions (restocking, availability checking) that are logically related to product inventory.
 It only changes if any of those specific inventory-related logics change.
+Solution: To make ProductService comply with Functional Cohesion and Single Responsibility Principle (SRP), we can split it into two separate services:
  */
 public class ProductService {
 
