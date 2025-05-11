@@ -6,6 +6,20 @@ import com.hustict.aims.model.ProductInfo;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Cohesion Level: procedural cohesion.
+ * It performs multiple loosely related tasks in one place:
+    * It initializes and simulates a product database.
+    * It contains logic to validate product IDs and check active status.
+    * It constructs and returns a ProductInfo instance.
+ * These tasks are only sequentially connected, not functionally cohesive (they do not all contribute to a single, well-defined responsibility).
+ * SRP Violation: violates as it has multiple responsibilities:
+    * Data Initialization: using a hardcoded map.
+    * Business Logic: validating product ID, checking activity.
+    * Data Transformation: returning "ProductInfo".
+ * Solution for Improvement: distribute responsibilities into other classes
+ */
+
 public class ViewProductDetailsService {
 
     // Simulated product repository
@@ -14,7 +28,7 @@ public class ViewProductDetailsService {
 
     public ViewProductDetailsService() {
         // Simulated data
-        Product p1 = new Product("Effective Java", 100000, 20, 0.5, true,
+        Product p1 = new Product(1, "Effective Java", 100000, 20, 0.5, true,
                 "img.jpg", "111", "Clean and new", "20x30x2cm");
         productDatabase.put(42, p1);
         productActiveStatus.put(42, true);
