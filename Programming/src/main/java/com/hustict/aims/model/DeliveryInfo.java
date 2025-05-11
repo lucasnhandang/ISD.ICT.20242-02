@@ -1,5 +1,15 @@
 package com.hustict.aims.model;
 
+/**
+ * Cohesion Level: Communicational Cohesion
+ * - All attributes and methods revolve around storing or displaying delivery-related data.
+ * - Methods act on the same set of data (delivery ID, address, name, phone, etc.).
+ * SRP: Does NOT violate SRP
+ * - Only handles eligibility checking logic, no unrelated concerns like payment or UI.
+ * Suggested improvement: Consider delegating the address check to a separate class
+ * (e.g., LocationValidator) if more regions are added later.
+ */
+
 public class DeliveryInfo {
     private int deliveryID;
     private char[] customerName;
@@ -9,15 +19,9 @@ public class DeliveryInfo {
     private char[] email;
     private String shippingInstruction;
 
-    /**
-     * Constructor mặc định
-     */
     public DeliveryInfo() {
     }
 
-    /**
-     * Constructor với đầy đủ tham số
-     */
     public DeliveryInfo(int deliveryID, char[] customerName, String phoneNumber,
                         String province, String detailAddress, char[] email,
                         String shippingInstruction) {
@@ -30,20 +34,10 @@ public class DeliveryInfo {
         this.shippingInstruction = shippingInstruction;
     }
 
-    /**
-     * Phương thức lấy thông tin địa chỉ đầy đủ
-     * @param detailedAddress địa chỉ chi tiết
-     * @param province tỉnh/thành phố
-     * @return chuỗi địa chỉ đầy đủ
-     */
     public String getAddressInfo(String detailedAddress, char province) {
         return detailedAddress + ", " + province;
     }
 
-    /**
-     * Phương thức getter trả về tất cả thông tin
-     * @return không có giá trị trả về
-     */
     public void getter() {
         System.out.println("Delivery ID: " + this.deliveryID);
         System.out.println("Customer Name: " + new String(this.customerName));
@@ -54,16 +48,6 @@ public class DeliveryInfo {
         System.out.println("Shipping Instruction: " + this.shippingInstruction);
     }
 
-    /**
-     * Phương thức setter để thiết lập tất cả thông tin
-     * @param deliveryID ID giao hàng
-     * @param customerName tên khách hàng
-     * @param phoneNumber số điện thoại
-     * @param province tỉnh/thành phố
-     * @param detailedAddress địa chỉ chi tiết
-     * @param email địa chỉ email
-     * @param shippingInstruction hướng dẫn giao hàng
-     */
     public void setter(int deliveryID, char[] customerName, String phoneNumber,
                        String province, String detailedAddress, char[] email,
                        String shippingInstruction) {
