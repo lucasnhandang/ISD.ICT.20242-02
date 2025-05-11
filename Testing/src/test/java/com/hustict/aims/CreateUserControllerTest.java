@@ -1,4 +1,4 @@
-package com.hustict.aims.controller;
+package com.hustict.aims;
 
 import com.hustict.aims.model.User;
 import com.hustict.aims.repository.UserRepository;
