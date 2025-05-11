@@ -1,3 +1,17 @@
+/*
+ * Cohesion Analysis:
+ * - Functional Cohesion: As all methods are related to product creation and validation
+ * - SRP Analysis:
+ *   1. It handles both validation and creation logic
+ *   2. It contains error display functionality which could be separated
+ * 
+ * Improvement Suggestions:
+ * 1. Split into separate classes:
+ *    - ProductValidator: Handle all validation logic
+ *    - ProductCreator: Handle product creation and database operations
+ *    - ErrorHandler: Handle error display and logging
+ * 2. Use dependency injection for better testability
+ */
 package com.hustict.aims.controller;
 
 import com.hustict.aims.exception.DatabaseFailConnectionException;
