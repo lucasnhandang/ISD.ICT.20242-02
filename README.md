@@ -68,7 +68,7 @@ This project combines **Spring Boot (Java)** for backend and **Electron + React 
 ### Run Application (Development Mode)
 
 ```bash
-git clone <this-repo-url>
+git clone https://github.com/lucasnhandang/ISD.ICT.20242-02
 cd ISD.ICT.20242-02/Programming
 
 npm install # Download Electron dependencies
