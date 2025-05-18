@@ -18,6 +18,7 @@ public class Product {
     private String barcode;
     private String description;
     private String productDimension;
+    private String genre;
 
     // Default constructor
     public Product() {
