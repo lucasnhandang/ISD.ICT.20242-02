@@ -18,7 +18,7 @@ public class Product {
     private String barcode;
     private String description;
     private String productDimension;
-
+    
     // Default constructor
     public Product() {
         this.id = 0; // Default id
