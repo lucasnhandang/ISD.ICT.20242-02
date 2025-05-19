@@ -13,6 +13,7 @@ public class LP extends Product {
     private List<String> trackList;
     private String genre;
     private String releaseDate;
+    private String musicCollection;
 
     public LP(String title, int price, int totalQuantity, double weight,
               boolean rushOrderSupported, String imageUrl, String barcode,
