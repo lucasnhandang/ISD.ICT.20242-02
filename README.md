@@ -198,3 +198,16 @@ This section outlines the tasks assigned to each team member on a weekly basis.
 | **Nguyen Lan Nhi**            | Evaluate Cohesion + Coupling            |
 
 </details>
+
+<details>
+  <summary>W12: 11/05/2025 - 18/05/2025</summary>
+
+| **Student Name**   | **Task**                                         |
+|--------------------|--------------------------------------------------|
+| **Ha Viet Khanh**          | Evaluate Cohesion + Coupling with SOLID + Coding |
+| **Ho Bao Thu**            | Evaluate Cohesion + Coupling with SOLID + Coding |
+| **Dang Van Nhan**           | Evaluate Cohesion + Coupling with SOLID + Coding                    |
+| **Tran Cao Phong**          | Evaluate Cohesion + Coupling with SOLID + Coding                     |
+| **Nguyen Lan Nhi**            | Evaluate Cohesion + Coupling with SOLID + Coding                    |
+
+</details>
