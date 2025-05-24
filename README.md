@@ -50,6 +50,7 @@ ISD.ICT.20242-02/
 │   └── target/                     # Compiled output from Maven
 ├── Requirements/
 │   ├── G2-Cohesion+SRP.pdf     # Submission for W11's task
+│   ├── G2-SOLID_Evaluate.pdf   # Submission for W12's task
 │   ├── G2-SRS.docx             # Software Requirements Specification
 │   └── G2-SDD.docx             # Software Design Description
 └── Testing/                    # Testing files, unit tests, etc.
