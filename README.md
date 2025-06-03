@@ -58,28 +58,64 @@ ISD.ICT.20242-02/
 ```
 
 ## How to run AIMS?
-This project combines **Spring Boot (Java)** for backend and **Electron + React (JavaScript)** for frontend.
+This project is a **Web Application** that combines **Spring Boot (Java)** for backend REST API and **React (JavaScript)** for frontend.
+
+### 🏗️ Tech Stack
+
+- **Backend**: Java Spring Boot (REST API)
+- **Frontend**: React (JavaScript)
+- **Database**: H2 Database (development)
+- **Architecture**: Client-Server Web Application
 
 ### Requirements
 
-- **Java 17+**
-- **Node.js 16+**
+- **Java 21+** (to run Spring Boot backend)
 - **Maven** (to build backend)
+- **Node.js 16+** (to run React frontend)
+- **npm** (Node package manager)
 
-### Run Application (Development Mode)
+### Run Application (Web Mode)
 
+#### Option 1: Quick Start (Recommended)
 ```bash
 git clone https://github.com/lucasnhandang/ISD.ICT.20242-02
 cd ISD.ICT.20242-02/Programming
 
-npm install # Download Electron dependencies
+# Install frontend dependencies
+npm install
 
-mvn clean package # Build the backend .jar file
-# After building, you should see the file: 
-# target/aims-0.0.1-SNAPSHOT.jar
-
-npm start # Start the app
+# Run both frontend and backend simultaneously
+npm run dev
 ```
+
+#### Option 2: Manual Setup
+```bash
+# Terminal 1 - Backend (Spring Boot)
+cd ISD.ICT.20242-02/Programming
+mvn spring-boot:run
+
+# Terminal 2 - Frontend (React)
+cd ISD.ICT.20242-02/Programming
+npm start
+```
+
+#### Option 3: Demo Check
+```bash
+# Check the main application demo
+cd ISD.ICT.20242-02/Programming
+
+# Install dependencies and start
+npm install
+npm start
+
+# Backend API will be available at http://localhost:8080
+# Frontend React app will be available at http://localhost:3000
+```
+
+### Access the Application
+- **Frontend (React)**: http://localhost:3000
+- **Backend API**: http://localhost:8080/api/*
+- **Health Check**: http://localhost:8080/health
 
 ## Report content
 This section outlines the tasks assigned to each team member on a weekly basis.
