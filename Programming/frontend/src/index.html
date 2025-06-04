@@ -1,12 +1,122 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
   <head>
     <meta charset="UTF-8" />
     <title>AIMS - An Internet Media Store</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #eee;
+      }
+      .status {
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 4px;
+        font-weight: 500;
+      }
+      .status.success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+      .status.error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+      button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 5px;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div class="container">
+      <div class="header">
+        <h1>🛒 AIMS - An Internet Media Store</h1>
+        <p>Web Application Demo</p>
+      </div>
+      
+      <div id="status" class="status">
+        Đang kiểm tra kết nối với backend...
+      </div>
+      
+      <div id="root">
+        <h2>🔧 Testing API Connection</h2>
+        <button onclick="testConnection()">Test Backend Connection</button>
+        <button onclick="testAPI()">Test API Endpoint</button>
+        
+        <h2>📦 Products (Demo)</h2>
+        <div id="products">
+          Loading products...
+        </div>
+      </div>
+    </div>
+    
+    <!-- Load API configuration -->
+    <script src="js/config.js"></script>
+    
+    <!-- Main application script -->
+    <script>
+      // Test backend connection
+      async function testConnection() {
+        const statusEl = document.getElementById('status');
+        try {
+          const response = await fetch('http://localhost:8080');
+          if (response.ok) {
+            statusEl.className = 'status success';
+            statusEl.textContent = '✅ Backend connection successful!';
+          } else {
+            throw new Error('Backend not responding');
+          }
+        } catch (error) {
+          statusEl.className = 'status error';
+          statusEl.textContent = '❌ Backend connection failed. Make sure Spring Boot is running on port 8080.';
+        }
+      }
+      
+      // Test API endpoint
+      async function testAPI() {
+        try {
+          const data = await apiCall('/test');
+          console.log('API Test successful:', data);
+          alert('API test successful! Check console for details.');
+        } catch (error) {
+          console.error('API Test failed:', error);
+          alert('API test failed. Make sure backend has /api/test endpoint.');
+        }
+      }
+      
+      // Auto-test connection on page load
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(testConnection, 1000);
+      });
+    </script>
   </body>
 </html>

@@ -17,7 +17,6 @@ This repository is organized as follows:
 ```
 ISD.ICT.20242-02/
 ├── .gitignore
-├── AIMS/                             
 ├── Analysis/                         # Analysis and design documentation
 │   ├── Business Process/
 │   ├── Communication Diagram + Analysis Class Diagram/
@@ -26,61 +25,102 @@ ISD.ICT.20242-02/
 │   │   ├── Data Modeling/           
 │   │   ├── Interface Design/        
 │   │   └── Use Cases/                          # Detailed use case diagrams
-│   │       └── General Combined Package.png    # Class Diagram for AIMS of Group 2
-│   └── Sequence Diagram/                       # Sequence diagrams for each use case
+│   │       └── General Combined Package.png    # Class Diagram for AIMS
+│   ├── Enhanced Detailed Design/     # Enhanced detailed design, contains members' improved class diagrams
+│   └── Sequence Diagram/                       
 │       └── ... (each member has a folder for their assigned use cases)
 ├── Programming/              
-│   ├── pom.xml                      # Maven configuration (Java backend)
-│   ├── main.js                      # Entry point (JavaScript frontend)
-│   ├── package.json                 # Node.js project configuration
+│   ├── pom.xml                         # Maven configuration (backend)
+│   ├── main.js                         # Entry point (frontend)
+│   ├── package.json                    # Node.js project configuration
 │   ├── package-lock.json
-│   ├── frontend/                    # Source code for React
-│   ├── node_modules/                # Frontend dependencies
+│   ├── frontend/                       # Source code for frontend
+│   ├── node_modules/                   # Frontend dependencies
 │   ├── src/
 │   │   └── java/
 │   │       └── com/
 │   │           └── hustict/
-│   │               └── aims/
+│   │               └── aims/           # Source code for backend
 │   │                   ├── controller/   
-│   │                   ├── model/        
+│   │                   ├── model/  
+│   │                   ├── dto/              
 │   │                   ├── repository/   
 │   │                   ├── service/      
 │   │                   ├── utils/        
 │   │                   └── Application.java 
-│   └── target/                     # Compiled output from Maven
+│   └── target/                    
 ├── Requirements/
-│   ├── G2-Cohesion+SRP.pdf     # Submission for W11's task
-│   ├── G2-SRS.docx             # Software Requirements Specification
-│   └── G2-SDD.docx             # Software Design Description
+│   ├── G2-Cohesion+SRP.pdf     # Week 11's task submission
+│   ├── G2-SOLID_Evaluate.pdf   # Week 12's task submission
+│   ├── G2-SRS.docx      
+│   ├── G2-SDD.docx
+│   ├── G2-UseCaseSpecs.docx      
+│   └── G2-TestPlan.xlsx             
 └── Testing/                    # Testing files, unit tests, etc.
 
 ```
 
 ## How to run AIMS?
-This project combines **Spring Boot (Java)** for backend and **Electron + React (JavaScript)** for frontend.
+This project is a **Web Application** that combines **Spring Boot (Java)** for backend REST API and **React (JavaScript/TypeScript)** for frontend.
+
+### Techstack
+
+- **Backend**: Java Spring Boot (REST API)
+- **Frontend**: React (JavaScript/TypeScript)
+- **Database**: PostgreSQL
+- **Architecture**: Client-Server Web Application
 
 ### Requirements
 
-- **Java 17+**
-- **Node.js 16+**
-- **Maven** (to build backend)
+- **Java 21+** to run Spring Boot backend
+- **Maven** to build backend
+- **Node.js 16+** to run React frontend
+- **npm** Node package manager
 
-### Run Application (Development Mode)
+### Run Application
 
+#### Option 1: Quick Start (Recommended)
 ```bash
 git clone https://github.com/lucasnhandang/ISD.ICT.20242-02
 cd ISD.ICT.20242-02/Programming
 
-npm install # Download Electron dependencies
+# Install frontend dependencies
+npm install
 
-mvn clean package # Build the backend .jar file
-# After building, you should see the file: 
-# target/aims-0.0.1-SNAPSHOT.jar
-
-npm start # Start the app
+# Run both frontend and backend simultaneously
+npm run dev
 ```
 
-## Report content
+#### Option 2: Manual Setup
+```bash
+# Terminal 1 - Backend (Spring Boot)
+cd ISD.ICT.20242-02/Programming
+mvn spring-boot:run
+
+# Terminal 2 - Frontend (React)
+cd ISD.ICT.20242-02/Programming
+npm start
+```
+
+#### Option 3: Demo Check
+```bash
+# Check the main application demo
+cd ISD.ICT.20242-02/Programming
+
+# Install dependencies and start
+npm install
+npm start
+
+# Backend API will be available at http://localhost:8080
+# Frontend React app will be available at http://localhost:3000
+```
+
+### Access the Application
+- **Frontend (React)**: http://localhost:3000
+- **Backend API**: http://localhost:8080/api/*
+- **Health Check**: http://localhost:8080/health
+
+## Report Content
 This section outlines the tasks assigned to each team member on a weekly basis.
 <details>
   <summary> W3: 24/02/2025 - 02/03/2025 </summary>
@@ -196,5 +236,18 @@ This section outlines the tasks assigned to each team member on a weekly basis.
 | **Dang Van Nhan**           | Evaluate Cohesion + Coupling             |
 | **Tran Cao Phong**          | Evaluate Cohesion + Coupling        |
 | **Nguyen Lan Nhi**            | Evaluate Cohesion + Coupling            |
+
+</details>
+
+<details>
+  <summary>W12: 11/05/2025 - 18/05/2025</summary>
+
+| **Student Name**   | **Task**                                         |
+|--------------------|--------------------------------------------------|
+| **Ha Viet Khanh**          | Evaluate Cohesion + Coupling with SOLID + Coding |
+| **Ho Bao Thu**            | Evaluate Cohesion + Coupling with SOLID + Coding |
+| **Dang Van Nhan**           | Evaluate Cohesion + Coupling with SOLID + Coding                    |
+| **Tran Cao Phong**          | Evaluate Cohesion + Coupling with SOLID + Coding                     |
+| **Nguyen Lan Nhi**            | Evaluate Cohesion + Coupling with SOLID + Coding                    |
 
 </details>
