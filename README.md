@@ -17,7 +17,6 @@ This repository is organized as follows:
 ```
 ISD.ICT.20242-02/
 ├── .gitignore
-├── AIMS/                             
 ├── Analysis/                         # Analysis and design documentation
 │   ├── Business Process/
 │   ├── Communication Diagram + Analysis Class Diagram/
@@ -56,7 +55,7 @@ ISD.ICT.20242-02/
 │   ├── G2-SRS.docx      
 │   ├── G2-SDD.docx
 │   ├── G2-UseCaseSpecs.docx      
-│   └── G2-TestPlan.docx             
+│   └── G2-TestPlan.xlsx             
 └── Testing/                    # Testing files, unit tests, etc.
 
 ```
