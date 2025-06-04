@@ -56,7 +56,7 @@ ISD.ICT.20242-02/
 │   ├── G2-SRS.docx      
 │   ├── G2-SDD.docx
 │   ├── G2-UseCaseSpecs.docx      
-│   └── G2-TestPlan.docx             
+│   └── G2-TestPlan.xlsx             
 └── Testing/                    # Testing files, unit tests, etc.
 
 ```
