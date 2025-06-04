@@ -26,55 +26,59 @@ ISD.ICT.20242-02/
 │   │   ├── Data Modeling/           
 │   │   ├── Interface Design/        
 │   │   └── Use Cases/                          # Detailed use case diagrams
-│   │       └── General Combined Package.png    # Class Diagram for AIMS of Group 2
-│   └── Sequence Diagram/                       # Sequence diagrams for each use case
+│   │       └── General Combined Package.png    # Class Diagram for AIMS
+│   ├── Enhanced Detailed Design/     # Enhanced detailed design, contains members' improved class diagrams
+│   └── Sequence Diagram/                       
 │       └── ... (each member has a folder for their assigned use cases)
 ├── Programming/              
-│   ├── pom.xml                      # Maven configuration (Java backend)
-│   ├── main.js                      # Entry point (JavaScript frontend)
-│   ├── package.json                 # Node.js project configuration
+│   ├── pom.xml                         # Maven configuration (backend)
+│   ├── main.js                         # Entry point (frontend)
+│   ├── package.json                    # Node.js project configuration
 │   ├── package-lock.json
-│   ├── frontend/                    # Source code for React
-│   ├── node_modules/                # Frontend dependencies
+│   ├── frontend/                       # Source code for frontend
+│   ├── node_modules/                   # Frontend dependencies
 │   ├── src/
 │   │   └── java/
 │   │       └── com/
 │   │           └── hustict/
-│   │               └── aims/
+│   │               └── aims/           # Source code for backend
 │   │                   ├── controller/   
-│   │                   ├── model/        
+│   │                   ├── model/  
+│   │                   ├── dto/              
 │   │                   ├── repository/   
 │   │                   ├── service/      
 │   │                   ├── utils/        
 │   │                   └── Application.java 
-│   └── target/                     # Compiled output from Maven
+│   └── target/                    
 ├── Requirements/
-│   ├── G2-Cohesion+SRP.pdf     # Submission for W11's task
-│   ├── G2-SOLID_Evaluate.pdf   # Submission for W12's task
-│   ├── G2-SRS.docx             # Software Requirements Specification
-│   └── G2-SDD.docx             # Software Design Description
+│   ├── G2-Cohesion+SRP.pdf     # Week 11's task submission
+│   ├── G2-SOLID_Evaluate.pdf   # Week 12's task submission
+│   ├── G2-SRS.docx      
+│   ├── G2-SDD.docx
+│   ├── G2-UseCaseSpecs.docx      
+│   └── G2-TestPlan.docx             
 └── Testing/                    # Testing files, unit tests, etc.
 
 ```
 
 ## How to run AIMS?
-This project is a **Web Application** that combines **Spring Boot (Java)** for backend REST API and **React (JavaScript)** for frontend.
+This project is a **Web Application** that combines **Spring Boot (Java)** for backend REST API and **React (JavaScript/TypeScript)** for frontend.
 
-### 🏗️ Tech Stack
+### Techstack
 
 - **Backend**: Java Spring Boot (REST API)
-- **Frontend**: React (JavaScript)
-- **Database**: H2 Database (development)
+- **Frontend**: React (JavaScript/TypeScript)
+- **Database**: PostgreSQL
 - **Architecture**: Client-Server Web Application
 
 ### Requirements
 
-- **Java 21+** (to run Spring Boot backend)
-- **Maven** (to build backend)
-- **Node.js 16+** (to run React frontend)
-- **npm** (Node package manager)
+- **Java 21+** to run Spring Boot backend
+- **Maven** to build backend
+- **Node.js 16+** to run React frontend
+- **npm** Node package manager
 
-### Run Application (Web Mode)
+### Run Application
 
 #### Option 1: Quick Start (Recommended)
 ```bash
@@ -117,7 +121,7 @@ npm start
 - **Backend API**: http://localhost:8080/api/*
 - **Health Check**: http://localhost:8080/health
 
-## Report content
+## Report Content
 This section outlines the tasks assigned to each team member on a weekly basis.
 <details>
   <summary> W3: 24/02/2025 - 02/03/2025 </summary>
