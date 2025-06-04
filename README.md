@@ -17,7 +17,6 @@ This repository is organized as follows:
 ```
 ISD.ICT.20242-02/
 ├── .gitignore
-├── AIMS/                             
 ├── Analysis/                         # Analysis and design documentation
 │   ├── Business Process/
 │   ├── Communication Diagram + Analysis Class Diagram/
