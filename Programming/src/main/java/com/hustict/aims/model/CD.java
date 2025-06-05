@@ -1,8 +1,11 @@
 package com.hustict.aims.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
 
+@Entity
+@Table(name = "CD")
 public class CD extends Product {
     private List<String> artists;
     private String recordLabel;
@@ -12,9 +15,8 @@ public class CD extends Product {
 
     public CD() {}
 
-    public CD(Long id, String productDimension, int totalQuantity, String description, Boolean rushOrderSupported, String imageUrl, String barcode, String title, double weight, int price,
-              List<String> artists, String recordLabel, List<String> trackList, String genre, LocalDate releaseDate) {
-        super(id, productDimension, totalQuantity, description, rushOrderSupported, imageUrl, barcode, title, weight, price);
+    public CD(Product product, List<String> artists, String recordLabel, List<String> trackList, String genre, LocalDate releaseDate) {
+        super(product);
         this.artists = artists;
         this.recordLabel = recordLabel;
         this.trackList = trackList;
@@ -22,14 +24,17 @@ public class CD extends Product {
         this.releaseDate = releaseDate;
     }
 
-    public List<String> getArtists() { return artists; }
     public void setArtists(List<String> artists) { this.artists = artists; }
-    public String getRecordLabel() { return recordLabel; }
+    public List<String> getArtists() { return artists; }
     public void setRecordLabel(String recordLabel) { this.recordLabel = recordLabel; }
-    public List<String> getTrackList() { return trackList; }
+    public String getRecordLabel() { return recordLabel; }
     public void setTrackList(List<String> trackList) { this.trackList = trackList; }
-    public String getGenre() { return genre; }
+    public List<String> getTrackList() { return trackList; }
     public void setGenre(String genre) { this.genre = genre; }
-    public LocalDate getReleaseDate() { return releaseDate; }
+    public String getGenre() { return genre; }
     public void setReleaseDate(LocalDate releaseDate) { this.releaseDate = releaseDate; }
+    public LocalDate getReleaseDate() { return releaseDate; }
+
+    @Override
+    public String getCategory() { return "CD"; }
 } 

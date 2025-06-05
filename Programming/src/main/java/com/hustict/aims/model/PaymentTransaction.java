@@ -28,7 +28,6 @@ public class PaymentTransaction {
     }
 
     public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
     public String getCustomerName() { return customerName; }
     public void setCustomerName(String customerName) { this.customerName = customerName; }
     public String getCardType() { return cardType; }
@@ -45,4 +44,15 @@ public class PaymentTransaction {
     public void setBankCode(String bankCode) { this.bankCode = bankCode; }
     public int getBankTranNo() { return bankTranNo; }
     public void setBankTranNo(int bankTranNo) { this.bankTranNo = bankTranNo; }
+
+    public PaymentTransaction(String customerName, String cardType, String transactionContent, int totalAmount, String currency, LocalDateTime date, String bankCode, int bankTranNo) {
+        this.customerName = customerName;
+        this.cardType = cardType;
+        this.transactionContent = transactionContent;
+        this.totalAmount = totalAmount;
+        this.currency = currency;
+        this.date = date;
+        this.bankCode = bankCode;
+        this.bankTranNo = bankTranNo;
+    }
 } 

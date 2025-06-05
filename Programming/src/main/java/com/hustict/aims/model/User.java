@@ -44,4 +44,12 @@ public class User {
     public Set<UserRole> getRoles() { return roles; }
     public void setRoles(Set<UserRole> roles) { this.roles = roles; }
     public String getUserRoleAsString() { return roles != null ? roles.toString() : null; }
+
+    public User(String email, String name, String password, String phoneNumber, Set<UserRole> roles) {
+        this.email = email;
+        this.name = name;
+        this.password = password;
+        this.phoneNumber = phoneNumber;
+        this.roles = roles;
+    }
 } 

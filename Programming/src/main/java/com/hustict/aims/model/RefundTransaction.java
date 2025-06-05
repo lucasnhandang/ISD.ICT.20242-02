@@ -22,7 +22,6 @@ public class RefundTransaction {
     }
 
     public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
     public LocalDateTime getRefundDate() { return refundDate; }
     public void setRefundDate(LocalDateTime refundDate) { this.refundDate = refundDate; }
     public int getOrderAmount() { return orderAmount; }
@@ -33,4 +32,12 @@ public class RefundTransaction {
     public void setCurrency(String currency) { this.currency = currency; }
     public PaymentTransaction getPaymentTransaction() { return paymentTransaction; }
     public void setPaymentTransaction(PaymentTransaction paymentTransaction) { this.paymentTransaction = paymentTransaction; }
+
+    public RefundTransaction(LocalDateTime refundDate, int orderAmount, String bankTranID, String currency, PaymentTransaction paymentTransaction) {
+        this.refundDate = refundDate;
+        this.orderAmount = orderAmount;
+        this.bankTranID = bankTranID;
+        this.currency = currency;
+        this.paymentTransaction = paymentTransaction;
+    }
 } 
