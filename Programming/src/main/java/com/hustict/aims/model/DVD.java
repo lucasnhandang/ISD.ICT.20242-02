@@ -1,7 +1,10 @@
 package com.hustict.aims.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDate;
 
+@Entity
+@Table(name = "DVD")
 public class DVD extends Product {
     private String discType;
     private String director;
@@ -14,9 +17,8 @@ public class DVD extends Product {
 
     public DVD() {}
 
-    public DVD(Long id, String productDimension, int totalQuantity, String description, Boolean rushOrderSupported, String imageUrl, String barcode, String title, double weight, int price,
-               String discType, String director, int runtime, String studio, String language, String subtitles, String genre, LocalDate releaseDate) {
-        super(id, productDimension, totalQuantity, description, rushOrderSupported, imageUrl, barcode, title, weight, price);
+    public DVD(Product product, String discType, String director, int runtime, String studio, String language, String subtitles, String genre, LocalDate releaseDate) {
+        super(product);
         this.discType = discType;
         this.director = director;
         this.runtime = runtime;
@@ -27,20 +29,23 @@ public class DVD extends Product {
         this.releaseDate = releaseDate;
     }
 
-    public String getDiscType() { return discType; }
     public void setDiscType(String discType) { this.discType = discType; }
-    public String getDirector() { return director; }
+    public String getDiscType() { return discType; }
     public void setDirector(String director) { this.director = director; }
-    public int getRuntime() { return runtime; }
+    public String getDirector() { return director; }
     public void setRuntime(int runtime) { this.runtime = runtime; }
-    public String getStudio() { return studio; }
+    public int getRuntime() { return runtime; }
     public void setStudio(String studio) { this.studio = studio; }
-    public String getLanguage() { return language; }
+    public String getStudio() { return studio; }
     public void setLanguage(String language) { this.language = language; }
-    public String getSubtitles() { return subtitles; }
+    public String getLanguage() { return language; }
     public void setSubtitles(String subtitles) { this.subtitles = subtitles; }
-    public String getGenre() { return genre; }
+    public String getSubtitles() { return subtitles; }
     public void setGenre(String genre) { this.genre = genre; }
-    public LocalDate getReleaseDate() { return releaseDate; }
+    public String getGenre() { return genre; }
     public void setReleaseDate(LocalDate releaseDate) { this.releaseDate = releaseDate; }
+    public LocalDate getReleaseDate() { return releaseDate; }
+
+    @Override
+    public String getCategory() { return "DVD"; }
 }
