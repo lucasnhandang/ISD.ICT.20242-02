@@ -1,43 +1,48 @@
 package com.hustict.aims.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
 
+@Entity
+@Table(name = "Book")
 public class Book extends Product {
     private List<String> authors;
     private String coverType;
-    private String cancelOrderRepo;
+    private String publisher;
     private LocalDate publicationDate;
-    private int pages;
+    private Integer pages;
     private String language;
     private String genre;
 
     public Book() {}
 
-    public Book(Long id, String productDimension, int totalQuantity, String description, Boolean rushOrderSupported, String imageUrl, String barcode, String title, double weight, int price,
-                List<String> authors, String coverType, String cancelOrderRepo, LocalDate publicationDate, int pages, String language, String genre) {
-        super(id, productDimension, totalQuantity, description, rushOrderSupported, imageUrl, barcode, title, weight, price);
+    public Book(Product product, List<String> authors, String coverType, String publisher, Integer pages, String language, String genre, LocalDate publicationDate) {
+        super(product);
         this.authors = authors;
         this.coverType = coverType;
-        this.cancelOrderRepo = cancelOrderRepo;
-        this.publicationDate = publicationDate;
+        this.publisher = publisher;
         this.pages = pages;
         this.language = language;
         this.genre = genre;
+        this.publicationDate = publicationDate;
     }
 
-    public List<String> getAuthors() { return authors; }
     public void setAuthors(List<String> authors) { this.authors = authors; }
-    public String getCoverType() { return coverType; }
+    public List<String> getAuthors() { return authors; }
     public void setCoverType(String coverType) { this.coverType = coverType; }
-    public String getCancelOrderRepo() { return cancelOrderRepo; }
-    public void setCancelOrderRepo(String cancelOrderRepo) { this.cancelOrderRepo = cancelOrderRepo; }
-    public LocalDate getPublicationDate() { return publicationDate; }
-    public void setPublicationDate(LocalDate publicationDate) { this.publicationDate = publicationDate; }
-    public int getPages() { return pages; }
-    public void setPages(int pages) { this.pages = pages; }
-    public String getLanguage() { return language; }
+    public String getCoverType() { return coverType; }
+    public void setPublisher(String publisher) { this.publisher = publisher; }
+    public String getPublisher() { return publisher; }
+    public void setPages(Integer pages) { this.pages = pages; }
+    public Integer getPages() { return pages; }
     public void setLanguage(String language) { this.language = language; }
-    public String getGenre() { return genre; }
+    public String getLanguage() { return language; }
     public void setGenre(String genre) { this.genre = genre; }
+    public String getGenre() { return genre; }
+    public void setPublicationDate(LocalDate publicationDate) { this.publicationDate = publicationDate; }
+    public LocalDate getPublicationDate() { return publicationDate; }
+
+    @Override
+    public String getCategory() { return "Book"; }
 } 

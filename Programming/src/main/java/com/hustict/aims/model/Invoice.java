@@ -1,8 +1,17 @@
 package com.hustict.aims.model;
 
+import jakarta.persistence.*;
+
+@Entity
 public class Invoice {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @OneToOne
+    @JoinColumn(name = "order_id", referencedColumnName = "id")
     private Order order;
+
     private int shippingFee;
     private int totalPriceIncludeVAT;
     private int totalPriceExcludeVAT;

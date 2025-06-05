@@ -1,8 +1,11 @@
 package com.hustict.aims.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
 
+@Entity
+@Table(name = "LP")
 public class LP extends Product {
     private List<String> artists;
     private String recordLabel;
@@ -12,9 +15,8 @@ public class LP extends Product {
 
     public LP() {}
 
-    public LP(Long id, String productDimension, int totalQuantity, String description, Boolean rushOrderSupported, String imageUrl, String barcode, String title, double weight, int price,
-              List<String> artists, String recordLabel, List<String> trackList, String genre, LocalDate releaseDate) {
-        super(id, productDimension, totalQuantity, description, rushOrderSupported, imageUrl, barcode, title, weight, price);
+    public LP(Product product, List<String> artists, String recordLabel, List<String> trackList, String genre, LocalDate releaseDate) {
+        super(product);
         this.artists = artists;
         this.recordLabel = recordLabel;
         this.trackList = trackList;
@@ -32,4 +34,7 @@ public class LP extends Product {
     public void setGenre(String genre) { this.genre = genre; }
     public LocalDate getReleaseDate() { return releaseDate; }
     public void setReleaseDate(LocalDate releaseDate) { this.releaseDate = releaseDate; }
+
+    @Override
+    public String getCategory() { return "LP"; }
 } 
