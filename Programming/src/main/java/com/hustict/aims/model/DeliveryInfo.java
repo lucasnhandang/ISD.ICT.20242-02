@@ -3,21 +3,34 @@ package com.hustict.aims.model;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "deliveryinfo")
 public class DeliveryInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "deliveryinfoid")
     private Long id;
+    
+    @Column(name = "name")
     private String name;
+    
+    @Column(name = "address")
     private String address;
+    
+    @Column(name = "phonenumber")
     private String phoneNumber;
+    
+    @Column(name = "email")
     private String email;
+    
+    @Column(name = "province")
     private String province;
+    
+    @Column(name = "shippinginstruction")
     private String shippingInstruction;
 
     public DeliveryInfo() {}
 
-    public DeliveryInfo(Long id, String name, String address, String phoneNumber, String email, String province, String shippingInstruction) {
-        this.id = id;
+    public DeliveryInfo(String name, String address, String phoneNumber, String email, String province, String shippingInstruction) {
         this.name = name;
         this.address = address;
         this.phoneNumber = phoneNumber;
@@ -40,12 +53,4 @@ public class DeliveryInfo {
     public String getShippingInstruction() { return shippingInstruction; }
     public void setShippingInstruction(String shippingInstruction) { this.shippingInstruction = shippingInstruction; }
 
-    public DeliveryInfo(String name, String address, String phoneNumber, String email, String province, String shippingInstruction) {
-        this.name = name;
-        this.address = address;
-        this.phoneNumber = phoneNumber;
-        this.email = email;
-        this.province = province;
-        this.shippingInstruction = shippingInstruction;
-    }
 } 

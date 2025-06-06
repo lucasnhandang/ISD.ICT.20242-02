@@ -3,39 +3,49 @@ package com.hustict.aims.model;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "orderitem")
+@IdClass(OrderItemId.class)
 public class OrderItem {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id")
+    @JoinColumn(name = "orderid", referencedColumnName = "orderid")
     private Order order;
 
+    @Id
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
+    @JoinColumn(name = "productid", referencedColumnName = "id")
     private Product product;
 
+    @Column(name = "quantity")
     private int quantity;
-    private boolean isRushOrder;
+
+    @Column(name = "type")
+    private OrderType type;
 
     public OrderItem() {}
 
-    public OrderItem(Order order, Product product, int quantity, boolean isRushOrder) {
+    public OrderItem(Product product, int quantity, OrderType type) {
+        this.product = product;
+        this.quantity = quantity;
+        this.type = type;
+    }
+
+    public OrderItem(Order order, Product product, int quantity, OrderType type) {
         this.order = order;
         this.product = product;
         this.quantity = quantity;
-        this.isRushOrder = isRushOrder;
+        this.type = type;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
     public Order getOrder() { return order; }
     public void setOrder(Order order) { this.order = order; }
+
     public Product getProduct() { return product; }
     public void setProduct(Product product) { this.product = product; }
+    
     public int getQuantity() { return quantity; }
     public void setQuantity(int quantity) { this.quantity = quantity; }
-    public boolean isRushOrder() { return isRushOrder; }
-    public void setIsRushOrder(boolean isRushOrder) { this.isRushOrder = isRushOrder; }
-} 
+
+    public OrderType getType() { return type; } 
+    public void setType(OrderType type) { this.type = type; } 
+}
