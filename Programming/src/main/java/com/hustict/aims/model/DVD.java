@@ -4,15 +4,30 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "DVD")
+@Table(name = "dvd")
 public class DVD extends Product {
+    @Column(name = "disctype")
     private String discType;
+    
+    @Column(name = "director")
     private String director;
+    
+    @Column(name = "runtime")
     private int runtime;
+    
+    @Column(name = "studio")
     private String studio;
+    
+    @Column(name = "language")
     private String language;
+    
+    @Column(name = "subtitles")
     private String subtitles;
+    
+    @Column(name = "genre")
     private String genre;
+    
+    @Column(name = "releasedate")
     private LocalDate releaseDate;
 
     public DVD() {}
