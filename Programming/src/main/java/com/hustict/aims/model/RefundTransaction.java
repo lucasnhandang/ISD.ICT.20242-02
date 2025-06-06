@@ -1,43 +1,45 @@
 package com.hustict.aims.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "refundtransaction")
 public class RefundTransaction {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "refundid")
     private Long id;
-    private LocalDateTime refundDate;
+    
+    @Column(name = "banktransactionid")
+    private String bankTransactionId;
+    
+    @Column(name = "refundtime")
+    private LocalDateTime refundTime;
+    
+    @Column(name = "orderamount")
     private int orderAmount;
-    private String bankTranID;
-    private String currency;
-    private PaymentTransaction paymentTransaction;
+    
+    @Column(name = "currency")
+    private String currency = "VND";
 
     public RefundTransaction() {}
 
-    public RefundTransaction(Long id, LocalDateTime refundDate, int orderAmount, String bankTranID, String currency, PaymentTransaction paymentTransaction) {
-        this.id = id;
-        this.refundDate = refundDate;
+    public RefundTransaction(String bankTransactionId, LocalDateTime refundTime, 
+                           int orderAmount, String currency) {
+        this.bankTransactionId = bankTransactionId;
+        this.refundTime = refundTime;
         this.orderAmount = orderAmount;
-        this.bankTranID = bankTranID;
         this.currency = currency;
-        this.paymentTransaction = paymentTransaction;
     }
 
     public Long getId() { return id; }
-    public LocalDateTime getRefundDate() { return refundDate; }
-    public void setRefundDate(LocalDateTime refundDate) { this.refundDate = refundDate; }
+    public String getBankTransactionId() { return bankTransactionId; }
+    public void setBankTransactionId(String bankTransactionId) { this.bankTransactionId = bankTransactionId; }
+    public LocalDateTime getRefundTime() { return refundTime; }
+    public void setRefundTime(LocalDateTime refundTime) { this.refundTime = refundTime; }
     public int getOrderAmount() { return orderAmount; }
     public void setOrderAmount(int orderAmount) { this.orderAmount = orderAmount; }
-    public String getBankTranID() { return bankTranID; }
-    public void setBankTranID(String bankTranID) { this.bankTranID = bankTranID; }
     public String getCurrency() { return currency; }
     public void setCurrency(String currency) { this.currency = currency; }
-    public PaymentTransaction getPaymentTransaction() { return paymentTransaction; }
-    public void setPaymentTransaction(PaymentTransaction paymentTransaction) { this.paymentTransaction = paymentTransaction; }
-
-    public RefundTransaction(LocalDateTime refundDate, int orderAmount, String bankTranID, String currency, PaymentTransaction paymentTransaction) {
-        this.refundDate = refundDate;
-        this.orderAmount = orderAmount;
-        this.bankTranID = bankTranID;
-        this.currency = currency;
-        this.paymentTransaction = paymentTransaction;
-    }
 } 

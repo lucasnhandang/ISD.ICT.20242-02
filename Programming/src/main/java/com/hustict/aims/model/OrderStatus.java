@@ -7,4 +7,4 @@ public enum OrderStatus {
     REJECTED_REFUNDED,
     CANCELLED_PENDING,
     CANCELLED_REFUNDED
-} 
+}

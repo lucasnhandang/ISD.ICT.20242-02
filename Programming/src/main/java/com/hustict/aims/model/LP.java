@@ -2,20 +2,28 @@ package com.hustict.aims.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
-import java.util.List;
 
 @Entity
-@Table(name = "LP")
+@Table(name = "lp")
 public class LP extends Product {
-    private List<String> artists;
+    @Column(name = "artists")
+    private String artists;
+    
+    @Column(name = "recordlabel")
     private String recordLabel;
-    private List<String> trackList;
+    
+    @Column(name = "tracklist")
+    private String trackList;
+    
+    @Column(name = "genre")
     private String genre;
+    
+    @Column(name = "releasedate")
     private LocalDate releaseDate;
 
     public LP() {}
 
-    public LP(Product product, List<String> artists, String recordLabel, List<String> trackList, String genre, LocalDate releaseDate) {
+    public LP(Product product, String artists, String recordLabel, String trackList, String genre, LocalDate releaseDate) {
         super(product);
         this.artists = artists;
         this.recordLabel = recordLabel;
@@ -24,12 +32,12 @@ public class LP extends Product {
         this.releaseDate = releaseDate;
     }
 
-    public List<String> getArtists() { return artists; }
-    public void setArtists(List<String> artists) { this.artists = artists; }
+    public String getArtists() { return artists; }
+    public void setArtists(String artists) { this.artists = artists; }
     public String getRecordLabel() { return recordLabel; }
     public void setRecordLabel(String recordLabel) { this.recordLabel = recordLabel; }
-    public List<String> getTrackList() { return trackList; }
-    public void setTrackList(List<String> trackList) { this.trackList = trackList; }
+    public String getTrackList() { return trackList; }
+    public void setTrackList(String trackList) { this.trackList = trackList; }
     public String getGenre() { return genre; }
     public void setGenre(String genre) { this.genre = genre; }
     public LocalDate getReleaseDate() { return releaseDate; }

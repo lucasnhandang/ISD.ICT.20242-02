@@ -3,40 +3,57 @@ package com.hustict.aims.model;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "invoice")
 public class Invoice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "invoiceid")
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "order_id", referencedColumnName = "id")
-    private Order order;
-
+    @Column(name = "productpriceexvat")
+    private int productPriceExVAT;
+    
+    @Column(name = "productpriceincvat")
+    private int productPriceIncVAT;
+    
+    @Column(name = "shippingfee")
     private int shippingFee;
-    private int totalPriceIncludeVAT;
-    private int totalPriceExcludeVAT;
+    
+    @Column(name = "totalamount")
     private int totalAmount;
-    private PaymentTransaction transaction;
+    
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "transactionid", referencedColumnName = "transactionid")
+    private PaymentTransaction paymentTransaction;
+    
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "refundid", referencedColumnName = "refundid")
+    private RefundTransaction refundTransaction;
 
     public Invoice() {}
 
-    public Invoice(int shippingFee, Order order) {
+    public Invoice(int productPriceExVAT, int productPriceIncVAT, int shippingFee, 
+                   int totalAmount, PaymentTransaction paymentTransaction, 
+                   RefundTransaction refundTransaction) {
+        this.productPriceExVAT = productPriceExVAT;
+        this.productPriceIncVAT = productPriceIncVAT;
         this.shippingFee = shippingFee;
-        this.order = order;
+        this.totalAmount = totalAmount;
+        this.paymentTransaction = paymentTransaction;
+        this.refundTransaction = refundTransaction;
     }
 
     public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public Order getOrder() { return order; }
-    public void setOrder(Order order) { this.order = order; }
+    public int getProductPriceExVAT() { return productPriceExVAT; }
+    public void setProductPriceExVAT(int productPriceExVAT) { this.productPriceExVAT = productPriceExVAT; }
+    public int getProductPriceIncVAT() { return productPriceIncVAT; }
+    public void setProductPriceIncVAT(int productPriceIncVAT) { this.productPriceIncVAT = productPriceIncVAT; }
     public int getShippingFee() { return shippingFee; }
     public void setShippingFee(int shippingFee) { this.shippingFee = shippingFee; }
-    public int getTotalPriceIncludeVAT() { return totalPriceIncludeVAT; }
-    public void setTotalPriceIncludeVAT(int totalPriceIncludeVAT) { this.totalPriceIncludeVAT = totalPriceIncludeVAT; }
-    public int getTotalPriceExcludeVAT() { return totalPriceExcludeVAT; }
-    public void setTotalPriceExcludeVAT(int totalPriceExcludeVAT) { this.totalPriceExcludeVAT = totalPriceExcludeVAT; }
     public int getTotalAmount() { return totalAmount; }
     public void setTotalAmount(int totalAmount) { this.totalAmount = totalAmount; }
-    public PaymentTransaction getTransaction() { return transaction; }
-    public void setTransaction(PaymentTransaction transaction) { this.transaction = transaction; }
+    public PaymentTransaction getPaymentTransaction() { return paymentTransaction; }
+    public void setPaymentTransaction(PaymentTransaction paymentTransaction) { this.paymentTransaction = paymentTransaction; }
+    public RefundTransaction getRefundTransaction() { return refundTransaction; }
+    public void setRefundTransaction(RefundTransaction refundTransaction) { this.refundTransaction = refundTransaction; }
 } 
