@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
-    @Query("SELECT SUM(p.totalQuantity) FROM Order o JOIN o.productList p WHERE o.id = :id")
+    @Query("SELECT SUM(oi.quantity) FROM Order o JOIN o.orderItems oi WHERE o.id = :id")
     int getQuantityById(@Param("id") Long id);
 
     @Modifying
@@ -20,5 +20,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Modifying
     @Query("UPDATE Order o SET o.status = 'CANCELLED_REFUNDED' WHERE o.id = :id")
-    void updateRefundedOrderById(@Param("id") Long id);
-} 
+    void updateCancelRefundedOrderById(@Param("id") Long id);
+
+    @Modifying
+    @Query("UPDATE Order o SET o.status = 'REJECTED_REFUNDED' WHERE o.id = :id")
+    void updateRejectRefundedOrderById(@Param("id") Long id);
+}

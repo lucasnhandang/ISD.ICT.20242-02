@@ -1,58 +1,58 @@
 package com.hustict.aims.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "paymenttransaction")
 public class PaymentTransaction {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "transactionid")
     private Long id;
-    private String customerName;
+    
+    @Column(name = "banktransactionid")
+    private String bankTransactionId;
+    
+    @Column(name = "content")
+    private String content;
+    
+    @Column(name = "paymenttime")
+    private LocalDateTime paymentTime;
+    
+    @Column(name = "paymentamount")
+    private int paymentAmount;
+    
+    @Column(name = "cardtype")
     private String cardType;
-    private String transactionContent;
-    private int totalAmount;
-    private String currency;
-    private LocalDateTime date;
-    private String bankCode;
-    private int bankTranNo;
+    
+    @Column(name = "currency")
+    private String currency = "VND";
 
     public PaymentTransaction() {}
 
-    public PaymentTransaction(Long id, String customerName, String cardType, String transactionContent, int totalAmount, String currency, LocalDateTime date, String bankCode, int bankTranNo) {
-        this.id = id;
-        this.customerName = customerName;
+    public PaymentTransaction(String bankTransactionId, String content, 
+                             LocalDateTime paymentTime, int paymentAmount, 
+                             String cardType, String currency) {
+        this.bankTransactionId = bankTransactionId;
+        this.content = content;
+        this.paymentTime = paymentTime;
+        this.paymentAmount = paymentAmount;
         this.cardType = cardType;
-        this.transactionContent = transactionContent;
-        this.totalAmount = totalAmount;
         this.currency = currency;
-        this.date = date;
-        this.bankCode = bankCode;
-        this.bankTranNo = bankTranNo;
     }
 
     public Long getId() { return id; }
-    public String getCustomerName() { return customerName; }
-    public void setCustomerName(String customerName) { this.customerName = customerName; }
+    public String getBankTransactionId() { return bankTransactionId; }
+    public void setBankTransactionId(String bankTransactionId) { this.bankTransactionId = bankTransactionId; }
+    public String getContent() { return content; }
+    public void setContent(String content) { this.content = content; }
+    public LocalDateTime getPaymentTime() { return paymentTime; }
+    public void setPaymentTime(LocalDateTime paymentTime) { this.paymentTime = paymentTime; }
+    public int getPaymentAmount() { return paymentAmount; }
+    public void setPaymentAmount(int paymentAmount) { this.paymentAmount = paymentAmount; }
     public String getCardType() { return cardType; }
     public void setCardType(String cardType) { this.cardType = cardType; }
-    public String getTransactionContent() { return transactionContent; }
-    public void setTransactionContent(String transactionContent) { this.transactionContent = transactionContent; }
-    public int getTotalAmount() { return totalAmount; }
-    public void setTotalAmount(int totalAmount) { this.totalAmount = totalAmount; }
     public String getCurrency() { return currency; }
     public void setCurrency(String currency) { this.currency = currency; }
-    public LocalDateTime getDate() { return date; }
-    public void setDate(LocalDateTime date) { this.date = date; }
-    public String getBankCode() { return bankCode; }
-    public void setBankCode(String bankCode) { this.bankCode = bankCode; }
-    public int getBankTranNo() { return bankTranNo; }
-    public void setBankTranNo(int bankTranNo) { this.bankTranNo = bankTranNo; }
-
-    public PaymentTransaction(String customerName, String cardType, String transactionContent, int totalAmount, String currency, LocalDateTime date, String bankCode, int bankTranNo) {
-        this.customerName = customerName;
-        this.cardType = cardType;
-        this.transactionContent = transactionContent;
-        this.totalAmount = totalAmount;
-        this.currency = currency;
-        this.date = date;
-        this.bankCode = bankCode;
-        this.bankTranNo = bankTranNo;
-    }
 } 

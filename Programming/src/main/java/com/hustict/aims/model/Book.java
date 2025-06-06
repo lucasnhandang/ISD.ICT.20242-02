@@ -2,22 +2,34 @@ package com.hustict.aims.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
-import java.util.List;
 
 @Entity
-@Table(name = "Book")
+@Table(name = "book")
 public class Book extends Product {
-    private List<String> authors;
+    @Column(name = "authors")
+    private String authors;
+    
+    @Column(name = "covertype")
     private String coverType;
+    
+    @Column(name = "publisher")
     private String publisher;
+    
+    @Column(name = "publicationdate")
     private LocalDate publicationDate;
+    
+    @Column(name = "numpages")
     private Integer pages;
+    
+    @Column(name = "language")
     private String language;
+    
+    @Column(name = "genre")
     private String genre;
 
     public Book() {}
 
-    public Book(Product product, List<String> authors, String coverType, String publisher, Integer pages, String language, String genre, LocalDate publicationDate) {
+    public Book(Product product, String authors, String coverType, String publisher, Integer pages, String language, String genre, LocalDate publicationDate) {
         super(product);
         this.authors = authors;
         this.coverType = coverType;
@@ -28,8 +40,8 @@ public class Book extends Product {
         this.publicationDate = publicationDate;
     }
 
-    public void setAuthors(List<String> authors) { this.authors = authors; }
-    public List<String> getAuthors() { return authors; }
+    public void setAuthors(String authors) { this.authors = authors; }
+    public String getAuthors() { return authors; }
     public void setCoverType(String coverType) { this.coverType = coverType; }
     public String getCoverType() { return coverType; }
     public void setPublisher(String publisher) { this.publisher = publisher; }

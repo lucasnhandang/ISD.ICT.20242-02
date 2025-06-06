@@ -4,27 +4,51 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
+@Table(name = "product")
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "product_type")
 public abstract class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
+    
+    @Column(name = "title")
     private String title;
+    
+    @Column(name = "value")
     private int value;
+    
+    @Column(name = "currentprice")
     private int currentPrice;
+    
+    @Column(name = "barcode")
     private String barcode;
+    
+    @Column(name = "description")
     private String description;
+    
+    @Column(name = "quantity")
     private int quantity;
+    
+    @Column(name = "entrydate")
     private LocalDate entryDate;
-    private String productDimension;
+    
+    @Column(name = "dimension")
+    private String dimension;
+    
+    @Column(name = "weight")
     private double weight;
+    
+    @Column(name = "rushordersupported")
     private Boolean rushOrderSupported;
+    
+    @Column(name = "imageurl")
     private String imageUrl;
 
     public Product() {}
 
-    public Product(String title, int value, int currentPrice, String barcode, String description, int quantity, LocalDate entryDate, String productDimension, double weight, Boolean rushOrderSupported, String imageUrl) {
+    public Product(String title, int value, int currentPrice, String barcode, String description, int quantity, LocalDate entryDate, String dimension, double weight, Boolean rushOrderSupported, String imageUrl) {
         this.title = title;
         this.value = value;
         this.currentPrice = currentPrice;
@@ -32,7 +56,7 @@ public abstract class Product {
         this.description = description;
         this.quantity = quantity;
         this.entryDate = entryDate;
-        this.productDimension = productDimension;
+        this.dimension = dimension;
         this.weight = weight;
         this.rushOrderSupported = rushOrderSupported;
         this.imageUrl = imageUrl;
@@ -46,7 +70,7 @@ public abstract class Product {
         this.description = otherProduct.getDescription();
         this.quantity = otherProduct.getQuantity();
         this.entryDate = otherProduct.getEntryDate();
-        this.productDimension = otherProduct.getProductDimension();
+        this.dimension = otherProduct.getDimension();
         this.weight = otherProduct.getWeight();
         this.rushOrderSupported = otherProduct.getRushOrderSupported();
         this.imageUrl = otherProduct.getImageUrl();
@@ -75,8 +99,8 @@ public abstract class Product {
     public LocalDate getEntryDate() { return entryDate; }
     public void setEntryDate(LocalDate entryDate) { this.entryDate = entryDate; }
 
-    public String getProductDimension() { return productDimension; }
-    public void setProductDimension(String productDimension) { this.productDimension = productDimension; }
+    public String getDimension() { return dimension; }
+    public void setDimension(String dimension) { this.dimension = dimension; }
 
     public double getWeight() { return weight; }
     public void setWeight(double weight) { this.weight = weight; }
