@@ -1,4 +1,4 @@
-package com.hustict.aims.model;
+package com.hustict.aims.model.product;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -6,10 +6,10 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "product")
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class Product {
-
+public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     @Column(name = "title", nullable = false)
@@ -36,7 +36,7 @@ public abstract class Product {
     @Column(name = "dimension", nullable = false)
     private String dimension;
 
-    @Column(name = "weight", nullable = false)
+    @Column(name = "weight", columnDefinition = "NUMERIC", nullable = false)
     private double weight;
 
     @Column(name = "rushordersupported")
@@ -67,7 +67,7 @@ public abstract class Product {
         this.rushOrderSupported = rushOrderSupported;
         this.imageUrl = imageUrl;
 
-        assignCategory(); 
+        assignCategory();
     }
 
     public Product(Product otherProduct) {

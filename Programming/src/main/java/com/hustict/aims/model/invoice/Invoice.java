@@ -1,5 +1,7 @@
-package com.hustict.aims.model;
+package com.hustict.aims.model.invoice;
 
+import com.hustict.aims.model.payment.PaymentTransaction;
+import com.hustict.aims.model.payment.RefundTransaction;
 import jakarta.persistence.*;
 
 @Entity

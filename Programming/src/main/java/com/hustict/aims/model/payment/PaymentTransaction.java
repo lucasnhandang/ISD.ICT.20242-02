@@ -1,4 +1,4 @@
-package com.hustict.aims.model;
+package com.hustict.aims.model.payment;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;

@@ -1,4 +1,4 @@
-package com.hustict.aims.model;
+package com.hustict.aims.model.payment;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -26,7 +26,7 @@ public class RefundTransaction {
     public RefundTransaction() {}
 
     public RefundTransaction(String bankTransactionId, LocalDateTime refundTime, 
-                           int orderAmount, String currency) {
+                            int orderAmount, String currency) {
         this.bankTransactionId = bankTransactionId;
         this.refundTime = refundTime;
         this.orderAmount = orderAmount;
