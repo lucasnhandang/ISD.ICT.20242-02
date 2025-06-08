@@ -6,49 +6,55 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "product")
 @Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name = "product_type")
 public abstract class Product {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
-    
-    @Column(name = "title")
+
+    @Column(name = "title", nullable = false)
     private String title;
-    
-    @Column(name = "value")
+
+    @Column(name = "value", nullable = false)
     private int value;
-    
-    @Column(name = "currentprice")
+
+    @Column(name = "currentprice", nullable = false)
     private int currentPrice;
-    
-    @Column(name = "barcode")
+
+    @Column(name = "barcode", nullable = false)
     private String barcode;
-    
-    @Column(name = "description")
+
+    @Column(name = "description", nullable = false)
     private String description;
-    
-    @Column(name = "quantity")
+
+    @Column(name = "quantity", nullable = false)
     private int quantity;
-    
-    @Column(name = "entrydate")
+
+    @Column(name = "entrydate", nullable = false)
     private LocalDate entryDate;
-    
-    @Column(name = "dimension")
+
+    @Column(name = "dimension", nullable = false)
     private String dimension;
-    
-    @Column(name = "weight")
+
+    @Column(name = "weight", nullable = false)
     private double weight;
-    
+
     @Column(name = "rushordersupported")
     private Boolean rushOrderSupported;
-    
+
     @Column(name = "imageurl")
     private String imageUrl;
 
-    public Product() {}
+    @Column(name = "category", nullable = false, updatable = false)
+    private String category;
 
-    public Product(String title, int value, int currentPrice, String barcode, String description, int quantity, LocalDate entryDate, String dimension, double weight, Boolean rushOrderSupported, String imageUrl) {
+    public Product() {
+        assignCategory();
+    }
+
+    public Product(String title, int value, int currentPrice, String barcode, String description,
+                int quantity, LocalDate entryDate, String dimension, double weight,
+                Boolean rushOrderSupported, String imageUrl) {
         this.title = title;
         this.value = value;
         this.currentPrice = currentPrice;
@@ -60,20 +66,21 @@ public abstract class Product {
         this.weight = weight;
         this.rushOrderSupported = rushOrderSupported;
         this.imageUrl = imageUrl;
+
+        assignCategory(); 
     }
 
     public Product(Product otherProduct) {
-        this.title = otherProduct.getTitle();
-        this.value = otherProduct.getValue();
-        this.currentPrice = otherProduct.getCurrentPrice();
-        this.barcode = otherProduct.getBarcode();
-        this.description = otherProduct.getDescription();
-        this.quantity = otherProduct.getQuantity();
-        this.entryDate = otherProduct.getEntryDate();
-        this.dimension = otherProduct.getDimension();
-        this.weight = otherProduct.getWeight();
-        this.rushOrderSupported = otherProduct.getRushOrderSupported();
-        this.imageUrl = otherProduct.getImageUrl();
+        this(otherProduct.getTitle(), otherProduct.getValue(), otherProduct.getCurrentPrice(),
+            otherProduct.getBarcode(), otherProduct.getDescription(), otherProduct.getQuantity(),
+            otherProduct.getEntryDate(), otherProduct.getDimension(), otherProduct.getWeight(),
+            otherProduct.getRushOrderSupported(), otherProduct.getImageUrl());
+    }
+
+    @PrePersist
+    @PreUpdate
+    protected void assignCategory() {
+        this.category = this.getClass().getSimpleName(); 
     }
 
     public Long getId() { return id; }
@@ -111,5 +118,9 @@ public abstract class Product {
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
-    public abstract String getCategory();
-} 
+    public String getCategory() { return category; }
+
+    protected void setCategory(String category) {
+        this.category = category;
+    }
+}

@@ -54,7 +54,4 @@ public class Book extends Product {
     public String getGenre() { return genre; }
     public void setPublicationDate(LocalDate publicationDate) { this.publicationDate = publicationDate; }
     public LocalDate getPublicationDate() { return publicationDate; }
-
-    @Override
-    public String getCategory() { return "Book"; }
 } 
