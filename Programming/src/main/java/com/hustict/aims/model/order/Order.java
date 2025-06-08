@@ -1,5 +1,7 @@
-package com.hustict.aims.model;
+package com.hustict.aims.model.order;
 
+import com.hustict.aims.model.invoice.Invoice;
+import com.hustict.aims.model.shipping.DeliveryInfo;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;

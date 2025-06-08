@@ -1,11 +1,11 @@
-package com.hustict.aims.model;
+package com.hustict.aims.model.user;
 
 import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "\"User\"")
+@Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,15 +20,15 @@ public class User {
     
     @Column(name = "email")
     private String email;
-    
-    @Column(name = "phonenumber")
+
+    @Column(name = "phonenumber", columnDefinition = "CHAR(10)")
     private String phoneNumber;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     @JoinTable(
-        name = "userrole",
-        joinColumns = @JoinColumn(name = "id"),
-        inverseJoinColumns = @JoinColumn(name = "roleid")
+            name = "user_role_map",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
 
