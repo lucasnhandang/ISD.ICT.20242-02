@@ -60,7 +60,4 @@ public class DVD extends Product {
     public String getGenre() { return genre; }
     public void setReleaseDate(LocalDate releaseDate) { this.releaseDate = releaseDate; }
     public LocalDate getReleaseDate() { return releaseDate; }
-
-    @Override
-    public String getCategory() { return "DVD"; }
 }
