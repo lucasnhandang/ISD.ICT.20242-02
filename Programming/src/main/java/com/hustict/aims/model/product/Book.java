@@ -1,4 +1,4 @@
-package com.hustict.aims.model;
+package com.hustict.aims.model.product;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -54,4 +54,4 @@ public class Book extends Product {
     public String getGenre() { return genre; }
     public void setPublicationDate(LocalDate publicationDate) { this.publicationDate = publicationDate; }
     public LocalDate getPublicationDate() { return publicationDate; }
-} 
+}
