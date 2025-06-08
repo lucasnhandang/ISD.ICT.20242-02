@@ -4,48 +4,59 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "orderitem")
-@IdClass(OrderItemId.class)
 public class OrderItem {
-    @Id
+
+    @EmbeddedId
+    private OrderItemKey id = new OrderItemKey();
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "orderid", referencedColumnName = "orderid")
+    @MapsId("orderId") // ánh xạ theo field trong OrderItemKey
+    @JoinColumn(name = "orderid")
     private Order order;
 
-    @Id
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "productid", referencedColumnName = "id")
+    @MapsId("productId")
+    @JoinColumn(name = "productid")
     private Product product;
 
     @Column(name = "quantity")
     private int quantity;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "type")
     private OrderType type;
 
     public OrderItem() {}
-
-    public OrderItem(Product product, int quantity, OrderType type) {
-        this.product = product;
-        this.quantity = quantity;
-        this.type = type;
-    }
 
     public OrderItem(Order order, Product product, int quantity, OrderType type) {
         this.order = order;
         this.product = product;
         this.quantity = quantity;
         this.type = type;
+        this.id = new OrderItemKey(order.getId(), product.getId());
     }
 
+    // Getters & Setters
+
+    public OrderItemKey getId() { return id; }
+    public void setId(OrderItemKey id) { this.id = id; }
+
     public Order getOrder() { return order; }
-    public void setOrder(Order order) { this.order = order; }
+    public void setOrder(Order order) {
+        this.order = order;
+        this.id.setOrderId(order.getId());
+    }
 
     public Product getProduct() { return product; }
-    public void setProduct(Product product) { this.product = product; }
-    
+    public void setProduct(Product product) {
+        this.product = product;
+        this.id.setProductId(product.getId());
+    }
+
     public int getQuantity() { return quantity; }
     public void setQuantity(int quantity) { this.quantity = quantity; }
 
-    public OrderType getType() { return type; } 
-    public void setType(OrderType type) { this.type = type; } 
+    public OrderType getType() { return type; }
+    public void setType(OrderType type) { this.type = type; }
+
 }
