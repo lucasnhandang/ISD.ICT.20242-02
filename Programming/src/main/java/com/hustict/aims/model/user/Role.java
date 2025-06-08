@@ -1,4 +1,4 @@
-package com.hustict.aims.model;
+package com.hustict.aims.model.user;
 
 import jakarta.persistence.*;
 import java.util.Set;

@@ -1,4 +1,4 @@
-package com.hustict.aims.model;
+package com.hustict.aims.model.cart;
 
 import java.util.ArrayList;
 import java.util.List;

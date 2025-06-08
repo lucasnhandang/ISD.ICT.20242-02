@@ -1,4 +1,6 @@
-package com.hustict.aims.model;
+package com.hustict.aims.model.cart;
+
+import com.hustict.aims.model.product.Product;
 
 public class CartItem {
     private Product product;

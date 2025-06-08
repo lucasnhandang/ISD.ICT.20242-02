@@ -1,4 +1,4 @@
-package com.hustict.aims.model;
+package com.hustict.aims.model.shipping;
 
 import jakarta.persistence.*;
 

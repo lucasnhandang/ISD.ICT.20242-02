@@ -1,4 +1,4 @@
-package com.hustict.aims.repository;
+package com.hustict.aims.repository.product;
 
 import com.hustict.aims.model.product.Product;
 import org.springframework.data.jpa.repository.JpaRepository;

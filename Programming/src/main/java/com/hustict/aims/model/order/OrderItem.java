@@ -1,5 +1,6 @@
-package com.hustict.aims.model;
+package com.hustict.aims.model.order;
 
+import com.hustict.aims.model.product.Product;
 import jakarta.persistence.*;
 
 @Entity

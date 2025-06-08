@@ -1,4 +1,4 @@
-package com.hustict.aims.model;
+package com.hustict.aims.model.user;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -11,14 +11,13 @@ public class ProductChecklog {
     @Column(name = "checklogid")
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "userid", referencedColumnName = "userid")
-    private User user;
+    @Column(name = "userid")
+    private Long userId;
 
-    @ManyToOne
-    @JoinColumn(name = "productid", referencedColumnName = "id")
-    private Product product;
+    @Column(name = "productid")
+    private Long productId;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "actiontype")
     private ActionType actionType;
 
@@ -27,18 +26,18 @@ public class ProductChecklog {
 
     public ProductChecklog() {}
 
-    public ProductChecklog(User user, Product product, ActionType actionType, LocalDateTime date) {
-        this.user = user;
-        this.product = product;
+    public ProductChecklog(Long userId, Long productId, ActionType actionType, LocalDateTime date) {
+        this.userId = userId;
+        this.productId = productId;
         this.actionType = actionType;
         this.date = date;
     }
 
     public Long getId() { return id; }
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
-    public Product getProduct() { return product; }
-    public void setProduct(Product product) { this.product = product; }
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
+    public Long getProductId() { return productId; }
+    public void setProductId(Long productId) { this.productId = productId; }
     public ActionType getActionType() { return actionType; }
     public void setActionType(ActionType actionType) { this.actionType = actionType; }
     public LocalDateTime getDate() { return date; }
