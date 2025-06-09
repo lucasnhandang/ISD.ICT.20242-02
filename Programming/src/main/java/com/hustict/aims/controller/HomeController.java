@@ -5,7 +5,6 @@ import com.hustict.aims.dto.home.ProductSearchRequestDTO;
 import com.hustict.aims.dto.home.ProductSummaryDTO;
 import com.hustict.aims.service.HomeService;
 import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 public class HomeController {
     private final HomeService homeService;
 
-    @Autowired
     public HomeController(HomeService homeService) {
         this.homeService = homeService;
     }
@@ -25,12 +23,12 @@ public class HomeController {
     public ResponseEntity<String> handleException(Exception e) {
         e.printStackTrace();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Lỗi xử lý backend: " + e.getMessage());
+                .body("Error when handling backend: " + e.getMessage());
     }
 
     @PostConstruct
     public void init() {
-        System.out.println("✅ HomeController đã được khởi tạo");
+        System.out.println("HomeController is initialized...");
     }
 
     // Random products
