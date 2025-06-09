@@ -6,7 +6,6 @@ import com.hustict.aims.dto.auth.LoginResponseDTO.UserInfoDTO;
 import com.hustict.aims.model.user.Role;
 import com.hustict.aims.model.user.User;
 import com.hustict.aims.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,12 +17,11 @@ import java.util.stream.Collectors;
 public class AuthService {
     private final UserRepository userRepository;
 
-    @Autowired
     public AuthService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
-    public LoginResponseDTO authenticate(LoginRequestDTO loginRequest) throws Exception {
+    public LoginResponseDTO authenticate(LoginRequestDTO loginRequest) {
         // Validate input
         validateLoginInput(loginRequest);
         
@@ -47,7 +45,7 @@ public class AuthService {
 
         // Create user info DTO
         UserInfoDTO userInfo = new UserInfoDTO(
-            user.getid(),
+            user.getId(),
             user.getName(),
             user.getEmail(),
             roleNames
@@ -62,7 +60,7 @@ public class AuthService {
     /**
      * Validate token and return user info
      */
-    public LoginResponseDTO validateTokenAndGetUserInfo(String token) throws Exception {
+    public LoginResponseDTO validateTokenAndGetUserInfo(String token) {
         Long userId = getUserIdFromToken(token);
         
         Optional<User> userOptional = userRepository.findById(userId);
@@ -76,7 +74,7 @@ public class AuthService {
             .collect(Collectors.toList());
 
         UserInfoDTO userInfo = new UserInfoDTO(
-            user.getid(),
+            user.getId(),
             user.getName(),
             user.getEmail(),
             roleNames
@@ -88,7 +86,7 @@ public class AuthService {
     /**
      * Refresh user token
      */
-    public LoginResponseDTO refreshUserToken(String oldToken) throws Exception {
+    public LoginResponseDTO refreshUserToken(String oldToken) {
         Long userId = getUserIdFromToken(oldToken);
         
         Optional<User> userOptional = userRepository.findById(userId);
@@ -106,7 +104,7 @@ public class AuthService {
             .collect(Collectors.toList());
 
         UserInfoDTO userInfo = new UserInfoDTO(
-            user.getid(),
+            user.getId(),
             user.getName(),
             user.getEmail(),
             roleNames
@@ -150,7 +148,7 @@ public class AuthService {
     private String generateToken(User user) {
         // Simplified token generation
         // In production: use JWT with proper signing and expiration
-        return "token_" + user.getid() + "_" + System.currentTimeMillis();
+        return "token_" + user.getId() + "_" + System.currentTimeMillis();
     }
 
     /**
