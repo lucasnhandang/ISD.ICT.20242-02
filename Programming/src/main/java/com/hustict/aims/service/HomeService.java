@@ -8,7 +8,6 @@ import com.hustict.aims.repository.HomeRepository;
 import com.hustict.aims.utils.builder.PagedResponseBuilder;
 import com.hustict.aims.utils.mapper.ProductSummaryMapper;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -36,7 +35,6 @@ public class HomeService {
         "title", "title"
     );
 
-    @Autowired
     public HomeService(HomeRepository homeRepo, ProductSummaryMapper productMapper) {
         this.homeRepo = homeRepo;
         this.productSummaryMapper = productMapper;

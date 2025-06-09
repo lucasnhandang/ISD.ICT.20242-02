@@ -3,7 +3,6 @@ package com.hustict.aims.controller;
 import com.hustict.aims.dto.product.ProductDetailDTO;
 import com.hustict.aims.utils.mapper.ProductSummaryMapper;
 import com.hustict.aims.service.ProductService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +15,6 @@ public class ProductUserController {
 
     private final ProductService productService;
 
-    @Autowired
     public ProductUserController(ProductService productService, ProductSummaryMapper productMapper) {
         this.productService = productService;
     }
