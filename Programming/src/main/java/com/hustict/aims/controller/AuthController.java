@@ -3,7 +3,6 @@ package com.hustict.aims.controller;
 import com.hustict.aims.dto.auth.LoginRequestDTO;
 import com.hustict.aims.dto.auth.LoginResponseDTO;
 import com.hustict.aims.service.AuthService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +21,6 @@ public class AuthController {
     // Simple in-memory token blacklist
     private final Set<String> blacklistedTokens = new HashSet<>();
 
-    @Autowired
     public AuthController(AuthService authService) {
         this.authService = authService;
     }
