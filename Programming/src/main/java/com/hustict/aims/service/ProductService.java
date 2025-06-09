@@ -89,6 +89,9 @@ public class ProductService {
         }
 
         public boolean isProductAvailable(Long id, int requiredQty) {
-                return productRepo.findById(id).map(product -> product.getQuantity() >= requiredQty).orElse(false);
+                Product product = productRepo.findById(id).orElseThrow(() -> new NoSuchElementException(
+                                "Product not found with ID: " + id));
+                int availQty = product.getQuantity();
+                return availQty >= requiredQty;
         }
 }
