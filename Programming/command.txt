@@ -1,0 +1,4 @@
+mvnd spring-boot:run -e
+mvnd spring-boot:run -X
+
+mvnd clean install

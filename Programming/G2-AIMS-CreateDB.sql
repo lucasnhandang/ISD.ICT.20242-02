@@ -165,6 +165,24 @@ CREATE TABLE orderitem (
     FOREIGN KEY (orderid) REFERENCES orders(orderid) ON DELETE CASCADE,
     FOREIGN KEY (productid) REFERENCES product(id) ON DELETE CASCADE
 );
+CREATE TABLE reservation (
+    id BIGSERIAL PRIMARY KEY,
+    session_id VARCHAR(255),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE reservation_item (
+    id BIGSERIAL PRIMARY KEY,
+    product_id BIGINT NOT NULL,
+    quantity INTEGER NOT NULL,
+    reservation_id BIGINT NOT NULL,
+    CONSTRAINT fk_reservation
+        FOREIGN KEY (reservation_id)
+        REFERENCES reservation(id)
+        ON DELETE CASCADE
+);
+
 
 -- INDEXES
 CREATE INDEX idx_user_email ON users(email);
