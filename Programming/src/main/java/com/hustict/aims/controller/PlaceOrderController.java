@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpSession;
 
+import com.hustict.aims.dto.deliveryForm.DeliveryFormDTO;
 import com.hustict.aims.dto.cart.CartRequestDTO;
 import com.hustict.aims.service.placeOrder.DeliveryFormService;
 import com.hustict.aims.service.placeOrder.HandleRequestService;
@@ -14,7 +15,7 @@ import com.hustict.aims.service.placeOrder.PaymentHandlerService;
 // import com.hustict.aims.dto.DeliveryFormDTO;             
 
 @RestController
-@RequestMapping("/place-order")
+@RequestMapping("/api/v1/place-order")
 public class PlaceOrderController {
 
     private final HandleRequestService handleRequestService;
@@ -38,8 +39,10 @@ public class PlaceOrderController {
     }
 
     @PostMapping("/submit-form")
-    public ResponseEntity<String> submitDeliveryForm() {
-        deliveryFormService.submitDeliveryForm();
+    public ResponseEntity<String> submitDeliveryForm(@RequestBody DeliveryFormDTO form, HttpSession session) {
+        deliveryFormService.submitDeliveryForm(form, session.getId());
+        session.setAttribute("deliveryForm", form);
+
         return ResponseEntity.ok("Delivery form successfully submitted");
     }
 

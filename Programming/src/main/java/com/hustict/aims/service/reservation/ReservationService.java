@@ -28,7 +28,6 @@ public class ReservationService {
     @Transactional
     public void createReservation(CartRequestDTO cart, String sessionId) {
         // sửa
-        
         reservationRepository.deleteByStatusAndSessionId(Status.ACTIVE, sessionId);
 
         Reservation reservation = new Reservation();
