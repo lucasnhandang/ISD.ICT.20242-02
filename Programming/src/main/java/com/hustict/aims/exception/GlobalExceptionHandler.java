@@ -96,4 +96,14 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
+
+    
+    @ExceptionHandler(DeliveryFormValidationException.class)
+    public ResponseEntity<Map<String, Object>> handleDeliveryFormValidationException(DeliveryFormValidationException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Delivery form validation failed");
+        response.put("errors", ex.getErrors());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
 }
