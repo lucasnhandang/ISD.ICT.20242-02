@@ -9,9 +9,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class DeliveryFormDTO {
     private String customerName;
-    private int phoneNumber;
+    private String phoneNumber;
     private String deliveryProvince;
     private String deliveryAddress;
     private String deliveryInstructions;
     private boolean isRushOrder;
+    private String email;  
 }

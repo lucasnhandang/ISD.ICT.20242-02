@@ -8,7 +8,8 @@ public class CartItemRequestDTO {
     private String productName;
     private int quantity;
     private double price;
-
+    private double weight;
+    
     public Long getProductID() {
         return productID;
     }
