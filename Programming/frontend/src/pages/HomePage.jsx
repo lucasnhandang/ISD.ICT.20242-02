@@ -53,9 +53,9 @@ const HomePage = () => {
       setLoading(true);
       setError(null);
       let data;
-      
+
       if (searchQuery) {
-        data = await searchProducts(searchQuery, page - 1, PRODUCTS_PER_PAGE, sortBy, sortDirection);
+        data = await searchProducts(searchQuery, page - 1, PRODUCTS_PER_PAGE, sortBy, sortDirection, category);
       } else {
         data = await getProducts(page - 1, PRODUCTS_PER_PAGE, category, sortBy, sortDirection);
       }
@@ -97,7 +97,7 @@ const HomePage = () => {
   const handleCategoryChange = (newCategory) => {
     setCategory(newCategory);
     setPage(1);
-    setSearchQuery(''); // Clear search when changing category
+    setSearchQuery('');
   };
 
   const handleSortChange = (newSortBy, newSortDirection) => {
@@ -109,7 +109,6 @@ const HomePage = () => {
   const handleSearch = async (query) => {
     setSearchQuery(query);
     setPage(1);
-    setCategory('all'); // Reset category when searching
   };
 
   const handleSubscribe = (e) => {
@@ -122,82 +121,82 @@ const HomePage = () => {
   const renderContent = () => {
     if (loading) {
       return (
-        <Box sx={loadingContainerStyles}>
-          <CircularProgress />
-        </Box>
+          <Box sx={loadingContainerStyles}>
+            <CircularProgress />
+          </Box>
       );
     }
 
     if (error) {
       return (
-        <Box sx={messageContainerStyles}>
-          <Typography color="error">{error}</Typography>
-        </Box>
+          <Box sx={messageContainerStyles}>
+            <Typography color="error">{error}</Typography>
+          </Box>
       );
     }
 
     if (products.length === 0) {
       return (
-        <Box sx={messageContainerStyles}>
-          <Typography>
-            {searchQuery 
-              ? `No products found for "${searchQuery}"`
-              : `No products found in category "${category}"`}
-          </Typography>
-        </Box>
+          <Box sx={messageContainerStyles}>
+            <Typography>
+              {searchQuery
+                  ? `No products found for "${searchQuery}"`
+                  : `No products found in category "${category}"`}
+            </Typography>
+          </Box>
       );
     }
 
     return (
-      <>
-        <Grid container spacing={3}>
-          {products.map((product) => (
-            <Grid item key={product.id} xs={12} sm={6} md={3}>
-              <ProductCard product={product} />
-            </Grid>
-          ))}
-        </Grid>
+        <>
+          <Grid container spacing={3}>
+            {products.map((product) => (
+                <Grid item key={product.id} xs={12} sm={6} md={3}>
+                  <ProductCard product={product} />
+                </Grid>
+            ))}
+          </Grid>
 
-        <Box sx={paginationContainerStyles}>
-          <Pagination 
-            count={totalPages} 
-            page={page} 
-            onChange={handlePageChange}
-            color="primary"
-          />
-        </Box>
-      </>
+          <Box sx={paginationContainerStyles}>
+            <Pagination
+                count={totalPages}
+                page={page}
+                onChange={handlePageChange}
+                color="primary"
+            />
+          </Box>
+        </>
     );
   };
 
   return (
-    <Box sx={rootStyles}>
-      <Header onSearch={handleSearch} />
-      
-      <ConnectionStatus 
-        open={connectionStatus.checked} 
-        message={connectionStatus.message}
-        severity={connectionStatus.connected ? 'success' : 'error'}
-      />
-      
-      <Container maxWidth="lg" sx={containerStyles}>
-        <Navigation 
-          onCategoryChange={handleCategoryChange} 
-          onSortChange={handleSortChange}
-        />
-        {renderContent()}
-      </Container>
+      <Box sx={rootStyles}>
+        <Header onSearch={handleSearch} />
 
-      <Box 
-        component="footer" 
-        sx={{ 
-          py: 4, 
-          bgcolor: '#f5f5f5',
-          mt: 'auto'
-        }}
-      >
+        <ConnectionStatus
+            open={connectionStatus.checked}
+            message={connectionStatus.message}
+            severity={connectionStatus.connected ? 'success' : 'error'}
+        />
+
+        <Container maxWidth="lg" sx={containerStyles}>
+          <Navigation
+              onCategoryChange={handleCategoryChange}
+              onSortChange={handleSortChange}
+          />
+          {renderContent()}
+        </Container>
+
+        <Box
+            component="footer"
+            sx={{
+              py: 4,
+              bgcolor: '#f5f5f5',
+              mt: 'auto'
+            }}
+        >
+        </Box>
       </Box>
-    </Box>
   );
 };
 

@@ -1,56 +1,45 @@
 import axios from 'axios';
 
-// Create axios instance with base URL
+// Axios instance for API calls
 const api = axios.create({
-  baseURL: 'http://localhost:8080/api/v1', // Update with your backend URL
+  baseURL: 'http://localhost:8080/api/v1',
   timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  headers: { 'Content-Type': 'application/json' },
 });
 
-// Add response interceptor for error handling
+// Global error handler
 api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    console.error('API Error:', error);
-    return Promise.reject(error);
-  }
+    (response) => response,
+    (error) => {
+      console.error('API Error:', error);
+      return Promise.reject(error);
+    }
 );
 
+// Health check
 export const checkBackendConnection = async () => {
   try {
-    const response = await api.get('/health');
+    await api.get('/health');
     return { connected: true, message: 'Successfully connected to backend' };
   } catch (error) {
-    return { 
-      connected: false, 
+    return {
+      connected: false,
       message: 'Failed to connect to backend. Please check if the backend server is running.'
     };
   }
 };
 
-export const getProducts = async (page = 0, size = 12, category = null, sortBy = null, sortDirection = 'asc') => {
+// Get products (all/filter/sort)
+export const getProducts = async (page = 0, size = 12, category = null, sortBy = 'title', sortDirection = 'asc') => {
   try {
-    const params = { page, size };
+    const params = { page, size, sortBy, sortDirection };
     let endpoint;
-
-    // Determine which endpoint to use based on category and sort requirements
     if (category && category !== 'all') {
-      // Category filtering - use category endpoint
       endpoint = `/products/category/${category}`;
-      // Note: Category endpoint doesn't support sorting in backend
-    } else if (sortBy) {
-      // Sorting required - use search endpoint with empty query
-      endpoint = '/products/search';
-      params.query = ''; // Empty query to get all products with sorting
-      params.sortBy = sortBy;
-      params.sortDirection = sortDirection;
     } else {
-      // No category, no sorting - use home endpoint for random products
-      endpoint = '/home';
+      endpoint = '/products/search';
+      params.query = '';
     }
-
     const response = await api.get(endpoint, { params });
     return {
       content: response.data.content,
@@ -65,17 +54,12 @@ export const getProducts = async (page = 0, size = 12, category = null, sortBy =
   }
 };
 
-export const searchProducts = async (query, page = 0, size = 12, sortBy = 'title', sortDirection = 'asc') => {
+// Search products (optionally filter by category)
+export const searchProducts = async (query, page = 0, size = 12, sortBy = 'title', sortDirection = 'asc', category = null) => {
   try {
-    const response = await api.get('/products/search', {
-      params: {
-        query,
-        page,
-        size,
-        sortBy,
-        sortDirection
-      }
-    });
+    const params = { query, page, size, sortBy, sortDirection };
+    if (category && category !== 'all') params.category = category;
+    const response = await api.get('/products/search', { params });
     return response.data;
   } catch (error) {
     console.error('API Error:', error);
@@ -83,11 +67,11 @@ export const searchProducts = async (query, page = 0, size = 12, sortBy = 'title
   }
 };
 
-// New function for getting products by category with potential sorting support
-export const getProductsByCategory = async (category, page = 0, size = 12) => {
+// Get products by category (with sorting)
+export const getProductsByCategory = async (category, page = 0, size = 12, sortBy = 'title', sortDirection = 'asc') => {
   try {
     const response = await api.get(`/products/category/${category}`, {
-      params: { page, size }
+      params: { page, size, sortBy, sortDirection }
     });
     return {
       content: response.data.content,
@@ -99,31 +83,6 @@ export const getProductsByCategory = async (category, page = 0, size = 12) => {
   } catch (error) {
     console.error('API Error:', error);
     throw new Error('Failed to fetch products by category');
-  }
-};
-
-// New function for getting sorted products (uses search endpoint with empty query)
-export const getSortedProducts = async (page = 0, size = 12, sortBy = 'title', sortDirection = 'asc') => {
-  try {
-    const response = await api.get('/products/search', {
-      params: {
-        query: '', // Empty query to get all products
-        page,
-        size,
-        sortBy,
-        sortDirection
-      }
-    });
-    return {
-      content: response.data.content,
-      totalPages: response.data.totalPages,
-      totalElements: response.data.totalElements,
-      size: response.data.size,
-      number: response.data.number
-    };
-  } catch (error) {
-    console.error('API Error:', error);
-    throw new Error('Failed to fetch sorted products');
   }
 };
 
