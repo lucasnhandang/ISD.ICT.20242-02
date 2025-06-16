@@ -3,6 +3,7 @@ package com.hustict.aims.service;
 import com.hustict.aims.dto.product.ProductDetailDTO;
 import com.hustict.aims.model.product.Product;
 import com.hustict.aims.model.user.ActionType;
+import com.hustict.aims.repository.ReservationItemRepository;
 import com.hustict.aims.repository.product.ProductRepository;
 import com.hustict.aims.service.handler.ProductHandler;
 import com.hustict.aims.service.handler.ProductHandlerRegistry;
@@ -20,15 +21,18 @@ public class ProductService {
         private final ProductValidatorRegistry validatorReg;
         private final ProductRepository productRepo;
         private final ProductActionService actionService;
+        private final ReservationItemRepository reservationItemRepository; 
 
         public ProductService(ProductHandlerRegistry handlerReg,
                                 ProductValidatorRegistry validatorReg,
                                 ProductRepository productRepo,
-                                ProductActionService actionService) {
+                                ProductActionService actionService,
+                                ReservationItemRepository reservationItemRepository) {
                 this.handlerReg = handlerReg;
                 this.validatorReg = validatorReg;
                 this.productRepo = productRepo;
                 this.actionService = actionService;
+                this.reservationItemRepository = reservationItemRepository; // gán vào trường
         }
 
         public ProductDetailDTO createProduct(Map<String, Object> data) {
@@ -89,6 +93,16 @@ public class ProductService {
         }
 
         public boolean isProductAvailable(Long id, int requiredQty) {
-                return productRepo.findById(id).map(product -> product.getQuantity() >= requiredQty).orElse(false);
+                Product product = productRepo.findById(id).orElseThrow(() -> new NoSuchElementException(
+                                "Product not found with ID: " + id));
+                if (requiredQty <= 0) {
+                        throw new IllegalArgumentException("Required quantity must be greater than 0");
+                }
+
+                int reservedQty = reservationItemRepository.getReservedQuantityByProductId(id);
+                //int availQty = product.getQuantity();
+                
+                int availQty = product.getQuantity() - reservedQty;
+                return availQty >= requiredQty;
         }
 }
