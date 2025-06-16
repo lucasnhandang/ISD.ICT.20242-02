@@ -58,6 +58,5 @@ dist/
 # Mac
 .DS_Store
 
-# Ignore classpath.txt
-/Users/lucasnhandang/Study_Work/HUST/20242/ITSS_Software_Development/ISD.ICT.20242-02/Programming/classpath.txt
-
+# Ignore the local node installation and its contents within frontend
+Programming/frontend/node/
