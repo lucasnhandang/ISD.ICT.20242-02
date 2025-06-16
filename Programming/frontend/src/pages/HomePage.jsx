@@ -55,7 +55,7 @@ const HomePage = () => {
       let data;
       
       if (searchQuery) {
-        data = await searchProducts(searchQuery, page - 1, PRODUCTS_PER_PAGE, sortBy, sortDirection);
+        data = await searchProducts(searchQuery, page - 1, PRODUCTS_PER_PAGE, sortBy, sortDirection, category);
       } else {
         data = await getProducts(page - 1, PRODUCTS_PER_PAGE, category, sortBy, sortDirection);
       }
@@ -97,7 +97,7 @@ const HomePage = () => {
   const handleCategoryChange = (newCategory) => {
     setCategory(newCategory);
     setPage(1);
-    setSearchQuery(''); // Clear search when changing category
+    setSearchQuery('');
   };
 
   const handleSortChange = (newSortBy, newSortDirection) => {
@@ -109,7 +109,6 @@ const HomePage = () => {
   const handleSearch = async (query) => {
     setSearchQuery(query);
     setPage(1);
-    setCategory('all'); // Reset category when searching
   };
 
   const handleSubscribe = (e) => {

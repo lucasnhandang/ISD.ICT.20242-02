@@ -4,7 +4,6 @@ import com.hustict.aims.dto.PagedResponseDTO;
 import com.hustict.aims.dto.home.ProductSearchRequestDTO;
 import com.hustict.aims.dto.home.ProductSummaryDTO;
 import com.hustict.aims.service.HomeService;
-import jakarta.annotation.PostConstruct;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,11 +25,6 @@ public class HomeController {
                 .body("Error when handling backend: " + e.getMessage());
     }
 
-    @PostConstruct
-    public void init() {
-        System.out.println("HomeController is initialized...");
-    }
-
     // Random products
     @GetMapping("/home")
     public ResponseEntity<PagedResponseDTO<ProductSummaryDTO>> getHomePage(
@@ -45,12 +39,13 @@ public class HomeController {
     @GetMapping("/products/search")
     public ResponseEntity<PagedResponseDTO<ProductSummaryDTO>> searchProducts(
             @RequestParam(required = false) String query,
+            @RequestParam(required = false) String category,
             @RequestParam(defaultValue = "title") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDirection,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
 
-        ProductSearchRequestDTO searchRequest = new ProductSearchRequestDTO(query, sortBy, sortDirection, page, size);
+        ProductSearchRequestDTO searchRequest = new ProductSearchRequestDTO(query, category, sortBy, sortDirection, page, size);
         PagedResponseDTO<ProductSummaryDTO> products = homeService.searchProducts(searchRequest);
         return ResponseEntity.ok(products);
     }
@@ -59,10 +54,12 @@ public class HomeController {
     @GetMapping("/products/category/{category}")
     public ResponseEntity<PagedResponseDTO<ProductSummaryDTO>> getProductsByCategory(
             @PathVariable String category,
+            @RequestParam(defaultValue = "title") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDirection,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
 
-        PagedResponseDTO<ProductSummaryDTO> products = homeService.getProductsByCategory(category, page, size);
+        PagedResponseDTO<ProductSummaryDTO> products = homeService.getProductsByCategory(category, sortBy, sortDirection, page, size);
         return ResponseEntity.ok(products);
     }
 

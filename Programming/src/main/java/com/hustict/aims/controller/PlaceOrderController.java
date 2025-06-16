@@ -1,6 +1,5 @@
 package com.hustict.aims.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpSession;
@@ -22,7 +21,6 @@ public class PlaceOrderController {
     private final DeliveryFormService deliveryFormService;
     private final PaymentHandlerService paymentHandlerService;
 
-    @Autowired
     public PlaceOrderController(HandleRequestService handleRequestService,
                                 DeliveryFormService deliveryFormService,
                                 PaymentHandlerService paymentHandlerService) {

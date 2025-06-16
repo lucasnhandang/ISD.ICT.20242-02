@@ -54,12 +54,18 @@ public class HomeService {
             createSort(searchRequest.getSortBy(), searchRequest.getSortDirection())
         );
 
-        Page<Product> page = homeRepo.findByTitle(searchRequest.getSearchQuery(), pageable);
+        Page<Product> page;
+        
+        if (searchRequest.getCategory() != null && !searchRequest.getCategory().isEmpty()) {
+            page = homeRepo.findByTitleContainingIgnoreCaseAndCategoryIgnoreCase(searchRequest.getSearchQuery(), searchRequest.getCategory(), pageable);
+        } else {
+            page = homeRepo.findByTitleContainingIgnoreCase(searchRequest.getSearchQuery(), pageable);
+        }
         return PagedResponseBuilder.fromPage(page, productSummaryMapper::toSummaryDTO);
     }
 
-    public PagedResponseDTO<ProductSummaryDTO> getProductsByCategory(String category, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public PagedResponseDTO<ProductSummaryDTO> getProductsByCategory(String category, String sortBy, String sortDirection, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, createSort(sortBy, sortDirection));
         Page<Product> pageResult = homeRepo.findByCategory(category, pageable);
         return PagedResponseBuilder.fromPage(pageResult, productSummaryMapper::toSummaryDTO);
     }
