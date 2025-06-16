@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -84,4 +85,25 @@ public class GlobalExceptionHandler {
                 "An unexpected error occurred: " + e.getMessage(), 
                 HttpStatus.INTERNAL_SERVER_ERROR));
     }
+
+
+    // Handle unmet item in cart
+    @ExceptionHandler(CartAvailabilityException.class)
+    public ResponseEntity<Map<String, Object>> handleCartAvailabilityException(CartAvailabilityException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("error", "Cart validation failed");
+        body.put("messages", ex.getErrors()); 
+
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    
+    @ExceptionHandler(DeliveryFormValidationException.class)
+    public ResponseEntity<Map<String, Object>> handleDeliveryFormValidationException(DeliveryFormValidationException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Delivery form validation failed");
+        response.put("errors", ex.getErrors());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
 }
