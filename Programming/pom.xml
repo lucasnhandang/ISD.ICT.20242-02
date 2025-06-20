@@ -92,6 +92,13 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- Java Desktop module for AWT/Swing support -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>21</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -151,16 +158,6 @@
                         </goals>
                         <configuration>
                             <arguments>run build</arguments>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy build to static</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>npm</goal>
-                        </goals>
-                        <configuration>
-                            <arguments>run copy-build</arguments>
                         </configuration>
                     </execution>
                 </executions>
