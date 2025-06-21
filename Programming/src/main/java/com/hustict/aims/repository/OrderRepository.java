@@ -14,6 +14,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Modifying
     @Transactional
+    @Query("UPDATE Order o SET o.orderStatus = 'APPROVED' WHERE o.id = :id")
+    void approveOrderById(@Param("id") Long id);
+
+    @Modifying
+    @Transactional
     @Query("UPDATE Order o SET o.orderStatus = 'CANCELLED_PENDING' WHERE o.id = :id")
     void cancelOrderById(@Param("id") Long id);
 
