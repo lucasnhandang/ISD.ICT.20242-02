@@ -69,7 +69,7 @@ public class PlaceOrderController {
         CartRequestDTO cart = (CartRequestDTO) session.getAttribute("cart"); 
         InvoiceDTO invoice = (InvoiceDTO) session.getAttribute("invoice");
 
-        paymentHandlerService.handlePaymentSuccess(deliveryForm,cart,invoice);
+        paymentHandlerService.handlePaymentSuccess();
         return ResponseEntity.ok("Order is successfully created");
     }
 
