@@ -1,7 +1,5 @@
 package com.hustict.aims.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,8 +23,6 @@ public class PlaceOrderController {
     private final DeliveryFormValidator deliveryFormValidator;
     private final NormalOrderService normalOrderService;
     private final PaymentHandlerService paymentHandlerService;
-    
-    @Autowired
     public PlaceOrderController(HandleRequestService handleRequestService,
                                 @Qualifier("deliveryFormValidatorImpl") DeliveryFormValidator deliveryFormValidator,
                                 NormalOrderService normalOrderService,

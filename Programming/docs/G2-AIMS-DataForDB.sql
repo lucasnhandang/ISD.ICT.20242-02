@@ -4,9 +4,9 @@ INSERT INTO role (name) VALUES ('ADMIN');
 
 -- Insert users
 INSERT INTO users (name, password, email, phonenumber) VALUES 
-('Dang Van Nhan', '12345678', 'nhandang@gmail.com', '0901234567'),
-('Admin', '12345678', 'admin1@gmail.com', '0912345678'),
-('Admin PM', '12345678', 'admin2@gmail.com', '0923456789');
+('Dang Van Nhan', '$2a$10$UNqb33Qv1vHyuW6qMUuxJuOZmA/zgh8oyc493HInbvuE65vLV2lPm', 'nhandang@gmail.com', '0901234567'),
+('Admin', '$2a$10$UNqb33Qv1vHyuW6qMUuxJuOZmA/zgh8oyc493HInbvuE65vLV2lPm', 'admin1@gmail.com', '0912345678'),
+('Admin PM', '$2a$10$UNqb33Qv1vHyuW6qMUuxJuOZmA/zgh8oyc493HInbvuE65vLV2lPm', 'admin2@gmail.com', '0923456789');
 
 -- Insert user_role_map
 INSERT INTO user_role_map (user_id, role_id) VALUES 
