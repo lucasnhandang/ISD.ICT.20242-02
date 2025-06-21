@@ -5,5 +5,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 public abstract class SendEmailServiceImpl implements SendEmailService {
-
+    public void sendEmail() {
+    
+}
 }
