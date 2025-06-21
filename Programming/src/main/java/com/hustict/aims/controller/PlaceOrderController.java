@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.persistence.criteria.CriteriaBuilder.In;
 import jakarta.servlet.http.HttpSession;
 
 import com.hustict.aims.dto.deliveryForm.DeliveryFormDTO;
@@ -66,7 +68,11 @@ public class PlaceOrderController {
 
     @PostMapping("/handle-payment")
     public ResponseEntity<String> handlePaymentSuccess(HttpSession session) {
-        paymentHandlerService.handlePaymentSuccess();
+        DeliveryFormDTO deliveryForm = (DeliveryFormDTO) session.getAttribute("deliveryForm");
+        CartRequestDTO cart = (CartRequestDTO) session.getAttribute("cart"); 
+        InvoiceDTO invoice = (InvoiceDTO) session.getAttribute("invoice");
+
+        paymentHandlerService.handlePaymentSuccess(deliveryForm,cart,invoice);
         return ResponseEntity.ok("Order is successfully created");
     }
 
