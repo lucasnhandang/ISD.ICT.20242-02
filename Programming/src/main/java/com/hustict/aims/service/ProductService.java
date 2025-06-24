@@ -9,7 +9,10 @@ import com.hustict.aims.service.handler.ProductHandler;
 import com.hustict.aims.service.handler.ProductHandlerRegistry;
 import com.hustict.aims.service.validation.ProductValidator;
 import com.hustict.aims.service.validation.ProductValidatorRegistry;
+import com.hustict.aims.service.storage.ImageUploadStorage;
+
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -17,27 +20,41 @@ import java.util.NoSuchElementException;
 
 @Service
 public class ProductService {
+        private final ImageUploadStorage uploadService;
         private final ProductHandlerRegistry handlerReg;
         private final ProductValidatorRegistry validatorReg;
         private final ProductRepository productRepo;
         private final ProductActionService actionService;
-        private final ReservationItemRepository reservationItemRepository; 
+        private final ReservationItemRepository reservationItemRepository;
 
         public ProductService(ProductHandlerRegistry handlerReg,
                                 ProductValidatorRegistry validatorReg,
                                 ProductRepository productRepo,
                                 ProductActionService actionService,
+                                ImageUploadStorage uploadService,
                                 ReservationItemRepository reservationItemRepository) {
                 this.handlerReg = handlerReg;
                 this.validatorReg = validatorReg;
                 this.productRepo = productRepo;
                 this.actionService = actionService;
-                this.reservationItemRepository = reservationItemRepository; // gán vào trường
+                this.uploadService = uploadService;
+                this.reservationItemRepository = reservationItemRepository;
         }
 
-        public ProductDetailDTO createProduct(Map<String, Object> data) {
+        public ProductDetailDTO createProduct(Map<String, Object> data, MultipartFile image) {
                 String type = (String) data.get("category");
                 if (type == null) throw new IllegalArgumentException("Missing category field");
+
+                // Upload image if provided
+                if (image != null && !image.isEmpty()) {
+                        try {
+                                String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
+                                String imageUrl = uploadService.upload(image.getBytes(), fileName, image.getContentType());
+                                data.put("imageUrl", imageUrl);
+                        } catch (Exception e) {
+                                throw new RuntimeException("Failed to upload image: " + e.getMessage());
+                        }
+                }
 
                 ProductHandler handler = handlerReg.getHandler(type)
                         .orElseThrow(() -> new IllegalArgumentException("Unsupported category: " + type));
@@ -53,12 +70,23 @@ public class ProductService {
                 return handler.saveAndReturnDTO(product);
         }
 
-        public ProductDetailDTO updateProduct(Long id, Map<String, Object> data, Long userId) {
+        public ProductDetailDTO updateProduct(Long id, Map<String, Object> data, MultipartFile image, Long userId) {
                 // Validate action limits before processing
                 actionService.validateProductUpdate(userId, id, data);
 
                 Product existing = productRepo.findById(id)
                         .orElseThrow(() -> new NoSuchElementException("Product not found with ID: " + id));
+
+                // Upload new image if provided
+                if (image != null && !image.isEmpty()) {
+                        try {
+                                String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
+                                String imageUrl = uploadService.upload(image.getBytes(), fileName, image.getContentType());
+                                data.put("imageUrl", imageUrl);
+                        } catch (Exception e) {
+                                throw new RuntimeException("Failed to upload image: " + e.getMessage());
+                        }
+                }
 
                 String type = existing.getCategory();
 
@@ -89,7 +117,7 @@ public class ProductService {
                 ProductHandler handler = handlerReg.getHandler(p.getCategory())
                         .orElseThrow(() -> new IllegalArgumentException("No handler for category: " + p.getCategory()));
 
-                return handler.saveAndReturnDTO(p); 
+                return handler.saveAndReturnDTO(p);
         }
 
         public boolean isProductAvailable(Long id, int requiredQty) {
