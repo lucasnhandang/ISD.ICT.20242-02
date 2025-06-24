@@ -48,7 +48,7 @@ public class ReservationService {
 
             reservation.getItems().add(item); 
         }
-        // 4. Lưu reservation
+        
         reservationRepository.save(reservation);
 
         // xóa

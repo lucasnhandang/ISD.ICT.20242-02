@@ -106,4 +106,10 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(OrderOperationException.class)
+    public ResponseEntity<Map<String, Object>> handleOrderOperationException(OrderOperationException e) {
+        return ResponseEntity.badRequest()
+                .body(createErrorResponse("ORDER_OPERATION_ERROR", e.getMessage(), HttpStatus.BAD_REQUEST));
+    }
+
 }

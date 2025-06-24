@@ -104,6 +104,18 @@
             <version>21</version>
         </dependency>
 
+            <!-- Spring Boot Mail starter -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
+        <!-- Thymeleaf template engine (nếu bạn dùng Thymeleaf) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+        
     </dependencies>
 
     <build>
