@@ -3,7 +3,9 @@ package com.hustict.aims.controller;
 import com.hustict.aims.dto.product.ProductDetailDTO;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.*;
 
 import com.hustict.aims.service.ProductService;
@@ -23,19 +25,23 @@ public class ProductPMController {
         this.actionService = actionService;
     }
 
-    @PostMapping
-    public ResponseEntity<ProductDetailDTO> create(@RequestBody Map<String, Object> data) {
-        ProductDetailDTO created = productService.createProduct(data);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ProductDetailDTO> create(
+            @RequestPart("data") Map<String, Object> data,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+
+        ProductDetailDTO created = productService.createProduct(data, image);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ProductDetailDTO> update(
             @PathVariable Long id,
-            @RequestBody Map<String, Object> data,
+            @RequestPart("data") Map<String, Object> data,
+            @RequestPart(value = "image", required = false) MultipartFile image,
             @RequestHeader("X-User-ID") Long userId) {
-        
-        ProductDetailDTO updated = productService.updateProduct(id, data, userId);
+
+        ProductDetailDTO updated = productService.updateProduct(id, data, image, userId);
         return ResponseEntity.ok(updated);
     }
 
