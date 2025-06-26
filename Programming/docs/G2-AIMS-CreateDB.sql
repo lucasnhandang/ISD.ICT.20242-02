@@ -104,9 +104,7 @@ CREATE TABLE deliveryinfo (
     phonenumber VARCHAR(20) NOT NULL,
     email VARCHAR(100) NOT NULL,
     province VARCHAR(50) NOT NULL,
-    shippinginstruction TEXT,
-    expected_time TIMESTAMP
-
+    shippinginstruction TEXT
 );
 
 -- PAYMENT
@@ -162,7 +160,6 @@ CREATE TABLE orderitem (
     orderid BIGINT,
     productid BIGINT,
     quantity INTEGER NOT NULL,
-    price INTEGER NOT NULL,
     type VARCHAR(50) NOT NULL,
     PRIMARY KEY (orderid, productid),
     FOREIGN KEY (orderid) REFERENCES orders(orderid) ON DELETE CASCADE,
