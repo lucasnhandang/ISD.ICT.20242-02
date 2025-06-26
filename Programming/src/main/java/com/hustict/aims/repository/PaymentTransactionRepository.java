@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 
 public interface PaymentTransactionRepository extends JpaRepository<PaymentTransaction, Long> {
@@ -18,5 +17,5 @@ public interface PaymentTransactionRepository extends JpaRepository<PaymentTrans
     @Modifying
     @Transactional
     @Query("UPDATE PaymentTransaction p SET p.paymentAmount = :amount WHERE p.id = :id")
-    void updatePaymentAmountById(@Param("id") Long id, @Param("amount") BigDecimal amount);
+    void updatePaymentAmountById(@Param("id") Long id, @Param("amount") int amount);
 }

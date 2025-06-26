@@ -13,7 +13,6 @@ public class PaymentHandlerService {
     private final SaveOrderService saveOrderService;
     private final EmailSenderFactory emailSenderFactory;
 
-    @Autowired
     public PaymentHandlerService(
         CartCleanupService cartCleanupService,
         SaveOrderService saveOrderService,

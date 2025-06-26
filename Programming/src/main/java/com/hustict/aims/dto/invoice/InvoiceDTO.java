@@ -13,5 +13,6 @@ public class InvoiceDTO {
     private int productPriceExVAT;
     private int productPriceIncVAT;
     private int shippingFee;
+    private Long paymentTransactionId;
     private int totalAmount;
 }

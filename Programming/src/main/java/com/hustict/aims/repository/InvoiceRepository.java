@@ -7,15 +7,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 
 public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 
     @Query("SELECT i.totalAmount FROM Invoice i WHERE i.id = :id")
-    BigDecimal getTotalAmountById(@Param("id") Long id);
+    int getTotalAmountById(@Param("id") Long id);
 
     @Modifying
     @Transactional
     @Query("UPDATE Invoice i SET i.shippingFee = :fee WHERE i.id = :id")
-    void updateShippingFeeById(@Param("id") Long id, @Param("fee") BigDecimal fee);
+    void updateShippingFeeById(@Param("id") Long id, @Param("fee") int fee);
 }

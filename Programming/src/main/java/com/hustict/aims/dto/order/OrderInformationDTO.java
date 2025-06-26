@@ -15,11 +15,7 @@ import com.hustict.aims.dto.cart.CartItemRequestDTO;
 public class OrderInformationDTO {
     private Long orderId;
     private List<CartItemRequestDTO> productList;
-    private int totalPriceInVAT;
-    private int totalPriceExVAT;
-    private int shippingFee;
     private boolean isRushOrder;
-    private int totalAmount;
     private String currency;
     private Long deliveryInfoId;
     private Long invoiceId;
