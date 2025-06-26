@@ -6,23 +6,35 @@ import com.hustict.aims.dto.cart.CartItemRequestDTO;
 import com.hustict.aims.dto.cart.CartRequestDTO;
 import com.hustict.aims.dto.deliveryForm.DeliveryFormDTO;
 
-@Service("rushShippingFee") 
+@Service("rushShippingFee")
 public class RushShippingFee implements ShippingFeeCalculator {
 
     @Override
-    public int calculateShippingFee(DeliveryFormDTO deliveryForm,CartRequestDTO cart) {
-        double shippingFee = 0;
+    public int calculateShippingFee(DeliveryFormDTO deliveryInfo, CartRequestDTO rushCart) {
         double totalWeight = 0;
 
-        for (CartItemRequestDTO item : cart.getProductList()) {
-            totalWeight += item.getWeight() * item.getQuantity();  
+        // Tính tổng khối lượng đơn hàng
+        for (CartItemRequestDTO item : rushCart.getProductList()) {
+            totalWeight += item.getWeight() * item.getQuantity();
         }
-        if (deliveryForm.getDeliveryProvince().equals("Hanoi") || deliveryForm.getDeliveryProvince().equals("HoChiMinhCity")){
-            shippingFee = (totalWeight <= 3) ? 22000 : 22000 + ((totalWeight - 3) / 0.5) * 2500;
+
+        double shippingFee;
+        // Tính phí ship theo tỉnh và khối lượng
+        if (deliveryInfo.getDeliveryProvince().equalsIgnoreCase("Hanoi") 
+         || deliveryInfo.getDeliveryProvince().equalsIgnoreCase("HoChiMinhCity")) {
+            shippingFee = (totalWeight <= 3)
+                ? 22000
+                : 22000 + Math.ceil((totalWeight - 3) / 0.5) * 2500;
         } else {
-            shippingFee = (totalWeight <= 0.5) ? 30000 : 30000 + ((totalWeight - 0.5) / 0.5) * 2500;
+            shippingFee = (totalWeight <= 0.5)
+                ? 30000
+                : 30000 + Math.ceil((totalWeight - 0.5) / 0.5) * 2500;
         }
-        shippingFee = cart.getTotalItem() * 10000;
-        return (int) Math.round(shippingFee);
+
+        // Phí rush: 10.000 cho mỗi sản phẩm trong giỏ hàng
+        int rushFee = 10000 * rushCart.getProductList().size();
+
+        // Tổng phí = phí ship + phí rush
+        return (int) Math.round(shippingFee + rushFee);
     }
 }

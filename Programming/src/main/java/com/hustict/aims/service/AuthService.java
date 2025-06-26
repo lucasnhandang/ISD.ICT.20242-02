@@ -9,7 +9,7 @@ import com.hustict.aims.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import io.jsonwebtoken.Claims;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -17,45 +17,38 @@ import java.util.stream.Collectors;
 import java.util.Map;
 import com.hustict.aims.utils.JwtUtils;
 import com.hustict.aims.utils.AuthUtils;
+import com.hustict.aims.service.MessageService;
 
 @Service
 public class AuthService {
     private final UserRepository userRepository;
     private final JwtUtils jwtUtils;
-    private final PasswordEncoder passwordEncoder;
+    private final MessageService messageService;
 
-    public AuthService(UserRepository userRepository, JwtUtils jwtUtils, PasswordEncoder passwordEncoder) {
+    @Autowired
+    public AuthService(UserRepository userRepository, JwtUtils jwtUtils, MessageService messageService) {
         this.userRepository = userRepository;
         this.jwtUtils = jwtUtils;
-        this.passwordEncoder = passwordEncoder;
+        this.messageService = messageService;
     }
 
     public LoginResponseDTO authenticate(LoginRequestDTO loginRequest) {
         validateLoginInput(loginRequest);
-
+        
         Optional<User> userOptional = userRepository.findByEmail(loginRequest.getEmail());
-
         if (!userOptional.isPresent()) {
-            throw new NoSuchElementException("User not found.");
+            throw new NoSuchElementException(messageService.getAuthFailed());
         }
-
+        
         User user = userOptional.get();
-
-        if (!isPasswordValid(user.getPassword(), loginRequest.getPassword())) {
-            throw new SecurityException("Invalid password.");
+        if (!user.getPassword().equals(loginRequest.getPassword())) {
+            throw new SecurityException(messageService.getAuthFailed());
         }
-
+        
         List<String> roleNames = user.getRoles().stream()
                 .map(Role::getName)
                 .collect(Collectors.toList());
-
-        UserInfoDTO userInfo = new UserInfoDTO(
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                roleNames
-        );
-
+        
         String token = jwtUtils.generateToken(
                 String.valueOf(user.getId()),
                 Map.of(
@@ -63,8 +56,34 @@ public class AuthService {
                         "roles", roleNames
                 )
         );
+        
+        UserInfoDTO userInfo = new UserInfoDTO(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                roleNames
+        );
+        return new LoginResponseDTO(true, "Login successful", token, userInfo);
+    }
 
-        return new LoginResponseDTO(true, "Login successfully.", token, userInfo);
+    public LoginResponseDTO validateTokenAndGetUserInfo(String token) {
+        Claims claims = jwtUtils.getClaimsFromToken(token);
+        Long userId = Long.parseLong(claims.getSubject());
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (!userOptional.isPresent()) {
+            throw new NoSuchElementException(messageService.getAuthFailed());
+        }
+        User user = userOptional.get();
+        List<String> roleNames = user.getRoles().stream()
+                .map(Role::getName)
+                .collect(Collectors.toList());
+        UserInfoDTO userInfo = new UserInfoDTO(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                roleNames
+        );
+        return new LoginResponseDTO(true, "Token is valid.", token, userInfo);
     }
 
     public LoginResponseDTO validateTokenAndGetUserInfo(String token, String requiredRole) {
@@ -72,11 +91,11 @@ public class AuthService {
         Long userId = Long.parseLong(claims.getSubject());
         Optional<User> userOptional = userRepository.findById(userId);
         if (!userOptional.isPresent()) {
-            throw new NoSuchElementException("User not found");
+            throw new NoSuchElementException(messageService.getAuthFailed());
         }
         User user = userOptional.get();
         if (requiredRole != null && !requiredRole.isEmpty() && !AuthUtils.hasRole(user, requiredRole)) {
-            throw new SecurityException("User does not have required role");
+            throw new SecurityException(messageService.getAuthFailed());
         }
         List<String> roleNames = user.getRoles().stream()
                 .map(Role::getName)
@@ -92,31 +111,23 @@ public class AuthService {
 
     private void validateLoginInput(LoginRequestDTO loginRequest) {
         if (loginRequest.getEmail() == null || loginRequest.getEmail().trim().isEmpty()) {
-            throw new IllegalArgumentException("Email cannot be empty.");
+            throw new IllegalArgumentException(messageService.getInvalidInput() + ": Email cannot be empty.");
         }
 
         if (loginRequest.getPassword() == null || loginRequest.getPassword().trim().isEmpty()) {
-            throw new IllegalArgumentException("Password cannot be empty.");
+            throw new IllegalArgumentException(messageService.getInvalidInput() + ": Password cannot be empty.");
         }
 
         if (!isValidEmail(loginRequest.getEmail())) {
-            throw new IllegalArgumentException("Invalid email format.");
+            throw new IllegalArgumentException(messageService.getInvalidInput() + ": Invalid email format.");
         }
 
         if (loginRequest.getPassword().length() < 5) {
-            throw new IllegalArgumentException("Password must be at least 5 characters.");
+            throw new IllegalArgumentException(messageService.getInvalidInput() + ": Password must be at least 5 characters.");
         }
     }
 
     private boolean isValidEmail(String email) {
         return email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
-    }
-
-    private boolean isPasswordValid(String storedPassword, String providedPassword) {
-        return passwordEncoder.matches(providedPassword, storedPassword);
-    }
-
-    public LoginResponseDTO validateTokenAndGetUserInfo(String token) {
-        return validateTokenAndGetUserInfo(token, null);
     }
 }
