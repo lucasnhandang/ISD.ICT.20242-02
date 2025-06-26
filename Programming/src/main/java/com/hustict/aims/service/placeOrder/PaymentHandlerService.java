@@ -1,30 +1,35 @@
 package com.hustict.aims.service.placeOrder;
+
+import com.hustict.aims.dto.order.OrderInformationDTO;
+import com.hustict.aims.service.email.EmailSenderFactory;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.hustict.aims.dto.cart.CartRequestDTO;
-import com.hustict.aims.dto.deliveryForm.DeliveryFormDTO;
-import com.hustict.aims.dto.invoice.InvoiceDTO;
-import com.hustict.aims.service.email.SendEmailService;;
 @Service
 public class PaymentHandlerService {
-    
-    public void handlePaymentSuccess(){
-    
+
+    private final CartCleanupService cartCleanupService;
+    private final SaveOrderService saveOrderService;
+    private final EmailSenderFactory emailSenderFactory;
+
+    @Autowired
+    public PaymentHandlerService(
+        CartCleanupService cartCleanupService,
+        SaveOrderService saveOrderService,
+        EmailSenderFactory emailSenderFactory
+    ) {
+        this.cartCleanupService = cartCleanupService;
+        this.saveOrderService   = saveOrderService;
+        this.emailSenderFactory = emailSenderFactory;
     }
-    // private final SendEmailServiceFactory sendEmailServiceFactory;
 
-    // @Autowired
-    // public PaymentHandlerService(SendEmailServiceFactory sendEmailServiceFactory) {
-    //     this.sendEmailServiceFactory = sendEmailServiceFactory;
-    // }
+    public void handlePaymentSuccess(HttpSession session) {
+        OrderInformationDTO savedOrderInfo = saveOrderService.saveAll(session);
+        session.setAttribute("orderInformation", savedOrderInfo);
+        session.setAttribute("deliveryForm", session.getAttribute("deliveryForm"));
 
-    // public void handlePaymentSuccess(DeliveryFormDTO deliveryForm, CartRequestDTO cart, InvoiceDTO invoice) {
-    //     // Business logic xử lý đơn hàng thành công ở đây
-    //     System.out.println("Payment was successful, order placed!");
-
-    //     // Gửi email order thành công
-    //     SendEmailService emailService = sendEmailServiceFactory.getService(EmailType.ORDER_SUCCESS);
-    //     emailService.sendEmail(deliveryForm.getCustomerEmail()); // hoặc deliveryForm.getRecipient()
-    // }
+        cartCleanupService.removePurchasedItems(session);
+        emailSenderFactory.process("orderSuccess", session);
+    }
 }

@@ -1,5 +1,9 @@
 package com.hustict.aims.service.email;
 
-public interface SendEmailService {
-    void sendEmail();
+import com.hustict.aims.dto.email.BaseEmailRequest;
+import jakarta.servlet.http.HttpSession;
+
+public interface SendEmailService<T extends BaseEmailRequest> {
+    T buildRequest(HttpSession session);
+    void sendEmail(T request);
 }
