@@ -48,6 +48,8 @@ public class Product {
     @Column(name = "category", nullable = false, updatable = false)
     private String category;
 
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted;
     public Product() {
         assignCategory();
     }
@@ -122,5 +124,12 @@ public class Product {
 
     protected void setCategory(String category) {
         this.category = category;
+    }
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(boolean isDeleted) {
+        this.isDeleted = isDeleted;
     }
 }

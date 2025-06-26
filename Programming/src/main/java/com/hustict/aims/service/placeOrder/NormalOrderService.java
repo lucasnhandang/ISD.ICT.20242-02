@@ -29,7 +29,7 @@ public class NormalOrderService {
         // xóa
         System.out.println("Shipping Fee: " + shippingFee);
         System.out.println("Total Price Excluding VAT: " + totalPriceExVat);
-        System.out.println("Total Price Including VAT: " + invoice.getTotalPriceIncludingVat());
+        System.out.println("Total Price Including VAT: " + invoice.getProductPriceIncVAT());
         System.out.println("Total Amount (with shipping fee): " + invoice.getTotalAmount());
 
         return invoice;
