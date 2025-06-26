@@ -112,4 +112,15 @@ public class GlobalExceptionHandler {
                 .body(createErrorResponse("ORDER_OPERATION_ERROR", e.getMessage(), HttpStatus.BAD_REQUEST));
     }
 
+    @ExceptionHandler(BadSessionDataException.class)
+    public ResponseEntity<Map<String, Object>> handleBadSessionData(BadSessionDataException e) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("error", "SESSION_DATA_MISSING");
+        response.put("message", "Required session data is missing");
+        response.put("missingFields", e.getMissingFields());
+        response.put("timestamp", LocalDateTime.now());
+        response.put("status", HttpStatus.BAD_REQUEST.value());
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
 }
