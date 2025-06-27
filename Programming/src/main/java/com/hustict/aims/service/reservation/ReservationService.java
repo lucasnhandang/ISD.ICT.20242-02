@@ -13,7 +13,7 @@ import com.hustict.aims.model.reservation.Reservation;
 import com.hustict.aims.repository.ReservationRepository;
 import com.hustict.aims.model.reservation.Reservation.Status;
 import com.hustict.aims.model.reservation.ReservationItem;
-
+import com.hustict.aims.service.ProductService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -21,9 +21,14 @@ import jakarta.servlet.http.HttpSession;
 public class ReservationService {
     private final ReservationRepository reservationRepository;
 
-    public ReservationService(ReservationRepository reservationRepository) {
+    private final ProductService productService;
+
+    public ReservationService(ReservationRepository reservationRepository,
+                                 ProductService productService) {
         this.reservationRepository = reservationRepository;
+        this.productService = productService;
     }
+
     @Transactional
     public void createReservation(CartRequestDTO cart, String sessionId) {
         
@@ -115,7 +120,9 @@ public class ReservationService {
         
         if (session.getAttribute("invoice") != null) {
             InvoiceDTO invoiceDTO = (InvoiceDTO) session.getAttribute("invoice");
-
+            for (ReservationItem item : reservation.getItems()) {
+                productService.decreaseProductQuantity(item.getProductId(), item.getQuantity());
+            }
             if (invoiceDTO.getPaymentTransactionId() != null) {
                 reservation.setStatus(Status.CONFIRMED);  
                 reservationRepository.save(reservation);
