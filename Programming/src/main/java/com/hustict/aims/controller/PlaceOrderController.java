@@ -125,16 +125,16 @@ public class PlaceOrderController {
 
         // session.setAttribute("invoice", invoice);
 
-        // // 4. Fake Payment
-        // PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO();
-        // paymentTransaction.setBankTransactionId("FAKEBANK-" + System.currentTimeMillis());
-        // paymentTransaction.setContent("Mock payment transaction for test user");
-        // paymentTransaction.setPaymentTime(LocalDateTime.now());
-        // paymentTransaction.setPaymentAmount(999000);
-        // paymentTransaction.setCardType("TEST_CARD");
-        // paymentTransaction.setCurrency("VND");
+        // 4. Fake Payment
+        PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO();
+        paymentTransaction.setBankTransactionId("FAKEBANK-" + System.currentTimeMillis());
+        paymentTransaction.setContent("Mock payment transaction for test user");
+        paymentTransaction.setPaymentTime(LocalDateTime.now());
+        paymentTransaction.setPaymentAmount(999000);
+        paymentTransaction.setCardType("TEST_CARD");
+        paymentTransaction.setCurrency("VND");
 
-        // session.setAttribute("paymentTransaction", paymentTransaction);
+        session.setAttribute("paymentTransaction", paymentTransaction);
 
         // String sessionId = session.getId();
 
