@@ -10,9 +10,8 @@ import com.hustict.aims.service.handler.ProductHandlerRegistry;
 import com.hustict.aims.service.validation.ProductValidator;
 import com.hustict.aims.service.validation.ProductValidatorRegistry;
 import com.hustict.aims.service.storage.ImageUploadStorage;
-import com.hustict.aims.service.MessageService;
-import com.hustict.aims.exception.RushOrderException;
 
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +78,7 @@ public class ProductService {
 
         public ProductDetailDTO updateProduct(Long id, Map<String, Object> data, MultipartFile image, Long userId) {
                 // Validate action limits before processing
-                actionService.validateProductUpdate(userId, id, data);
+                actionService.validateUpdate(userId, id, data);
 
                 Product existing = productRepo.findById(id)
                         .orElseThrow(() -> new NoSuchElementException(messageService.getProductNotFound() + " with ID: " + id));
@@ -127,8 +126,38 @@ public class ProductService {
                 return handler.saveAndReturnDTO(p);
         }
 
+        @Transactional
+        public void deleteProducts (Long id, List<Long> productIds) {
+                if (productIds == null || productIds.isEmpty()) {
+                        throw new IllegalArgumentException(messageService.getInvalidInput() + ": Product IDs cannot be empty.");
+                }
+
+                if (productIds.size() > 10) {
+                        throw new IllegalArgumentException("Cannot delete more than 10 products at once.");
+                }
+
+                actionService.validateDelete(id, productIds);
+
+                List<Product> productsToDelete = productRepo.findAllById(productIds);
+                if (productsToDelete.size() != productIds.size()) {
+                        throw new NoSuchElementException("One or more products not found or already deleted.");
+                }
+
+                for (Long productId : productIds) {
+                        Product p = productRepo.findById(productId)
+                                .orElseThrow(() -> new NoSuchElementException("Product with ID " + productId + " not found."));
+
+                        if (p.isDeleted()) {
+                                throw new IllegalStateException("Product with ID " + productId + " has already been deleted.");
+                        }
+
+                        actionService.logProductAction(id, productId, ActionType.DELETE);
+                        productRepo.softDeleteById(productId);
+                }
+        }
+
         public boolean isProductAvailable(Long id, int requiredQty) {
-                Product product = productRepo.findById(id).orElseThrow(() -> new NoSuchElementException(
+                Product product = productRepo.findByIdNotDeleted(id).orElseThrow(() -> new NoSuchElementException(
                                 messageService.getProductNotFound() + " with ID: " + id));
                 if (requiredQty <= 0) {
                         throw new IllegalArgumentException(messageService.getInvalidInput() + ": Required quantity must be greater than 0");

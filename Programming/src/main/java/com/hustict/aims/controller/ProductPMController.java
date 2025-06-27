@@ -9,8 +9,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.*;
 
 import com.hustict.aims.service.ProductService;
-import com.hustict.aims.service.ProductActionService;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -18,11 +18,9 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class ProductPMController {
     private final ProductService productService;
-    private final ProductActionService actionService;
-    
-    public ProductPMController(ProductService productService, ProductActionService actionService) {
+
+    public ProductPMController(ProductService productService) {
         this.productService = productService;
-        this.actionService = actionService;
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -51,17 +49,14 @@ public class ProductPMController {
         return ResponseEntity.ok(dto);
     }
 
-    @GetMapping("/limits/user/{userId}")
-    public ResponseEntity<Map<String, Object>> getUserLimits(@PathVariable Long userId) {
-        Map<String, Object> limits = actionService.getUserLimitsInfo(userId);
-        return ResponseEntity.ok(limits);
-    }
+    @DeleteMapping
+    public ResponseEntity<Map<String, String>> deleteProducts(
+            @RequestBody Map<String, List<Long>> payload,
+            @RequestHeader("X-User-ID") Long userId) {
 
-    @GetMapping("/limits/product/{productId}/user/{userId}")
-    public ResponseEntity<Map<String, Object>> getProductLimits(
-            @PathVariable Long productId, 
-            @PathVariable Long userId) {
-        Map<String, Object> limits = actionService.getProductLimitsInfo(userId, productId);
-        return ResponseEntity.ok(limits);
+        List<Long> productIds = payload.get("productIds");
+        productService.deleteProducts(userId, productIds);
+
+        return ResponseEntity.ok(Map.of("message", "Products deleted successfully!"));
     }
 }
