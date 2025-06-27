@@ -3,7 +3,6 @@ import com.hustict.aims.dto.cart.CartRequestDTO;
 import com.hustict.aims.exception.CartAvailabilityException;
 
 import com.hustict.aims.service.ProductService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -15,7 +14,6 @@ public class ProductAvailabilityService {
     // reuseable
     private final ProductService productService;
 
-    @Autowired
     public ProductAvailabilityService(ProductService productService) {
         this.productService = productService;
     }

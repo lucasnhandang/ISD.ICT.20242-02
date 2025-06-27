@@ -22,7 +22,7 @@ public class User {
     @Column(name = "email")
     private String email;
 
-    @Column(name = "phonenumber", columnDefinition = "CHAR(10)")
+    @Column(name = "phonenumber")
     private String phoneNumber;
 
     @ManyToMany

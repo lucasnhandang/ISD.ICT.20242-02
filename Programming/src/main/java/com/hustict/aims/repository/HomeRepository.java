@@ -8,23 +8,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-/*
- * Unified repository interface for all Product entities (home page and search functionality)
- * Provides general access to all product types (Books, CDs, DVDs, LPs) for customer operations
- * Differs from specialized repositories in /product/ folder which are for specific product type operations
- */
 @Repository
 public interface HomeRepository extends JpaRepository<Product, Long> {
-       // Find products by title containing search query (case-insensitive)
-       @Query("SELECT p FROM Product p WHERE " +
-              "(:searchQuery IS NULL OR :searchQuery = '' OR LOWER(p.title) LIKE LOWER(CONCAT('%', :searchQuery, '%')))")
-       Page<Product> findByTitle(@Param("searchQuery") String searchQuery, Pageable pageable);
-
-       // Get random products for home page
-       @Query("SELECT p FROM Product p")
+       @Query("SELECT p FROM Product p WHERE p.isDeleted = false")
        Page<Product> getRandomProducts(Pageable pageable);
 
-       // Get products by category
-       @Query("SELECT p FROM Product p WHERE p.category = :category")
+       @Query("SELECT p FROM Product p WHERE p.isDeleted = false AND LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+       Page<Product> searchByTitle(@Param("keyword") String keyword, Pageable pageable);
+
+       @Query("SELECT p FROM Product p WHERE p.isDeleted = false AND LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) AND LOWER(p.category) = LOWER(:category)")
+       Page<Product> searchByTitleAndCategory(@Param("keyword") String keyword, @Param("category") String category, Pageable pageable);
+
+       @Query("SELECT p FROM Product p WHERE p.isDeleted = false AND LOWER(p.category) = LOWER(:category)")
        Page<Product> findByCategory(@Param("category") String category, Pageable pageable);
 }

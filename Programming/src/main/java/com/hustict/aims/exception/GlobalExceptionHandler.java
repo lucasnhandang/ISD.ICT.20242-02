@@ -106,4 +106,34 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(OrderOperationException.class)
+    public ResponseEntity<Map<String, Object>> handleOrderOperationException(OrderOperationException e) {
+        return ResponseEntity.badRequest()
+                .body(createErrorResponse("ORDER_OPERATION_ERROR", e.getMessage(), HttpStatus.BAD_REQUEST));
+    }
+
+    @ExceptionHandler(BadSessionDataException.class)
+    public ResponseEntity<Map<String, Object>> handleBadSessionData(BadSessionDataException e) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("error", "SESSION_DATA_MISSING");
+        response.put("message", "Required session data is missing");
+        response.put("missingFields", e.getMissingFields());
+        response.put("timestamp", LocalDateTime.now());
+        response.put("status", HttpStatus.BAD_REQUEST.value());
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(RushOrderException.class)
+    public ResponseEntity<Map<String, Object>> handleRushOrderException(RushOrderException e) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("error", "RUSH_ORDER_ERROR");
+        response.put("errorCode", e.getErrorCode());
+        response.put("message", e.getMessage());
+        response.put("expectedDateTime", e.getExpectedDateTime());
+        response.put("timestamp", LocalDateTime.now());
+        response.put("status", HttpStatus.BAD_REQUEST.value());
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
 }

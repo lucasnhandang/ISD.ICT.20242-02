@@ -27,15 +27,21 @@ public class OrderItem {
     @Column(name = "type")
     private OrderType type;
 
+
+    @Column(name = "price", nullable = false)
+    private int price;
+
     public OrderItem() {}
 
-    public OrderItem(Order order, Product product, int quantity, OrderType type) {
+    public OrderItem(Order order, Product product, int quantity, OrderType type, int price) {
         this.order = order;
         this.product = product;
         this.quantity = quantity;
         this.type = type;
+        this.price = price;
         this.id = new OrderItemKey(order.getId(), product.getId());
     }
+
 
     // Getters & Setters
 
@@ -59,5 +65,13 @@ public class OrderItem {
 
     public OrderType getType() { return type; }
     public void setType(OrderType type) { this.type = type; }
+    public int getPrice() {
+        return price;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
+    }
+
 
 }

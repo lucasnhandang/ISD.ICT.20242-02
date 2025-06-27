@@ -1,5 +1,7 @@
 package com.hustict.aims.model.shipping;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -28,6 +30,10 @@ public class DeliveryInfo {
     @Column(name = "shippinginstruction")
     private String shippingInstruction;
 
+
+    @Column(name = "expected_time")
+    private LocalDateTime expectedTime;
+
     public DeliveryInfo() {}
 
     public DeliveryInfo(String name, String address, String phoneNumber, String email, String province, String shippingInstruction) {
@@ -52,5 +58,11 @@ public class DeliveryInfo {
     public void setProvince(String province) { this.province = province; }
     public String getShippingInstruction() { return shippingInstruction; }
     public void setShippingInstruction(String shippingInstruction) { this.shippingInstruction = shippingInstruction; }
+    public LocalDateTime getExpectedTime() {
+        return expectedTime;
+    }
 
+    public void setExpectedTime(LocalDateTime expectedTime) {
+        this.expectedTime = expectedTime;
+    }
 } 

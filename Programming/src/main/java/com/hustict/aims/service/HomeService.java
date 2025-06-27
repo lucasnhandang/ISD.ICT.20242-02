@@ -31,8 +31,8 @@ public class HomeService {
     private final ProductSummaryMapper productSummaryMapper;
 
     private static final Map<String, String> SORT_FIELD_MAP = Map.of(
-        "price", "currentPrice",
-        "title", "title"
+            "price", "currentPrice",
+            "title", "title"
     );
 
     public HomeService(HomeRepository homeRepo, ProductSummaryMapper productMapper) {
@@ -49,17 +49,23 @@ public class HomeService {
 
     public PagedResponseDTO<ProductSummaryDTO> searchProducts(ProductSearchRequestDTO searchRequest) {
         Pageable pageable = PageRequest.of(
-            searchRequest.getPage(),
-            searchRequest.getSize(),
-            createSort(searchRequest.getSortBy(), searchRequest.getSortDirection())
+                searchRequest.getPage(),
+                searchRequest.getSize(),
+                createSort(searchRequest.getSortBy(), searchRequest.getSortDirection())
         );
 
-        Page<Product> page = homeRepo.findByTitle(searchRequest.getSearchQuery(), pageable);
+        Page<Product> page;
+
+        if (searchRequest.getCategory() != null && !searchRequest.getCategory().isEmpty()) {
+            page = homeRepo.searchByTitleAndCategory(searchRequest.getSearchQuery(), searchRequest.getCategory(), pageable);
+        } else {
+            page = homeRepo.searchByTitle(searchRequest.getSearchQuery(), pageable);
+        }
         return PagedResponseBuilder.fromPage(page, productSummaryMapper::toSummaryDTO);
     }
 
-    public PagedResponseDTO<ProductSummaryDTO> getProductsByCategory(String category, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public PagedResponseDTO<ProductSummaryDTO> getProductsByCategory(String category, String sortBy, String sortDirection, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, createSort(sortBy, sortDirection));
         Page<Product> pageResult = homeRepo.findByCategory(category, pageable);
         return PagedResponseBuilder.fromPage(pageResult, productSummaryMapper::toSummaryDTO);
     }
