@@ -1,7 +1,7 @@
 package com.hustict.aims.service.email;
 
 import com.hustict.aims.dto.cart.CartItemRequestDTO;
-import com.hustict.aims.dto.email.OrderSuccessEmailRequest;
+import com.hustict.aims.dto.email.RejectOrderRequest;
 import com.hustict.aims.dto.order.OrderInformationDTO;
 
 import jakarta.servlet.http.HttpSession;
@@ -11,30 +11,30 @@ import java.text.DecimalFormat;
 import org.springframework.stereotype.Service;
 
 
-@Service("orderSuccess")
-public class OrderSuccessEmailService extends SendEmailServiceImpl<OrderSuccessEmailRequest> {
+@Service("rejectOrder")
+public class RejectOrderEmailService extends SendEmailServiceImpl<RejectOrderRequest> {
 
     @Override
-    public OrderSuccessEmailRequest buildRequest(HttpSession session) {
-        OrderSuccessEmailRequest req = instantiateRequest();
+    public RejectOrderRequest buildRequest(HttpSession session) {
+        RejectOrderRequest req = instantiateRequest();
         populateCommonFields(req);
-        req.setCancelLink("http://localhost:3000/order/cancel/" + req.getOrder().getOrderId());
         return req;
     }
 
     @Override
-    protected OrderSuccessEmailRequest instantiateRequest() {
-        return new OrderSuccessEmailRequest();
+    protected RejectOrderRequest instantiateRequest() {
+        return new RejectOrderRequest();
     }
 
     @Override
-    protected String buildSubject(OrderSuccessEmailRequest request) {
+    protected String buildSubject(RejectOrderRequest request) {
         OrderInformationDTO orderInfo = (OrderInformationDTO) session.getAttribute("orderInformation");
         Long orderId = orderInfo.getOrderId();
-        return "Your Order #" + orderId + " is Pending";
+        return "Your Order #" + orderId + " is Rejected";
     }
+
     @Override
-    protected String buildBody(OrderSuccessEmailRequest request) {
+    protected String buildBody(RejectOrderRequest request) {
         var info = request.getOrder();
         var delivery = request.getDeliveryInfor();
         var items = info.getProductList();
@@ -48,7 +48,8 @@ public class OrderSuccessEmailService extends SendEmailServiceImpl<OrderSuccessE
         body.append("<html><body>");
         body.append("<p>Dear ").append(delivery.getCustomerName()).append(",</p>");
 
-        body.append("<p>Thank you for your purchase. Here are your order details:</p>");
+        body.append("<p>We regret to inform you that your order has been rejected. Here are the details of your order:</p>");
+        body.append("<p><strong>Refund Notice:</strong> A refund will be processed soon, and you will be notified once the process is complete.</p>");
 
         // Create a table to list products
         body.append("<table border='1' cellpadding='5' cellspacing='0'>");
@@ -68,12 +69,6 @@ public class OrderSuccessEmailService extends SendEmailServiceImpl<OrderSuccessE
         if (delivery.isRushOrder()) {
             body.append("<p><strong>Note:</strong> This is a rush order.</p>");
         }
-
-        body.append("<p><strong>Expected Delivery Date:</strong> ").append(delivery.getExpectedDate()).append("</p>");
-
-        // Add Pending state information and cancel link
-        body.append("<p>The order will be in a <strong>pending processing state</strong>, and the software will send invoice and payment transaction information to your email.</p>");
-        body.append(String.format("<p>If you wish to cancel, click here: <a href='%s'>Cancel Order</a></p>", request.getCancelLink()));
 
         // Add Invoice details
         body.append("<p><strong>Invoice Details:</strong></p>");
@@ -104,7 +99,4 @@ public class OrderSuccessEmailService extends SendEmailServiceImpl<OrderSuccessE
 
         return body.toString();
     }
-
-
-
 }

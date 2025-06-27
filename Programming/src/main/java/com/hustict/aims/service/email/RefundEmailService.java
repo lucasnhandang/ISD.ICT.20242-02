@@ -1,7 +1,7 @@
 package com.hustict.aims.service.email;
 
 import com.hustict.aims.dto.cart.CartItemRequestDTO;
-import com.hustict.aims.dto.email.OrderSuccessEmailRequest;
+import com.hustict.aims.dto.email.RefundEmailRequest;
 import com.hustict.aims.dto.order.OrderInformationDTO;
 
 import jakarta.servlet.http.HttpSession;
@@ -11,35 +11,36 @@ import java.text.DecimalFormat;
 import org.springframework.stereotype.Service;
 
 
-@Service("orderSuccess")
-public class OrderSuccessEmailService extends SendEmailServiceImpl<OrderSuccessEmailRequest> {
+@Service("rejectOrder")
+public class RefundEmailService extends SendEmailServiceImpl<RefundEmailRequest> {
 
     @Override
-    public OrderSuccessEmailRequest buildRequest(HttpSession session) {
-        OrderSuccessEmailRequest req = instantiateRequest();
+    public RefundEmailRequest buildRequest(HttpSession session) {
+        RefundEmailRequest req = instantiateRequest();
         populateCommonFields(req);
-        req.setCancelLink("http://localhost:3000/order/cancel/" + req.getOrder().getOrderId());
         return req;
     }
 
     @Override
-    protected OrderSuccessEmailRequest instantiateRequest() {
-        return new OrderSuccessEmailRequest();
+    protected RefundEmailRequest instantiateRequest() {
+        return new RefundEmailRequest();
     }
 
     @Override
-    protected String buildSubject(OrderSuccessEmailRequest request) {
+    protected String buildSubject(RefundEmailRequest request) {
         OrderInformationDTO orderInfo = (OrderInformationDTO) session.getAttribute("orderInformation");
         Long orderId = orderInfo.getOrderId();
-        return "Your Order #" + orderId + " is Pending";
+        return "Your Order #" + orderId + " is Refunded Successfully";
     }
+    
     @Override
-    protected String buildBody(OrderSuccessEmailRequest request) {
+    protected String buildBody(RefundEmailRequest request) {
         var info = request.getOrder();
         var delivery = request.getDeliveryInfor();
         var items = info.getProductList();
         var invoice = request.getInvoice();
         var paymentTransaction = request.getPayment(); // Lấy thông tin thanh toán từ request
+        var refundPayment = request.getRefundPayment();  // Lấy thông tin hoàn tiền từ request
         StringBuilder body = new StringBuilder();
 
         // Định dạng tiền tệ
@@ -48,7 +49,9 @@ public class OrderSuccessEmailService extends SendEmailServiceImpl<OrderSuccessE
         body.append("<html><body>");
         body.append("<p>Dear ").append(delivery.getCustomerName()).append(",</p>");
 
-        body.append("<p>Thank you for your purchase. Here are your order details:</p>");
+        // Thông báo từ chối đơn hàng và quá trình hoàn tiền
+        body.append("<p>We regret to inform you that your order has been rejected. Here are the details of your order:</p>");
+        body.append("<p><strong>Refund Notice:</strong> A refund will be processed soon, and you will be notified once the process is complete.</p>");
 
         // Create a table to list products
         body.append("<table border='1' cellpadding='5' cellspacing='0'>");
@@ -68,12 +71,6 @@ public class OrderSuccessEmailService extends SendEmailServiceImpl<OrderSuccessE
         if (delivery.isRushOrder()) {
             body.append("<p><strong>Note:</strong> This is a rush order.</p>");
         }
-
-        body.append("<p><strong>Expected Delivery Date:</strong> ").append(delivery.getExpectedDate()).append("</p>");
-
-        // Add Pending state information and cancel link
-        body.append("<p>The order will be in a <strong>pending processing state</strong>, and the software will send invoice and payment transaction information to your email.</p>");
-        body.append(String.format("<p>If you wish to cancel, click here: <a href='%s'>Cancel Order</a></p>", request.getCancelLink()));
 
         // Add Invoice details
         body.append("<p><strong>Invoice Details:</strong></p>");
@@ -98,13 +95,23 @@ public class OrderSuccessEmailService extends SendEmailServiceImpl<OrderSuccessE
             body.append("</table>");
         }
 
+        // Add Refund Payment details if available
+        if (refundPayment != null) {
+            body.append("<p><strong>Refund Payment Details:</strong></p>");
+            body.append("<table border='1' cellpadding='5' cellspacing='0'>");
+            body.append("<tr><th>Bank Transaction ID</th><th>Content</th><th>Refund Time</th><th>Refund Amount (VND)</th><th>Card Type</th><th>Currency</th></tr>");
+            body.append(String.format("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
+                    refundPayment.getBankTransactionId(), refundPayment.getContent(), refundPayment.getPaymentTime(),
+                    formatter.format(refundPayment.getPaymentAmount()), refundPayment.getCardType(), refundPayment.getCurrency()));
+            body.append("</table>");
+        }
+
         // Closing email
         body.append("<p>Best regards,<br>Your Shop Team</p>");
         body.append("</body></html>");
 
         return body.toString();
     }
-
 
 
 }

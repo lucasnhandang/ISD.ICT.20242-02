@@ -28,7 +28,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public void rejectOrder(Long orderId, String reason) {
+    public void rejectOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderOperationException("Order not found with id: " + orderId));
 
