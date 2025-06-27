@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 public class CartRequestDTO {
      private List<CartItemRequestDTO> productList;
-     private double totalPrice;
+     private int totalPrice;
      private int totalItem;
      private String currency;
      private int discount;
