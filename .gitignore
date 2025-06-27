@@ -58,3 +58,5 @@ dist/
 # Mac
 .DS_Store
 
+# Ignore classpath
+Programming/frontend/node

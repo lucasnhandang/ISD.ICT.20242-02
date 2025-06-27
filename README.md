@@ -16,72 +16,102 @@ This repository is organized as follows:
 
 ```
 ISD.ICT.20242-02/
-├── .gitignore
-├── AIMS/                             
-├── Analysis/                         # Analysis and design documentation
+├── Analysis/                           # Analysis & design documentation
 │   ├── Business Process/
 │   ├── Communication Diagram + Analysis Class Diagram/
-│   │   └── ... (each member has a folder for their assigned use cases)
 │   ├── Detailed Design/
-│   │   ├── Data Modeling/           
-│   │   ├── Interface Design/        
-│   │   └── Use Cases/                          # Detailed use case diagrams
-│   │       └── General Combined Package.png    # Class Diagram for AIMS of Group 2
-│   └── Sequence Diagram/                       # Sequence diagrams for each use case
-│       └── ... (each member has a folder for their assigned use cases)
-├── Programming/              
-│   ├── pom.xml                      # Maven configuration (Java backend)
-│   ├── main.js                      # Entry point (JavaScript frontend)
-│   ├── package.json                 # Node.js project configuration
-│   ├── package-lock.json
-│   ├── frontend/                    # Source code for React
-│   ├── node_modules/                # Frontend dependencies
-│   ├── src/
-│   │   └── java/
-│   │       └── com/
-│   │           └── hustict/
-│   │               └── aims/
-│   │                   ├── controller/   
-│   │                   ├── model/        
-│   │                   ├── repository/   
-│   │                   ├── service/      
-│   │                   ├── utils/        
-│   │                   └── Application.java 
-│   └── target/                     # Compiled output from Maven
-├── Requirements/
-│   ├── Group2-SRS.docx             # Software Requirements Specification
-│   └── Group2-SDD.docx             # Software Design Description (TBD)
-└── Testing/                        # Testing files, unit tests, etc.
-
+│   ├── Enhanced Detailed Design/
+│   └── Sequence Diagram/
+├── Programming/
+│   ├── frontend/                       # Frontend source code (React)
+│   │   ├── public/
+│   │   ├── src/
+│   │   │   ├── components/
+│   │   │   ├── pages/
+│   │   │   ├── services/
+│   │   │   ├── styles/
+│   │   │   ├── js/
+│   │   │   └── App.jsx
+│   │   └── ...
+│   ├── src/                            # Backend source code (Java Spring Boot)
+│   │   ├── main/
+│   │   │   └── java/com/hustict/aims/
+│   │   │       ├── controller/
+│   │   │       ├── dto/
+│   │   │       ├── exception/
+│   │   │       ├── model/
+│   │   │       ├── repository/
+│   │   │       ├── service/
+│   │   │       ├── utils/
+│   │   │       └── Application.java    # Run this to start the server
+│   │   └── test/
+│   │       └── java/com/hustict/aims/
+│   │           ├── controller/
+│   │           ├── service/
+│   │           └── ...
+│   └── ...
+├── Requirements/                       # Project requirements and reports
+│   ├── G2-Cohesion+SRP.pdf
+│   ├── G2-SOLID_Evaluate.pdf
+│   ├── G2-SRS.docx
+│   ├── G2-SDD.docx
+│   ├── G2-UseCaseSpecs.docx
+│   └── G2-TestPlan.xlsx
+├── README.md
+└── aims.code-workspace                 # Run this in VSCode/Eclipse/...
 ```
 
 ## How to run AIMS?
-This project combines **Spring Boot (Java)** for backend and **Electron + React (JavaScript)** for desktop UI, enabling a full-stack desktop application experience.
+This project is a **Web Application** that combines **Spring Boot (Java)** for backend and **React (JavaScript)** for frontend.
+
+### Tech Stack
+- **Backend**: Java Spring Boot
+- **Frontend**: React
+- **Database**: PostgreSQL deployed on Supabase
+- **Architecture**: Client-Server Web Application
 
 ### Requirements
+- **Java 21+** (for backend)
+- **Maven** (for backend build)
+- **Node.js 16+** (for frontend)
+- **npm** (Node package manager)
 
-- **Java 17+**
-- **Node.js 16+**
-- **Maven** (build backend)
-- OS: macOS, Windows or Linux
+### Setup & Run
 
-### Run Application (Development Mode)
-
+#### 1. Clone the repository
 ```bash
-git clone <this-repo-url>
-cd ISD.ICT.20242-02/Programming
-
-npm install # Download Electron dependencies
-
-mvn clean package # Build the backend .jar file
-# After building, you should see the file: 
-# target/aims-0.0.1-SNAPSHOT.jar
-
-npm start # Start the app
+git clone https://github.com/lucasnhandang/ISD.ICT.20242-02.git
+cd ISD.ICT.20242-02/Coding
 ```
 
-## Report content
+#### 2. Database setup
+- Import the SQL scripts in `docs/G2-AIMS-CreateDB.sql` and `docs/G2-AIMS-DataForDB.sql` into your PostgreSQL instance.
+- Update database connection info in `src/main/resources/application.properties` if needed.
+
+#### 3. Run Backend (Spring Boot)
+```bash
+cd src
+mvn spring-boot:run
+```
+- The backend API will be available at: http://localhost:8080
+
+#### 4. Run Frontend (React)
+```bash
+cd frontend
+npm install
+npm start
+```
+- The frontend will be available at: http://localhost:3000
+
+#### 5. Access the Application
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8080/api/*
+
+---
+
+## Report Content
 This section outlines the tasks assigned to each team member on a weekly basis.
+
 <details>
   <summary> W3: 24/02/2025 - 02/03/2025 </summary>
 
@@ -176,12 +206,38 @@ This section outlines the tasks assigned to each team member on a weekly basis.
 <details>
   <summary>W10: 20/04/2025 - 04/05/2025</summary>
 
-| **Student Name**   | **Task (Unit Test + Test Plan)**        |
-|--------------------|-----------------------------------------|
-| **Ha Viet Khanh**          |                             |
-| **Ho Bao Thu**            |                          |
-| **Dang Van Nhan**           |           |
-| **Tran Cao Phong**          |            |
-| **Nguyen Lan Nhi**            | |
+| **Student Name**   | **Task (Unit Test + Test Plan)** |
+|--------------------|----------------------------------|
+| **Ha Viet Khanh**          | Create users                     |
+| **Ho Bao Thu**            | Pay order                        |
+| **Dang Van Nhan**           | Create products                  |
+| **Tran Cao Phong**          | View product details             |
+| **Nguyen Lan Nhi**            | Place rush order                 |
+
+</details>
+
+<details>
+  <summary>W11: 04/05/2025 - 11/05/2025</summary>
+
+| **Student Name**   | **Task**                    |
+|--------------------|-----------------------------|
+| **Ha Viet Khanh**          | Evaluate Cohesion + Coupling |
+| **Ho Bao Thu**            | Evaluate Cohesion + Coupling                   |
+| **Dang Van Nhan**           | Evaluate Cohesion + Coupling             |
+| **Tran Cao Phong**          | Evaluate Cohesion + Coupling        |
+| **Nguyen Lan Nhi**            | Evaluate Cohesion + Coupling            |
+
+</details>
+
+<details>
+  <summary>W12: 11/05/2025 - 18/05/2025</summary>
+
+| **Student Name**   | **Task**                                         |
+|--------------------|--------------------------------------------------|
+| **Ha Viet Khanh**          | Evaluate Cohesion + Coupling with SOLID + Coding |
+| **Ho Bao Thu**            | Evaluate Cohesion + Coupling with SOLID + Coding |
+| **Dang Van Nhan**           | Evaluate Cohesion + Coupling with SOLID + Coding                    |
+| **Tran Cao Phong**          | Evaluate Cohesion + Coupling with SOLID + Coding                     |
+| **Nguyen Lan Nhi**            | Evaluate Cohesion + Coupling with SOLID + Coding                    |
 
 </details>

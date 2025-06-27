@@ -1,65 +1,148 @@
 package com.hustict.aims.controller;
 
-import com.hustict.aims.model.*;
-import com.hustict.aims.service.*;
-import com.hustict.aims.boundary.*;
-/*
-The RejectOrderController has functional cohesion.
-All methods contribute to executing the place order process.
-Its only reason to change would be if the process of placing order changes, including add new steps, removal of old step,...
- */
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
+
+import jakarta.servlet.http.HttpSession;
+
+import com.hustict.aims.dto.deliveryForm.DeliveryFormDTO;
+import com.hustict.aims.dto.invoice.InvoiceDTO;
+import com.hustict.aims.dto.payment.PaymentTransactionDTO;
+import com.hustict.aims.dto.cart.CartItemRequestDTO;
+import com.hustict.aims.dto.cart.CartRequestDTO;
+import com.hustict.aims.service.placeOrder.DeliveryFormValidator;
+import com.hustict.aims.service.placeOrder.HandleRequestService;
+import com.hustict.aims.service.placeOrder.PaymentHandlerService;
+import com.hustict.aims.service.reservation.ReservationService;
+import com.hustict.aims.service.sessionValidator.SessionValidatorService;
+import com.hustict.aims.service.placeOrder.NormalOrderService;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/v1/place-order")
 public class PlaceOrderController {
 
-    private final ProductAvailabilityService availabilityService;
+    private final HandleRequestService handleRequestService;
     private final DeliveryFormValidator deliveryFormValidator;
-    private final ShippingFeeCalculator shippingFeeCalculator;
-    private final InvoiceService invoiceService;
-    private final OrderService orderService;
-    private final SuccessEmailService successEmailService;
-    private final DeliveryFormScreen deliveryFormScreen;
-    private final InvoiceScreen invoiceScreen;
-    private final OrderInfoScreen orderInfoScreen;
+    private final NormalOrderService normalOrderService;
+    private final PaymentHandlerService paymentHandlerService;
+    private final SessionValidatorService sessionValidatorService;
 
-    public PlaceOrderController(ProductAvailabilityService availabilityService,
-                                DeliveryFormValidator deliveryFormValidator,
-                                ShippingFeeCalculator shippingFeeCalculator,
-                                InvoiceService invoiceService,
-                                OrderService orderService,
-                                SuccessEmailService successEmailService,
-                                DeliveryFormScreen deliveryFormScreen,
-                                InvoiceScreen invoiceScreen,
-                                OrderInfoScreen orderInfoScreen) {
-        this.availabilityService = availabilityService;
+    // xóa
+    @Lazy
+    @Autowired
+    private ReservationService reservationService;  // Lazy initialization
+
+    public PlaceOrderController(HandleRequestService handleRequestService,
+                            @Qualifier("deliveryFormValidatorImpl") DeliveryFormValidator deliveryFormValidator,
+                            NormalOrderService normalOrderService,
+                            PaymentHandlerService paymentHandlerService,
+                            SessionValidatorService sessionValidatorService) {
+        this.handleRequestService = handleRequestService;
         this.deliveryFormValidator = deliveryFormValidator;
-        this.shippingFeeCalculator = shippingFeeCalculator;
-        this.invoiceService = invoiceService;
-        this.orderService = orderService;
-        this.successEmailService = successEmailService;
-        this.deliveryFormScreen = deliveryFormScreen;
-        this.invoiceScreen = invoiceScreen;
-        this.orderInfoScreen = orderInfoScreen;
+        this.normalOrderService = normalOrderService;
+        this.paymentHandlerService = paymentHandlerService;
+        this.sessionValidatorService = sessionValidatorService;
     }
 
-    public void requestToPlaceOrder(Cart cart) {
-        availabilityService.checkCartAvailability(cart);
-        Order order = orderService.createOrderFromCart(cart);
-        //them createOrderFromCart
-        deliveryFormScreen.promptUserInput(order);
+   @PostMapping("/request")
+    public ResponseEntity<String> requestToPlaceOrder(@RequestBody CartRequestDTO cart, HttpSession session) {
+        handleRequestService.requestToPlaceOrder(cart,session.getId());
+        session.setAttribute("cartRequested", cart);
+        return ResponseEntity.ok("Order request successfully submitted");
     }
 
-    public void submitDeliveryForm(Order order, DeliveryForm form) {
-        deliveryFormValidator.validate(form);
-        DeliveryInformation deliveryInfo = orderService.createDeliveryInfo(form);
-        int shippingFee = shippingFeeCalculator.calculate(deliveryInfo);
-        Invoice invoice = invoiceService.createInvoice(order, deliveryInfo, shippingFee);
-
-        orderService.attachDeliveryAndInvoice(order, deliveryInfo, invoice);
-        invoiceScreen.display(invoice);
+    @PostMapping("/submit-form")
+    public ResponseEntity<String> submitDeliveryForm(@RequestBody DeliveryFormDTO form, HttpSession session) {
+        sessionValidatorService.validateCartRequestedPresent(session);
+        deliveryFormValidator.validate(form, session.getId());
+        session.setAttribute("deliveryForm", form);
+        return ResponseEntity.ok("Delivery form successfully submitted");
     }
 
-    public void handlePaymentSuccess(Order order, TransactionInfo transaction) {
-        orderService.saveTransaction(order, transaction);
-        successEmailService.sendConfirmation(order);
-        orderInfoScreen.display(order);
-    } 
+    @PostMapping("/cancel")
+    public ResponseEntity<String> cancelOrder(HttpSession session) {
+        session.removeAttribute("cartRequested");
+        session.removeAttribute("deliveryForm");
+        session.removeAttribute("invoice");
+        session.removeAttribute("paymentTransaction");
+
+        reservationService.releaseReservation(session);
+
+        return ResponseEntity.ok("Order has been canceled.");
+    }
+
+    @PostMapping("/normal-order")
+    public ResponseEntity<String> handleNormalOrder(HttpSession session) {
+        sessionValidatorService.validateDeliveryAndCartForCheckout(session);
+        DeliveryFormDTO deliveryForm = (DeliveryFormDTO) session.getAttribute("deliveryForm");
+        CartRequestDTO cart = (CartRequestDTO) session.getAttribute("cartRequested");
+
+        InvoiceDTO invoice = normalOrderService.handleNormalOrder(deliveryForm, cart);
+        session.setAttribute("invoice", invoice);
+        return ResponseEntity.ok("Normal order handled successfully with delivery info and shipping fee.");
+    }
+
+    @PostMapping("/handle-payment")
+    public ResponseEntity<String> handlePaymentSuccess(HttpSession session) {
+
+        // // 1. Fake Cart
+        // CartRequestDTO cart = new CartRequestDTO();
+        // cart.setCurrency("VND");
+
+        // CartItemRequestDTO item = new CartItemRequestDTO();
+        // item.setProductID(1L);
+        // item.setQuantity(2);
+        // item.setPrice(499500); // mỗi sản phẩm giá giả định
+
+        // cart.setProductList(List.of(item));
+        // session.setAttribute("cartRequested", cart);
+
+        // // 2. Fake DeliveryForm
+        // DeliveryFormDTO form = new DeliveryFormDTO();
+        // form.setCustomerName("Nguyen Van Test");
+        // form.setEmail("hobaothu202@gmail.com");
+        // form.setPhoneNumber("0900000000");
+        // form.setDeliveryAddress("123 Đường Test, Quận 1, TP.HCM");
+        // form.setDeliveryProvince("TP.HCM");
+        // form.setRushOrder(false);
+
+        // session.setAttribute("deliveryForm", form);
+
+        // // 3. Fake Invoice
+        // InvoiceDTO invoice = new InvoiceDTO();
+        // invoice.setProductPriceExVAT(999000);
+        // invoice.setProductPriceIncVAT(999000);  // giả định chưa tính VAT
+        // invoice.setShippingFee(0);
+        // invoice.setTotalAmount(999000);
+
+        // session.setAttribute("invoice", invoice);
+
+        // // 4. Fake Payment
+        // PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO();
+        // paymentTransaction.setBankTransactionId("FAKEBANK-" + System.currentTimeMillis());
+        // paymentTransaction.setContent("Mock payment transaction for test user");
+        // paymentTransaction.setPaymentTime(LocalDateTime.now());
+        // paymentTransaction.setPaymentAmount(999000);
+        // paymentTransaction.setCardType("TEST_CARD");
+        // paymentTransaction.setCurrency("VND");
+
+        // session.setAttribute("paymentTransaction", paymentTransaction);
+
+        // String sessionId = session.getId();
+
+        // reservationService.createReservation(cart, sessionId);
+     
+        sessionValidatorService.validateAfterPayment(session);
+        paymentHandlerService.handlePaymentSuccess(session);
+
+        return ResponseEntity.ok("Order is successfully created (Mock Test)");
+    }
 }
