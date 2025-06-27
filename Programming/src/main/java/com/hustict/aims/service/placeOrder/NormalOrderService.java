@@ -23,7 +23,7 @@ public class NormalOrderService {
 
     public InvoiceDTO handleNormalOrder(DeliveryFormDTO deliveryForm, CartRequestDTO cart) {
         int shippingFee = shippingFeeCalculator.calculateShippingFee(deliveryForm, cart);
-        int totalPriceExVat = (int) cart.getTotalPrice();
+        int totalPriceExVat = cart.getTotalPrice();
         InvoiceDTO invoice = invoiceCalculationService.calculateInvoice(totalPriceExVat, shippingFee);
 
         // xóa
