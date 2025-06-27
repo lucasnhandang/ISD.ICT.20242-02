@@ -87,27 +87,17 @@ const LoginPage = ({ onLoginSuccess, onBackToHome }) => {
       
       if (response.success) {
         setUserInfo(response.userInfo);
-        setSuccess('Đăng nhập thành công! Redirecting to admin panel...');
+        setSuccess('Đăng nhập thành công! Redirecting to management panel...');
         
-        // Redirect to admin panel after 2 seconds
+        // Redirect to management panel after 2 seconds
         setTimeout(() => {
-          navigate('/admin');
+          navigate('/management');
         }, 2000);
       } else {
         setError(response.message || 'Login failed');
       }
     } catch (error) {
-      console.error('Login error:', error);
-      
-      if (error.response?.data?.message) {
-        setError(error.response.data.message);
-      } else if (error.response?.status === 401) {
-        setError('Invalid email or password');
-      } else if (error.response?.status === 400) {
-        setError('Please check your input and try again');
-      } else {
-        setError('Network error. Please check your connection and try again.');
-      }
+      setError(error.message);
     } finally {
       setLoading(false);
     }
@@ -149,7 +139,7 @@ const LoginPage = ({ onLoginSuccess, onBackToHome }) => {
         </LogoContainer>
         
         <WelcomeText>
-          Welcome back! Please sign in to access admin panel
+          Welcome back! Please sign in to access management panel
         </WelcomeText>
 
         <form onSubmit={handleSubmit} style={{ width: '100%' }}>

@@ -84,12 +84,11 @@ const HomePage = () => {
         setTotalPages(1);
       }
     } catch (error) {
-      console.error('Error fetching products:', error);
-      setError(error.message || 'Failed to fetch products');
+      setError(error.message);
       setConnectionStatus({
         ...connectionStatus,
         connected: false,
-        message: 'Failed to fetch products. Please try again later.',
+        message: error.message,
       });
       setProducts([]);
       setTotalPages(1);

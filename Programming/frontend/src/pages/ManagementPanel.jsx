@@ -1,47 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Box, Container, Typography, Alert } from '@mui/material';
-import AdminNavbar from '../components/AdminNavbar';
+import ManagementNavbar from '../components/ManagementNavbar';
 import CreateUserPage from './admin/CreateUserPage';
 import ProductManagementPage from './admin/ProductManagementPage';
 import OrderManagementPage from './admin/OrderManagementPage';
 import { authService } from '../services/authService';
 
-const AdminPanel = () => {
+const ManagementPanel = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const user = authService.getCurrentUser();
         if (!user) {
-          // Redirect to login if no user
           window.location.href = '/';
           return;
         }
-
-        // Check if user has admin or product manager role
         const hasValidRole = user.roles && (
           user.roles.includes('ADMIN') || 
           user.roles.includes('PRODUCT_MANAGER')
         );
-
         if (!hasValidRole) {
-          // Redirect if user doesn't have required roles
           window.location.href = '/';
           return;
         }
-
         setCurrentUser(user);
       } catch (error) {
-        console.error('Auth check error:', error);
+        setError(error.message);
         window.location.href = '/';
       } finally {
         setLoading(false);
       }
     };
-
     checkAuth();
   }, []);
 
@@ -50,7 +44,7 @@ const AdminPanel = () => {
       await authService.logout();
       window.location.href = '/';
     } catch (error) {
-      console.error('Logout error:', error);
+      setError(error.message);
     }
   };
 
@@ -61,15 +55,12 @@ const AdminPanel = () => {
       </Box>
     );
   }
-
-  if (!currentUser) {
-    return null;
-  }
+  if (!currentUser) return null;
 
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
-      <AdminNavbar currentUser={currentUser} onLogout={handleLogout} />
-      
+      <ManagementNavbar currentUser={currentUser} onLogout={handleLogout} />
+      {error && <Alert severity="error" sx={{ m: 2 }}>{error}</Alert>}
       <Container maxWidth="xl" sx={{ mt: 2, mb: 4 }}>
         <Routes>
           <Route 
@@ -77,32 +68,26 @@ const AdminPanel = () => {
             element={
               <Box sx={{ p: 3, backgroundColor: 'white', borderRadius: 2, boxShadow: 1 }}>
                 <Typography variant="h4" gutterBottom>
-                  Welcome to Admin Panel
+                  Welcome to Management Panel
                 </Typography>
                 <Typography variant="body1" color="text.secondary" paragraph>
                   Hello <strong>{currentUser.name}</strong>! You are logged in as: {currentUser.roles?.join(', ')}
                 </Typography>
                 <Alert severity="info" sx={{ mt: 2 }}>
-                  Use the navigation bar above to access different admin features.
+                  Use the navigation bar above to access different management features for Admin and Product Manager.
                 </Alert>
               </Box>
             } 
           />
-          
-          {/* Admin Routes */}
           {currentUser.roles?.includes('ADMIN') && (
             <Route path="/create-user" element={<CreateUserPage />} />
           )}
-          
-          {/* Product Manager Routes */}
           {currentUser.roles?.includes('PRODUCT_MANAGER') && (
             <>
               <Route path="/products" element={<ProductManagementPage />} />
               <Route path="/orders" element={<OrderManagementPage />} />
             </>
           )}
-          
-          {/* Fallback route */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Container>
@@ -110,4 +95,4 @@ const AdminPanel = () => {
   );
 };
 
-export default AdminPanel; 
+export default ManagementPanel; 

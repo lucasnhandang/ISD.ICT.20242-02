@@ -3,7 +3,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import CssBaseline from '@mui/material/CssBaseline';
 import HomePage from './pages/HomePage';
-import AdminPanel from './pages/AdminPanel';
+import ManagementPanel from './pages/ManagementPanel';
 
 const theme = createTheme({
   palette: {
@@ -68,7 +68,7 @@ function App() {
         <CssBaseline />
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/admin/*" element={<AdminPanel />} />
+          <Route path="/management/*" element={<ManagementPanel />} />
         </Routes>
       </ThemeProvider>
     </Router>

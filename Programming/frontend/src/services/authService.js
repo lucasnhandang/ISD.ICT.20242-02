@@ -18,8 +18,8 @@ export const authService = {
       
       return response.data;
     } catch (error) {
-      console.error('Login error:', error);
-      throw error;
+      const message = error.response?.data?.message || error.message || 'Đã xảy ra lỗi khi đăng nhập';
+      throw new Error(message);
     }
   },
 
@@ -33,7 +33,8 @@ export const authService = {
         });
       }
     } catch (error) {
-      console.error('Logout error:', error);
+      const message = error.response?.data?.message || error.message || 'Đã xảy ra lỗi khi đăng xuất';
+      throw new Error(message);
     } finally {
       // Clear local storage regardless of API call success
       localStorage.removeItem('token');
@@ -55,11 +56,10 @@ export const authService = {
       
       return response.data;
     } catch (error) {
-      console.error('Token validation error:', error);
-      // Clear invalid token
       localStorage.removeItem('token');
       localStorage.removeItem('userInfo');
-      throw error;
+      const message = error.response?.data?.message || error.message || 'Token không hợp lệ';
+      throw new Error(message);
     }
   },
 
