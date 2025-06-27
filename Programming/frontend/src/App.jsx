@@ -1,7 +1,9 @@
 import React from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import CssBaseline from '@mui/material/CssBaseline';
 import HomePage from './pages/HomePage';
+import AdminPanel from './pages/AdminPanel';
 
 const theme = createTheme({
   palette: {
@@ -61,10 +63,15 @@ const theme = createTheme({
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <HomePage />
-    </ThemeProvider>
+    <Router>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/admin/*" element={<AdminPanel />} />
+        </Routes>
+      </ThemeProvider>
+    </Router>
   );
 }
 

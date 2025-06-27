@@ -4,7 +4,9 @@ import Header from '../components/Header';
 import Navigation from '../components/Navigation';
 import ProductCard from '../components/ProductCard';
 import ConnectionStatus from '../components/ConnectionStatus';
+import LoginPage from './LoginPage';
 import { checkBackendConnection, getProducts, searchProducts } from '../services/api';
+import { authService } from '../services/authService';
 import {
   containerStyles,
   loadingContainerStyles,
@@ -26,11 +28,24 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState(null);
+  const [showLogin, setShowLogin] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState({
     checked: false,
     connected: false,
     message: '',
   });
+
+  // Check authentication status on component mount
+  useEffect(() => {
+    const checkAuthStatus = () => {
+      const user = authService.getCurrentUser();
+      if (user) {
+        setCurrentUser(user);
+      }
+    };
+    checkAuthStatus();
+  }, []);
 
   // Check backend connection on component mount
   useEffect(() => {
@@ -111,12 +126,44 @@ const HomePage = () => {
     setPage(1);
   };
 
+  const handleSignInClick = () => {
+    setShowLogin(true);
+  };
+
+  const handleLoginSuccess = (userInfo) => {
+    setCurrentUser(userInfo);
+    setShowLogin(false);
+  };
+
+  const handleBackToHome = () => {
+    setShowLogin(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      setCurrentUser(null);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
   const handleSubscribe = (e) => {
     e.preventDefault();
     // Implement newsletter subscription logic here
     console.log('Subscribe email:', email);
     setEmail('');
   };
+
+  // If login page is shown, render only login
+  if (showLogin) {
+    return (
+      <LoginPage 
+        onLoginSuccess={handleLoginSuccess}
+        onBackToHome={handleBackToHome}
+      />
+    );
+  }
 
   const renderContent = () => {
     if (loading) {
@@ -171,7 +218,13 @@ const HomePage = () => {
 
   return (
       <Box sx={rootStyles}>
-        <Header onSearch={handleSearch} />
+        <Header 
+          onSearch={handleSearch} 
+          onSignInClick={handleSignInClick}
+          currentUser={currentUser}
+          onLogout={handleLogout}
+          showLoginButton={true} // Always show login button for admin/PM
+        />
 
         <ConnectionStatus
             open={connectionStatus.checked}
