@@ -34,7 +34,7 @@ public class CartCleanupService {
 
         cart.setTotalItem(remainingItems.stream().mapToInt(CartItemRequestDTO::getQuantity).sum());
         cart.setTotalPrice(remainingItems.stream()
-            .mapToDouble(item -> item.getQuantity() * item.getPrice())
+            .mapToInt(item -> item.getQuantity() * item.getPrice())
             .sum());
 
         session.setAttribute("cart", cart);
