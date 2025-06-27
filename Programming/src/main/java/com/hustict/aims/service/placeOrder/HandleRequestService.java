@@ -15,7 +15,7 @@ public class HandleRequestService {
     public HandleRequestService(ProductAvailabilityService productAvailabilityService, 
                                 ReservationService reservationService) {
         this.productAvailabilityService = productAvailabilityService;
-         this.reservationService = reservationService;
+        this.reservationService = reservationService;
     }
 
     public void requestToPlaceOrder(CartRequestDTO cart,String sessionId) {

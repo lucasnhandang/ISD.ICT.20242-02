@@ -16,112 +16,102 @@ This repository is organized as follows:
 
 ```
 ISD.ICT.20242-02/
-├── .gitignore
-├── Analysis/                         # Analysis and design documentation
+├── Analysis/                           # Analysis & design documentation
 │   ├── Business Process/
 │   ├── Communication Diagram + Analysis Class Diagram/
-│   │   └── ... (each member has a folder for their assigned use cases)
 │   ├── Detailed Design/
-│   │   ├── Data Modeling/           
-│   │   ├── Interface Design/        
-│   │   └── Use Cases/                          # Detailed use case diagrams
-│   │       └── General Combined Package.png    # Class Diagram for AIMS
-│   ├── Enhanced Detailed Design/     # Enhanced detailed design, contains members' improved class diagrams
-│   └── Sequence Diagram/                       
-│       └── ... (each member has a folder for their assigned use cases)
-├── Programming/              
-│   ├── pom.xml                         # Maven configuration (backend)
-│   ├── main.js                         # Entry point (frontend)
-│   ├── package.json                    # Node.js project configuration
-│   ├── package-lock.json
-│   ├── frontend/                       # Source code for frontend
-│   ├── node_modules/                   # Frontend dependencies
-│   ├── src/
-│   │   └── java/
-│   │       └── com/
-│   │           └── hustict/
-│   │               └── aims/           # Source code for backend
-│   │                   ├── controller/   
-│   │                   ├── model/  
-│   │                   ├── dto/              
-│   │                   ├── repository/   
-│   │                   ├── service/      
-│   │                   ├── utils/        
-│   │                   └── Application.java 
-│   └── target/                    
-├── Requirements/
-│   ├── G2-Cohesion+SRP.pdf     # Week 11's task submission
-│   ├── G2-SOLID_Evaluate.pdf   # Week 12's task submission
-│   ├── G2-SRS.docx      
+│   ├── Enhanced Detailed Design/
+│   └── Sequence Diagram/
+├── Programming/
+│   ├── frontend/                       # Frontend source code (React)
+│   │   ├── public/
+│   │   ├── src/
+│   │   │   ├── components/
+│   │   │   ├── pages/
+│   │   │   ├── services/
+│   │   │   ├── styles/
+│   │   │   ├── js/
+│   │   │   └── App.jsx
+│   │   └── ...
+│   ├── src/                            # Backend source code (Java Spring Boot)
+│   │   ├── main/
+│   │   │   └── java/com/hustict/aims/
+│   │   │       ├── controller/
+│   │   │       ├── dto/
+│   │   │       ├── exception/
+│   │   │       ├── model/
+│   │   │       ├── repository/
+│   │   │       ├── service/
+│   │   │       ├── utils/
+│   │   │       └── Application.java    # Run this to start the server
+│   │   └── test/
+│   │       └── java/com/hustict/aims/
+│   │           ├── controller/
+│   │           ├── service/
+│   │           └── ...
+│   └── ...
+├── Requirements/                       # Project requirements and reports
+│   ├── G2-Cohesion+SRP.pdf
+│   ├── G2-SOLID_Evaluate.pdf
+│   ├── G2-SRS.docx
 │   ├── G2-SDD.docx
-│   ├── G2-UseCaseSpecs.docx      
-│   └── G2-TestPlan.xlsx             
-└── Testing/                    # Testing files, unit tests, etc.
-
+│   ├── G2-UseCaseSpecs.docx
+│   └── G2-TestPlan.xlsx
+├── README.md
+└── aims.code-workspace                 # Run this in VSCode/Eclipse/...
 ```
 
 ## How to run AIMS?
-This project is a **Web Application** that combines **Spring Boot (Java)** for backend REST API and **React (JavaScript/TypeScript)** for frontend.
+This project is a **Web Application** that combines **Spring Boot (Java)** for backend and **React (JavaScript)** for frontend.
 
-### Techstack
-
-- **Backend**: Java Spring Boot (REST API)
-- **Frontend**: React (JavaScript/TypeScript)
-- **Database**: PostgreSQL
+### Tech Stack
+- **Backend**: Java Spring Boot
+- **Frontend**: React
+- **Database**: PostgreSQL deployed on Supabase
 - **Architecture**: Client-Server Web Application
 
 ### Requirements
+- **Java 21+** (for backend)
+- **Maven** (for backend build)
+- **Node.js 16+** (for frontend)
+- **npm** (Node package manager)
 
-- **Java 21+** to run Spring Boot backend
-- **Maven** to build backend
-- **Node.js 16+** to run React frontend
-- **npm** Node package manager
+### Setup & Run
 
-### Run Application
-
-#### Option 1: Quick Start (Recommended)
+#### 1. Clone the repository
 ```bash
-git clone https://github.com/lucasnhandang/ISD.ICT.20242-02
-cd ISD.ICT.20242-02/Programming
-
-# Install frontend dependencies
-npm install
-
-# Run both frontend and backend simultaneously
-npm run dev
+git clone https://github.com/lucasnhandang/ISD.ICT.20242-02.git
+cd ISD.ICT.20242-02/Coding
 ```
 
-#### Option 2: Manual Setup
+#### 2. Database setup
+- Import the SQL scripts in `docs/G2-AIMS-CreateDB.sql` and `docs/G2-AIMS-DataForDB.sql` into your PostgreSQL instance.
+- Update database connection info in `src/main/resources/application.properties` if needed.
+
+#### 3. Run Backend (Spring Boot)
 ```bash
-# Terminal 1 - Backend (Spring Boot)
-cd ISD.ICT.20242-02/Programming
+cd src
 mvn spring-boot:run
-
-# Terminal 2 - Frontend (React)
-cd ISD.ICT.20242-02/Programming
-npm start
 ```
+- The backend API will be available at: http://localhost:8080
 
-#### Option 3: Demo Check
+#### 4. Run Frontend (React)
 ```bash
-# Check the main application demo
-cd ISD.ICT.20242-02/Programming
-
-# Install dependencies and start
+cd frontend
 npm install
 npm start
-
-# Backend API will be available at http://localhost:8080
-# Frontend React app will be available at http://localhost:3000
 ```
+- The frontend will be available at: http://localhost:3000
 
-### Access the Application
-- **Frontend (React)**: http://localhost:3000
+#### 5. Access the Application
+- **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:8080/api/*
-- **Health Check**: http://localhost:8080/health
+
+---
 
 ## Report Content
 This section outlines the tasks assigned to each team member on a weekly basis.
+
 <details>
   <summary> W3: 24/02/2025 - 02/03/2025 </summary>
 

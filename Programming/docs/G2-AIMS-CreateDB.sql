@@ -4,7 +4,7 @@ CREATE TABLE users (
     name VARCHAR(100) NOT NULL,
     password VARCHAR(255) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
-    phonenumber CHAR(10)
+    phonenumber VARCHAR(10)
 );
 
 -- ROLE
@@ -104,7 +104,9 @@ CREATE TABLE deliveryinfo (
     phonenumber VARCHAR(20) NOT NULL,
     email VARCHAR(100) NOT NULL,
     province VARCHAR(50) NOT NULL,
-    shippinginstruction TEXT
+    shippinginstruction TEXT,
+    expected_time TIMESTAMP
+
 );
 
 -- PAYMENT
@@ -160,6 +162,7 @@ CREATE TABLE orderitem (
     orderid BIGINT,
     productid BIGINT,
     quantity INTEGER NOT NULL,
+    price INTEGER NOT NULL,
     type VARCHAR(50) NOT NULL,
     PRIMARY KEY (orderid, productid),
     FOREIGN KEY (orderid) REFERENCES orders(orderid) ON DELETE CASCADE,
