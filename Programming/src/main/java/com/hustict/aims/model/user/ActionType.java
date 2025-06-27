@@ -3,5 +3,6 @@ package com.hustict.aims.model.user;
 public enum ActionType {
     CREATE,
     UPDATE,
-    UPDATE_PRICE
+    UPDATE_PRICE,
+    DELETE
 }
