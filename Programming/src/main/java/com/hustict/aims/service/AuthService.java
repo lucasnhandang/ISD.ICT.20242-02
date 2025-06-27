@@ -24,46 +24,68 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtUtils jwtUtils;
     private final MessageService messageService;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    public AuthService(UserRepository userRepository, JwtUtils jwtUtils, MessageService messageService) {
+    public AuthService(UserRepository userRepository, JwtUtils jwtUtils, MessageService messageService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.jwtUtils = jwtUtils;
         this.messageService = messageService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public LoginResponseDTO authenticate(LoginRequestDTO loginRequest) {
-        validateLoginInput(loginRequest);
-        
-        Optional<User> userOptional = userRepository.findByEmail(loginRequest.getEmail());
-        if (!userOptional.isPresent()) {
-            throw new NoSuchElementException(messageService.getAuthFailed());
+        try {
+            System.out.println("Starting authentication for email: " + loginRequest.getEmail());
+            
+            validateLoginInput(loginRequest);
+            System.out.println("Input validation passed");
+            
+            Optional<User> userOptional = userRepository.findByEmail(loginRequest.getEmail());
+            if (!userOptional.isPresent()) {
+                System.out.println("User not found for email: " + loginRequest.getEmail());
+                throw new NoSuchElementException(messageService.getAuthFailed());
+            }
+            
+            User user = userOptional.get();
+            System.out.println("User found: " + user.getName() + " (ID: " + user.getId() + ")");
+            
+            if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+                System.out.println("Password mismatch for user: " + user.getEmail());
+                throw new SecurityException(messageService.getAuthFailed());
+            }
+            
+            System.out.println("Password verification passed");
+            
+            List<String> roleNames = user.getRoles().stream()
+                    .map(Role::getName)
+                    .collect(Collectors.toList());
+            System.out.println("User roles: " + roleNames);
+            
+            System.out.println("Generating JWT token...");
+            String token = jwtUtils.generateToken(
+                    String.valueOf(user.getId()),
+                    Map.of(
+                            "email", user.getEmail(),
+                            "roles", roleNames
+                    )
+            );
+            System.out.println("JWT token generated successfully");
+            
+            UserInfoDTO userInfo = new UserInfoDTO(
+                    user.getId(),
+                    user.getName(),
+                    user.getEmail(),
+                    roleNames
+            );
+            System.out.println("UserInfo created successfully");
+            
+            return new LoginResponseDTO(true, "Login successful", token, userInfo);
+            
+        } catch (Exception e) {
+            System.err.println("Exception in authenticate method: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+            e.printStackTrace();
+            throw e;
         }
-        
-        User user = userOptional.get();
-        if (!user.getPassword().equals(loginRequest.getPassword())) {
-            throw new SecurityException(messageService.getAuthFailed());
-        }
-        
-        List<String> roleNames = user.getRoles().stream()
-                .map(Role::getName)
-                .collect(Collectors.toList());
-        
-        String token = jwtUtils.generateToken(
-                String.valueOf(user.getId()),
-                Map.of(
-                        "email", user.getEmail(),
-                        "roles", roleNames
-                )
-        );
-        
-        UserInfoDTO userInfo = new UserInfoDTO(
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                roleNames
-        );
-        return new LoginResponseDTO(true, "Login successful", token, userInfo);
     }
 
     public LoginResponseDTO validateTokenAndGetUserInfo(String token) {
