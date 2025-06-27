@@ -1,6 +1,7 @@
 package com.hustict.aims.model.product;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDate;
 
 @Entity
@@ -50,8 +51,8 @@ public class Product {
 
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted;
+
     public Product() {
-        assignCategory();
     }
 
     public Product(String title, int value, int currentPrice, String barcode, String description,
@@ -121,15 +122,8 @@ public class Product {
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
     public String getCategory() { return category; }
+    protected void setCategory(String category) { this.category = category; }
 
-    protected void setCategory(String category) {
-        this.category = category;
-    }
-    public boolean isDeleted() {
-        return isDeleted;
-    }
-
-    public void setIsDeleted(boolean isDeleted) {
-        this.isDeleted = isDeleted;
-    }
+    public boolean isDeleted() { return isDeleted; }
+    public void setIsDeleted(boolean isDeleted) { this.isDeleted = isDeleted; }
 }
