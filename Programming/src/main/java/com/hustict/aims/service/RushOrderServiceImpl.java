@@ -105,7 +105,7 @@ public class RushOrderServiceImpl implements RushOrderService {
         rushCart.setTotalItem(rushItems.size());
         rushCart.setCurrency(cart.getCurrency());
         rushCart.setDiscount(cart.getDiscount());
-        rushCart.setTotalPrice(rushItems.stream().mapToDouble(CartItemRequestDTO::getPrice).sum());
+        rushCart.setTotalPrice(rushItems.stream().mapToInt(CartItemRequestDTO::getPrice).sum());
         
         // Xử lý đơn thường nếu có
         if (!normalItems.isEmpty()) {
@@ -114,13 +114,13 @@ public class RushOrderServiceImpl implements RushOrderService {
             normalCart.setTotalItem(normalItems.size());
             normalCart.setCurrency(cart.getCurrency());
             normalCart.setDiscount(cart.getDiscount());
-            normalCart.setTotalPrice(normalItems.stream().mapToDouble(CartItemRequestDTO::getPrice).sum());
+            normalCart.setTotalPrice(normalItems.stream().mapToInt(CartItemRequestDTO::getPrice).sum());
             normalOrderService.handleNormalOrder(deliveryInfo, normalCart);
         }
         
         // Tính phí và tạo invoice cho rush order
         int rushShippingFee = rushShippingFeeCalculator.calculateShippingFee(deliveryInfo, rushCart);
-        InvoiceDTO rushInvoiceDTO = invoiceCalculationService.calculateInvoice((int) rushCart.getTotalPrice(), rushShippingFee);
+        InvoiceDTO rushInvoiceDTO = invoiceCalculationService.calculateInvoice(rushCart.getTotalPrice(), rushShippingFee);
         
         // Lưu order rush vào DB
         Order rushOrder = new Order();
