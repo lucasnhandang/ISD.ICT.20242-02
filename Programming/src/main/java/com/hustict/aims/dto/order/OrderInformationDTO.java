@@ -24,5 +24,6 @@ public class OrderInformationDTO {
     private Long deliveryInfoId;
     private Long invoiceId;
     private LocalDateTime orderDate;
+    private LocalDateTime rushDeliveryTime;
 
 }
