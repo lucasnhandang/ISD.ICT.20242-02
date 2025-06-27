@@ -12,9 +12,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.net.URLEncoder;
 
 @RestController
 @RequestMapping("/api/payment")
@@ -35,7 +37,7 @@ public class PaymentController {
         long amount = requestDTO.getAmount();
         String orderInfo = requestDTO.getOrderInfo() != null ? requestDTO.getOrderInfo() : "Thanh toan don hang";
         String txnRef = requestDTO.getTxnRef() != null ? requestDTO.getTxnRef() : String.valueOf(System.currentTimeMillis());
-        String ipAddr = "127.0.0.1";
+        String ipAddr = request.getRemoteAddr();
         String paymentUrl = vnpayService.createPaymentUrl(amount, orderInfo, txnRef, ipAddr);
         Map<String, String> response = new HashMap<>();
         response.put("paymentUrl", paymentUrl);
@@ -44,27 +46,18 @@ public class PaymentController {
     }
 
     @GetMapping("/vnpay-return")
-    public ResponseEntity<String> vnpayReturn(@RequestParam Map<String, String> allParams) {
-        System.out.println("VNPAY RETURN PARAMS: " + allParams);
+    public void vnpayReturn(@RequestParam Map<String, String> allParams, HttpServletResponse response) throws java.io.IOException {
         boolean valid = vnpayService.validateVnpayResponse(new HashMap<>(allParams));
-        if (!valid) {
-            return ResponseEntity.badRequest().body("Invalid checksum");
+        String result = "fail";
+        String message = "Thanh toán thất bại!";
+        if (valid && "00".equals(allParams.get("vnp_ResponseCode"))) {
+            result = "success";
+            message = "Thanh toán thành công!";
+        } else if (!valid) {
+            message = "Sai chữ ký!";
         }
-        String responseCode = allParams.get("vnp_ResponseCode");
-        if ("00".equals(responseCode)) {
-            // Save transaction
-            PaymentTransaction transaction = new PaymentTransaction();
-            transaction.setBankTransactionId(allParams.get("vnp_TransactionNo"));
-            transaction.setContent(allParams.get("vnp_OrderInfo"));
-            transaction.setPaymentTime(LocalDateTime.now());
-            transaction.setPaymentAmount(Integer.parseInt(allParams.get("vnp_Amount")) / 100);
-            transaction.setCardType(allParams.get("vnp_CardType"));
-            transaction.setCurrency(allParams.get("vnp_CurrCode"));
-            paymentTransactionRepository.save(transaction);
-            return ResponseEntity.ok("Payment successful");
-        } else {
-            return ResponseEntity.ok("Payment failed: " + responseCode);
-        }
+        String redirectUrl = "http://localhost:3000/payment-result?result=" + result + "&message=" + URLEncoder.encode(message, "UTF-8");
+        response.sendRedirect(redirectUrl);
     }
 
     @GetMapping("/vnpay-ipn")
