@@ -4,7 +4,6 @@ import com.hustict.aims.dto.cart.CartRequestDTO;
 import com.hustict.aims.dto.deliveryForm.DeliveryFormDTO;
 import com.hustict.aims.dto.invoice.InvoiceDTO;
 import com.hustict.aims.dto.order.OrderInformationDTO;
-import com.hustict.aims.dto.cart.CartItemRequestDTO;
 import com.hustict.aims.dto.payment.PaymentTransactionDTO;
 
 import com.hustict.aims.model.invoice.Invoice;
@@ -14,6 +13,7 @@ import com.hustict.aims.model.shipping.DeliveryInfo;
 import com.hustict.aims.repository.InvoiceRepository;
 import com.hustict.aims.repository.OrderRepository;
 import com.hustict.aims.repository.PaymentTransactionRepository;
+import com.hustict.aims.service.reservation.ReservationService;
 import com.hustict.aims.service.sessionValidator.SessionValidatorService;
 import com.hustict.aims.utils.mapper.DeliveryInfoMapper;
 import com.hustict.aims.utils.mapper.InvoiceMapper;
@@ -24,7 +24,8 @@ import com.hustict.aims.repository.DeliveryInfoRepository;
 
 import jakarta.servlet.http.HttpSession;
 
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +43,7 @@ public class SaveOrderService {
     private final SessionValidatorService sessionValidatorService;
     private final DeliveryInfoRepository deliveryInfoRepository;
 
+ 
     public SaveOrderService(
         OrderRepository orderRepository,
         PaymentTransactionRepository transactionRepository,
@@ -119,20 +121,20 @@ public class SaveOrderService {
 
 
 
-        // xóa
-        System.out.println("Order Information:");
-        System.out.println("Order Date: " + orderInfoDTO.getOrderDate());
-        System.out.println("Currency: " + orderInfoDTO.getCurrency());
-        System.out.println("Rush Order: " + orderInfoDTO.isRushOrder());
-        System.out.println("Delivery Info ID: " + orderInfoDTO.getDeliveryInfoId());
-        System.out.println("Invoice ID: " + orderInfoDTO.getInvoiceId());
+        // // xóa
+        // System.out.println("Order Information:");
+        // System.out.println("Order Date: " + orderInfoDTO.getOrderDate());
+        // System.out.println("Currency: " + orderInfoDTO.getCurrency());
+        // System.out.println("Rush Order: " + orderInfoDTO.isRushOrder());
+        // System.out.println("Delivery Info ID: " + orderInfoDTO.getDeliveryInfoId());
+        // System.out.println("Invoice ID: " + orderInfoDTO.getInvoiceId());
 
-        System.out.println("Products:");
-        for (CartItemRequestDTO item : orderInfoDTO.getProductList()) {
-            System.out.println("- Product ID: " + item.getProductID()
-                            + ", Quantity: " + item.getQuantity()
-                            + ", Price: " + item.getPrice());
-        }
+        // System.out.println("Products:");
+        // for (CartItemRequestDTO item : orderInfoDTO.getProductList()) {
+        //     System.out.println("- Product ID: " + item.getProductID()
+        //                     + ", Quantity: " + item.getQuantity()
+        //                     + ", Price: " + item.getPrice());
+        // }
         return orderInfoDTO;
     }
 }
