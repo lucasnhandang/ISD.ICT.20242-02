@@ -22,8 +22,8 @@ public class OrderPMController {
     }
 
     @PutMapping("/{id}/reject")
-    public ResponseEntity<Void> rejectOrder(@PathVariable Long id) {
-        orderService.rejectOrder(id);
+    public ResponseEntity<Void> rejectOrder(@PathVariable Long id,String reason) {
+        orderService.rejectOrder(id,reason);
         return ResponseEntity.ok().build();
     }
 } 

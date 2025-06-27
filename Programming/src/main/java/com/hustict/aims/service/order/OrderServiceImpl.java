@@ -23,13 +23,12 @@ public class OrderServiceImpl implements OrderService {
         if (order.getOrderStatus() != OrderStatus.PENDING) {
             throw new OrderOperationException("Only PENDING orders can be approved. Current status: " + order.getOrderStatus());
         }
-
         orderRepository.approveOrderById(orderId);
     }
 
     @Override
     @Transactional
-    public void rejectOrder(Long orderId) {
+    public void rejectOrder(Long orderId, String reason) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderOperationException("Order not found with id: " + orderId));
 
