@@ -81,21 +81,17 @@ This project is a **Web Application** that combines **Spring Boot (Java)** for b
 #### 1. Clone the repository
 ```bash
 git clone https://github.com/lucasnhandang/ISD.ICT.20242-02.git
-cd ISD.ICT.20242-02/Coding
+cd ISD.ICT.20242-02/Programming
 ```
 
-#### 2. Database setup
-- Import the SQL scripts in `docs/G2-AIMS-CreateDB.sql` and `docs/G2-AIMS-DataForDB.sql` into your PostgreSQL instance.
-- Update database connection info in `src/main/resources/application.properties` if needed.
-
-#### 3. Run Backend (Spring Boot)
+#### 2. Run Backend (Spring Boot)
 ```bash
 cd src
 mvn spring-boot:run
 ```
 - The backend API will be available at: http://localhost:8080
 
-#### 4. Run Frontend (React)
+#### 3. Run Frontend (React)
 ```bash
 cd frontend
 npm install
@@ -103,7 +99,7 @@ npm start
 ```
 - The frontend will be available at: http://localhost:3000
 
-#### 5. Access the Application
+#### 4. Access the Application
 - **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:8080/api/*
 

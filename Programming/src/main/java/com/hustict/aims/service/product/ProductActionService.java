@@ -1,10 +1,10 @@
-package com.hustict.aims.service;
+package com.hustict.aims.service.product;
 
 import com.hustict.aims.model.user.ActionType;
 import com.hustict.aims.model.user.ProductChecklog;
 import com.hustict.aims.repository.ProductChecklogRepository;
-import com.hustict.aims.service.validation.ProductDeleteRule;
-import com.hustict.aims.service.validation.ProductUpdateRule;
+import com.hustict.aims.service.rules.ProductDeleteRule;
+import com.hustict.aims.service.rules.ProductUpdateRule;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

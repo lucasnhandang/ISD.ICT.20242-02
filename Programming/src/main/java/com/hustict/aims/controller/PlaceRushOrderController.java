@@ -114,27 +114,21 @@ public class PlaceRushOrderController {
     public ResponseEntity<RushOrderResponseDTO> processRushOrder(HttpSession session) {
         // Validate session có đủ dữ liệu
         sessionValidatorService.validateDeliveryAndCartForCheckout(session);
-        
         // Lấy dữ liệu từ session
         com.hustict.aims.dto.cart.CartRequestDTO cart = 
             (com.hustict.aims.dto.cart.CartRequestDTO) session.getAttribute("cartRequested");
         DeliveryFormDTO deliveryInfo = (DeliveryFormDTO) session.getAttribute("deliveryForm");
         RushOrderEligibilityResponseDTO eligibility = 
             (RushOrderEligibilityResponseDTO) session.getAttribute("rushEligibility");
-        
         if (eligibility == null) {
             throw new IllegalStateException("Rush order eligibility not checked. Please check eligibility first.");
         }
-        
         // Xử lý rush order
         RushOrderResponseDTO response = rushOrderProcessingService.processRushOrder(
-            cart, deliveryInfo, eligibility.getRushItems(), eligibility.getNormalItems()
+            cart, deliveryInfo, eligibility.getRushItems(), eligibility.getNormalItems(), session
         );
-        
-        // Lưu invoice vào session
-        session.setAttribute("invoice", response.getInvoice());
+        // Không cần setAttribute("invoice", ...) nữa vì đã lưu danh sách invoice/cart vào session
         session.setAttribute("rushOrderResponse", response);
-        
         return ResponseEntity.ok(response);
     }
 
@@ -180,5 +174,37 @@ public class PlaceRushOrderController {
         reservationService.releaseReservation(session);
         
         return ResponseEntity.ok("Rush order has been canceled");
+    }
+
+    @PostMapping("/pay-invoice")
+    public ResponseEntity<String> payInvoice(@RequestParam Long invoiceId, HttpSession session) {
+        java.util.List<com.hustict.aims.dto.invoice.InvoiceDTO> invoiceList = (java.util.List<com.hustict.aims.dto.invoice.InvoiceDTO>) session.getAttribute("invoiceList");
+        java.util.List<com.hustict.aims.dto.cart.CartRequestDTO> cartList = (java.util.List<com.hustict.aims.dto.cart.CartRequestDTO>) session.getAttribute("cartList");
+        if (invoiceList == null || cartList == null) {
+            return ResponseEntity.badRequest().body("No invoices found in session.");
+        }
+        int idx = -1;
+        for (int i = 0; i < invoiceList.size(); i++) {
+            if (invoiceId.equals(invoiceList.get(i).getId())) {
+                idx = i;
+                break;
+            }
+        }
+        if (idx == -1) return ResponseEntity.badRequest().body("Invoice not found.");
+        com.hustict.aims.dto.invoice.InvoiceDTO invoiceToPay = invoiceList.get(idx);
+        com.hustict.aims.dto.cart.CartRequestDTO cartToPay = cartList.get(idx);
+
+        // Lưu vào session để SaveOrderService lấy đúng dữ liệu
+        session.setAttribute("cartRequested", cartToPay);
+        session.setAttribute("invoice", invoiceToPay);
+        paymentHandlerService.handlePaymentSuccess(session);
+
+        // Xóa invoice/cart đã thanh toán khỏi list
+        invoiceList.remove(idx);
+        cartList.remove(idx);
+        session.setAttribute("invoiceList", invoiceList);
+        session.setAttribute("cartList", cartList);
+
+        return ResponseEntity.ok("Invoice paid successfully.");
     }
 } 
