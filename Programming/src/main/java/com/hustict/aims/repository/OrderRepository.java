@@ -1,11 +1,13 @@
 package com.hustict.aims.repository;
 
 import com.hustict.aims.model.order.Order;
+import com.hustict.aims.model.order.OrderStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
@@ -36,4 +38,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Transactional
     @Query("UPDATE Order o SET o.orderStatus = 'REJECTED_REFUNDED' WHERE o.id = :id")
     void updateRejectRefundedOrderById(@Param("id") Long id);
+
+    List<Order> findByOrderStatus(OrderStatus status);
 }
