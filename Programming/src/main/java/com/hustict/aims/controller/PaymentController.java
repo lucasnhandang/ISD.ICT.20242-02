@@ -1,8 +1,10 @@
 package com.hustict.aims.controller;
 
+import com.hustict.aims.dto.payment.PaymentResultDTO;
 import com.hustict.aims.dto.payment.VnPayCreateRequestDTO;
 import com.hustict.aims.dto.payment.VnPayIpnResponseDTO;
 import com.hustict.aims.dto.payment.VnPayReturnResponseDTO;
+import com.hustict.aims.service.payment.PaymentResultService;
 import com.hustict.aims.service.placeOrder.VnPayService;
 import com.hustict.aims.utils.VnPayConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +18,14 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/payment")
+@CrossOrigin(origins = "*")
 public class PaymentController {
     @Autowired
     private VnPayService vnPayService;
     @Autowired
     private VnPayConfig vnPayConfig;
+    @Autowired
+    private PaymentResultService paymentResultService;
 
     @PostMapping("/vnpay-create")
     public ResponseEntity<?> createVnPayUrl(@RequestBody VnPayCreateRequestDTO req, HttpServletRequest request) {
@@ -35,31 +40,35 @@ public class PaymentController {
     }
 
     @GetMapping("/vnpay-return")
-    public ResponseEntity<VnPayReturnResponseDTO> vnPayReturn(HttpServletRequest request) {
+    public ResponseEntity<PaymentResultDTO> vnPayReturn(HttpServletRequest request) {
         Map<String, String> params = new HashMap<>();
         request.getParameterMap().forEach((k, v) -> params.put(k, v[0]));
         
-        boolean success = vnPayService.handleVnPayReturn(params);
-        
-        VnPayReturnResponseDTO response = new VnPayReturnResponseDTO();
-        response.setVnp_TxnRef(params.get("vnp_TxnRef"));
-        response.setVnp_ResponseCode(params.get("vnp_ResponseCode"));
-        response.setVnp_TransactionNo(params.get("vnp_TransactionNo"));
-        response.setVnp_Amount(params.get("vnp_Amount"));
-        response.setVnp_OrderInfo(params.get("vnp_OrderInfo"));
-        response.setVnp_PayDate(params.get("vnp_PayDate"));
-        response.setVnp_BankCode(params.get("vnp_BankCode"));
-        response.setVnp_CardType(params.get("vnp_CardType"));
-        response.setVnp_SecureHash(params.get("vnp_SecureHash"));
-        response.setSuccess(success);
-        
-        if (success) {
-            response.setMessage("Thanh toán thành công!");
-        } else {
-            response.setMessage("Thanh toán thất bại!");
-        }
-        
+        PaymentResultDTO response = paymentResultService.processPaymentReturn(params);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/payment-result")
+    public ResponseEntity<PaymentResultDTO> getPaymentResult(
+            @RequestParam(required = false) String txnRef,
+            @RequestParam(required = false) String responseCode) {
+        
+        PaymentResultDTO result = paymentResultService.createPaymentResult(txnRef, responseCode);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/payment-status")
+    public ResponseEntity<Map<String, Object>> getPaymentStatus(@RequestParam String txnRef) {
+        Map<String, Object> status = new HashMap<>();
+        
+        // TODO: Implement logic to check payment status from database
+        // For now, return a mock response
+        status.put("txnRef", txnRef);
+        status.put("status", "PENDING");
+        status.put("message", "Đang kiểm tra trạng thái thanh toán...");
+        status.put("timestamp", System.currentTimeMillis());
+        
+        return ResponseEntity.ok(status);
     }
 
     @PostMapping("/vnpay-ipn")
@@ -73,4 +82,4 @@ public class PaymentController {
             return ResponseEntity.ok(new VnPayIpnResponseDTO("97", "Invalid Checksum or Failed"));
         }
     }
-}
+} 
