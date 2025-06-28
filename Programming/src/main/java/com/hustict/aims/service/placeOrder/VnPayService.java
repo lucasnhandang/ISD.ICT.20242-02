@@ -104,6 +104,15 @@ public class VnPayService {
                 txn.setPaymentTime(LocalDateTime.now());
                 txn.setPaymentAmount(Integer.parseInt(amountStr) / 100);
                 txn.setCardType(cardType);
+                txn.setCurrency("VND");
+                txn.setSystems("VNPay");
+                // Lưu payment URL nếu có
+                // Note: Payment URL thường được lưu khi tạo giao dịch, không phải khi return
+                // Nhưng có thể lưu URL return để tracking
+                String returnUrl = vnPayConfig.getReturnUrl() + "?" + params.entrySet().stream()
+                    .map(e -> e.getKey() + "=" + e.getValue())
+                    .reduce("", (a, b) -> a + (a.isEmpty() ? "" : "&") + b);
+                txn.setPaymentUrl(returnUrl);
                 paymentTransactionRepository.save(txn);
                 // Gắn transaction vào order nếu cần
                 // ...
