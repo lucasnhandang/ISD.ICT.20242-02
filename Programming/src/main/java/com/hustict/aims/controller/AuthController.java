@@ -106,26 +106,4 @@ public class AuthController {
                     .body(new LoginResponseDTO(false, "System error when validating token.", null, null));
         }
     }
-
-    /**
-     * Admin-only endpoint - validate admin role
-     */
-    @GetMapping("/admin")
-    public ResponseEntity<LoginResponseDTO> adminOnly(
-            @RequestHeader(value = "Authorization", required = false) String authHeader) {
-        try {
-            String token = AuthUtils.extractTokenFromHeader(authHeader);
-            if (token == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(new LoginResponseDTO(false, "Token is not provided.", null, null));
-            }
-            
-            LoginResponseDTO response = authService.validateTokenAndGetUserInfo(token, "ADMIN");
-            return ResponseEntity.ok(new LoginResponseDTO(true, "Welcome ADMIN!", null, response.getUserInfo()));
-            
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new LoginResponseDTO(false, "Access denied: ADMIN only", null, null));
-        }
-    }
 } 
