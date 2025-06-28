@@ -4,7 +4,6 @@ import com.hustict.aims.dto.PagedResponseDTO;
 import com.hustict.aims.dto.home.ProductSearchRequestDTO;
 import com.hustict.aims.dto.home.ProductSummaryDTO;
 import com.hustict.aims.service.home.HomeService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,14 +17,6 @@ public class HomeController {
         this.homeService = homeService;
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleException(Exception e) {
-        e.printStackTrace();
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Error when handling backend: " + e.getMessage());
-    }
-
-    // Random products
     @GetMapping("/home")
     public ResponseEntity<PagedResponseDTO<ProductSummaryDTO>> getHomePage(
             @RequestParam(defaultValue = "0") int page,
@@ -35,7 +26,6 @@ public class HomeController {
         return ResponseEntity.ok(products);
     }
 
-    // Search products by name with sorting
     @GetMapping("/products/search")
     public ResponseEntity<PagedResponseDTO<ProductSummaryDTO>> searchProducts(
             @RequestParam(required = false) String query,
@@ -50,7 +40,6 @@ public class HomeController {
         return ResponseEntity.ok(products);
     }
 
-    // Filter by category (Book, CD, ...)
     @GetMapping("/products/category/{category}")
     public ResponseEntity<PagedResponseDTO<ProductSummaryDTO>> getProductsByCategory(
             @PathVariable String category,
@@ -61,11 +50,5 @@ public class HomeController {
 
         PagedResponseDTO<ProductSummaryDTO> products = homeService.getProductsByCategory(category, sortBy, sortDirection, page, size);
         return ResponseEntity.ok(products);
-    }
-
-    // Health check
-    @GetMapping("/health")
-    public ResponseEntity<String> healthCheck() {
-        return ResponseEntity.ok("AIMS backend is running");
     }
 }
