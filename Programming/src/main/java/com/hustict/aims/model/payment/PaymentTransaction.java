@@ -29,6 +29,9 @@ public class PaymentTransaction {
     @Column(name = "currency")
     private String currency = "VND";
 
+    @Column(name = "systems") 
+    private String systems;
+
     public PaymentTransaction() {}
 
     public PaymentTransaction(String bankTransactionId, String content, 
@@ -55,4 +58,11 @@ public class PaymentTransaction {
     public void setCardType(String cardType) { this.cardType = cardType; }
     public String getCurrency() { return currency; }
     public void setCurrency(String currency) { this.currency = currency; }
+    public String getSystems() {
+        return systems;
+    }
+
+    public void setSystems(String systems) {
+        this.systems = systems;
+    }
 } 

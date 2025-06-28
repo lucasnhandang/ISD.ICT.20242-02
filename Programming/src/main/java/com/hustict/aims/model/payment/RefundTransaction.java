@@ -23,6 +23,9 @@ public class RefundTransaction {
     @Column(name = "currency")
     private String currency = "VND";
 
+    @Column(name = "systems") 
+    private String systems;
+    
     public RefundTransaction() {}
 
     public RefundTransaction(String bankTransactionId, LocalDateTime refundTime, 
@@ -42,4 +45,11 @@ public class RefundTransaction {
     public void setOrderAmount(int orderAmount) { this.orderAmount = orderAmount; }
     public String getCurrency() { return currency; }
     public void setCurrency(String currency) { this.currency = currency; }
+    public String getSystems() {
+        return systems;
+    }
+
+    public void setSystems(String systems) {
+        this.systems = systems;
+    }
 } 

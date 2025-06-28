@@ -21,6 +21,7 @@ public class PaymentTransactionMapper {
         entity.setPaymentAmount(dto.getPaymentAmount());
         entity.setCardType(dto.getCardType());
         entity.setCurrency(dto.getCurrency());
+        entity.setSystems(dto.getSystems());
         return entity;
     }
 
@@ -38,6 +39,7 @@ public class PaymentTransactionMapper {
         dto.setPaymentAmount(entity.getPaymentAmount());
         dto.setCardType(entity.getCardType());
         dto.setCurrency(entity.getCurrency());
+        dto.setSystems(entity.getSystems());
         return dto;
     }
 }

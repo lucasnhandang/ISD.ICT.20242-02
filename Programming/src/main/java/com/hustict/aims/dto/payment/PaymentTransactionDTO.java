@@ -16,4 +16,5 @@ public class PaymentTransactionDTO {
     private int paymentAmount;
     private String cardType;
     private String currency;
+    private String systems;
 }
