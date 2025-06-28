@@ -32,7 +32,7 @@ public class PaymentTransaction {
     @Column(name = "systems") 
     private String systems;
 
-    @Column(name = "payment_url", length = 255)
+    @Column(name = "payment_url", length = 800)
     private String paymentUrl;
 
 

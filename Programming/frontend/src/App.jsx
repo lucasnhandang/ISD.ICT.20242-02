@@ -5,6 +5,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import HomePage from './pages/HomePage';
 import ManagementPanel from './pages/ManagementPanel';
 import CartPage from './pages/CartPage';
+import LoginPage from './pages/LoginPage';
 
 const theme = createTheme({
   palette: {
@@ -72,6 +73,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/management/*" element={<ManagementPanel />} />
+          <Route path="/login" element={<LoginPage />} />
         </Routes>
       </Router>
     </ThemeProvider>

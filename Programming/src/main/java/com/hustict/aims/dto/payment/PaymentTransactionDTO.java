@@ -1,14 +1,13 @@
 package com.hustict.aims.dto.payment;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class PaymentTransactionDTO {
     private String bankTransactionId;
     private String content;
@@ -16,5 +15,6 @@ public class PaymentTransactionDTO {
     private int paymentAmount;
     private String cardType;
     private String currency;
-    private String systems;
+    private String system = "VNPay";
+    private String paymentUrl;
 }

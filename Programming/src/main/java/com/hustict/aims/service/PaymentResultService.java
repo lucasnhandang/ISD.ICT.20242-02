@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+import jakarta.servlet.http.HttpSession;
+
 @Service
 public class PaymentResultService {
     
@@ -18,8 +20,8 @@ public class PaymentResultService {
         this.vnPayService = vnPayService;
     }
     
-    public PaymentResultDTO processPaymentReturn(Map<String, String> params) {
-        boolean success = vnPayService.handleVnPayReturn(params);
+    public PaymentResultDTO processPaymentReturn(Map<String, String> params, HttpSession session) {
+        boolean success = vnPayService.handleVnPayReturn(params,session);
         
         PaymentResultDTO result = new PaymentResultDTO();
         result.setTxnRef(params.get("vnp_TxnRef"));
