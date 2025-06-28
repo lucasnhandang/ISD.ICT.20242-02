@@ -3,8 +3,8 @@ import axios from 'axios';
 // Axios instance for API calls
 const api = axios.create({
   baseURL: 'http://localhost:8080/api/v1',
-  timeout: 10000,
-  headers: { 'Content-Type': 'application/json' },
+  timeout: 10000
+  // KHÔNG set Content-Type mặc định ở đây!
 });
 
 // Global error handler
