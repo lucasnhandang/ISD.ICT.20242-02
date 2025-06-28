@@ -104,6 +104,8 @@ public class SaveOrderService {
         if (savedInvoice.getId() == null) {
             throw new IllegalStateException("Lưu Invoice thất bại, id trả về null");
         }
+
+        invoiceDTO.setId(savedInvoice.getId());
         
 
         OrderInformationDTO orderInfoDTO = OrderInformationDTOMapper.toDTO(
@@ -116,8 +118,11 @@ public class SaveOrderService {
 
         Order order = orderMapper.toEntity(orderInfoDTO);
         Order orderEntity = orderRepository.save(order);
+        orderInfoDTO.setOrderId(orderEntity.getId());
 
-        sessionValidatorService.validateAfterPayment(session);
+        session.setAttribute("orderInformation", orderInfoDTO);  
+        session.setAttribute("invoice", invoiceDTO); 
+        session.setAttribute("deliveryForm", deliveryFormDTO);  
 
 
 

@@ -1,40 +1,38 @@
 package com.hustict.aims.service.email;
 
+import java.text.DecimalFormat;
+
 import com.hustict.aims.dto.cart.CartItemRequestDTO;
-import com.hustict.aims.dto.email.OrderSuccessEmailRequest;
+import com.hustict.aims.dto.email.ApproveOrderEmailRequest;
 import com.hustict.aims.dto.order.OrderInformationDTO;
+import org.springframework.stereotype.Service;
 
 import jakarta.servlet.http.HttpSession;
 
-import java.text.DecimalFormat;
-
-import org.springframework.stereotype.Service;
-
-
-@Service("orderSuccess")
-public class OrderSuccessEmailService extends SendEmailServiceImpl<OrderSuccessEmailRequest> {
-
+@Service("approveOrder")
+public class ApproveOrderEmailService extends SendEmailServiceImpl<ApproveOrderEmailRequest> {
+    
     @Override
-    public OrderSuccessEmailRequest buildRequest(HttpSession session) {
-        OrderSuccessEmailRequest req = instantiateRequest();
+    public ApproveOrderEmailRequest buildRequest(HttpSession session) {
+        ApproveOrderEmailRequest req = instantiateRequest();
         populateCommonFields(req);
-        req.setCancelLink("http://localhost:3000/order/cancel/" + req.getOrder().getOrderId());
         return req;
     }
 
     @Override
-    protected OrderSuccessEmailRequest instantiateRequest() {
-        return new OrderSuccessEmailRequest();
+    protected ApproveOrderEmailRequest instantiateRequest() {
+        return new ApproveOrderEmailRequest();
     }
 
     @Override
-    protected String buildSubject(OrderSuccessEmailRequest request) {
+    protected String buildSubject(ApproveOrderEmailRequest request) {
         OrderInformationDTO orderInfo = (OrderInformationDTO) session.getAttribute("orderInformation");
         Long orderId = orderInfo.getOrderId();
-        return "Your Order #" + orderId + " is Pending";
+        return "Your Order #" + orderId + " is Approved";
     }
+
     @Override
-    protected String buildBody(OrderSuccessEmailRequest request) {
+    protected String buildBody(ApproveOrderEmailRequest request) {
         var info = request.getOrder();
         var delivery = request.getDeliveryInfor();
         var items = info.getProductList();
@@ -48,7 +46,8 @@ public class OrderSuccessEmailService extends SendEmailServiceImpl<OrderSuccessE
         body.append("<html><body>");
         body.append("<p>Dear ").append(delivery.getCustomerName()).append(",</p>");
 
-        body.append("<p>Thank you for your purchase. Here are your order details:</p>");
+        body.append("<p>We are pleased to inform you that your order has been approved. Here are the details of your order:</p>");
+        body.append("<p><strong>Note:</strong> Your order is now being processed and will be shipped to you soon. You will receive a notification once your order is shipped.</p>");
 
         // Create a table to list products
         body.append("<table border='1' cellpadding='5' cellspacing='0'>");
@@ -69,12 +68,6 @@ public class OrderSuccessEmailService extends SendEmailServiceImpl<OrderSuccessE
             body.append("<p><strong>Note:</strong> This is a rush order.</p>");
         }
 
-        body.append("<p><strong>Expected Delivery Date:</strong> ").append(delivery.getExpectedDate()).append("</p>");
-
-        // Add Pending state information and cancel link
-        body.append("<p>The order will be in a <strong>pending processing state</strong>, and the software will send invoice and payment transaction information to your email.</p>");
-        body.append(String.format("<p>If you wish to cancel, click here: <a href='%s'>Cancel Order</a></p>", request.getCancelLink()));
-
         // Add Invoice details
         body.append("<p><strong>Invoice Details:</strong></p>");
         body.append("<table border='1' cellpadding='5' cellspacing='0'>");
@@ -84,7 +77,6 @@ public class OrderSuccessEmailService extends SendEmailServiceImpl<OrderSuccessE
             formatter.format(invoice.getProductPriceIncVAT()), 
             formatter.format(invoice.getShippingFee()),
             formatter.format(invoice.getTotalAmount())));  
-
         body.append("</table>");
 
         // Add Payment Transaction details
@@ -104,7 +96,4 @@ public class OrderSuccessEmailService extends SendEmailServiceImpl<OrderSuccessE
 
         return body.toString();
     }
-
-
-
 }

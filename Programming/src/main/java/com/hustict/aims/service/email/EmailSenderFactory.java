@@ -16,12 +16,7 @@ public class EmailSenderFactory {
         this.emailServices = emailServices;
     }
 
-    /**
-     * Look up the email service by key, build its request, then send the email.
-     *
-     * @param type    identifier of the email service to use
-     * @param session HTTP session holding order and delivery data
-     */
+  
     @SuppressWarnings("unchecked")
     public void process(String type, HttpSession session) {
         SendEmailService<BaseEmailRequest> service =
