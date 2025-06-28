@@ -241,6 +241,35 @@ export const validateToken = async () => {
   }
 };
 
+// Order Management APIs
+export const orderManagementAPI = {
+  getPendingOrders: async () => {
+    try {
+      const response = await api.get('/product-manager/orders/pending');
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to fetch pending orders');
+    }
+  },
+
+  approveOrder: async (orderId) => {
+    try {
+      const response = await api.put(`/product-manager/orders/${orderId}/approve`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to approve order');
+    }
+  },
+
+  rejectOrder: async (orderId) => {
+    try {
+      const response = await api.put(`/product-manager/orders/${orderId}/reject`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to reject order');
+    }
+  }
+  
 // Place Order APIs
 export const submitDeliveryForm = async (data) => {
   return api.post('/place-order/submit-form', data);
