@@ -2,11 +2,14 @@ package com.hustict.aims.controller;
 
 import com.hustict.aims.service.email.EmailSenderFactory;
 import com.hustict.aims.service.order.OrderService;
+import com.hustict.aims.dto.order.OrderInformationDTO;
 
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/product-manager/orders")
@@ -21,9 +24,15 @@ public class OrderPMController {
         this.emailSenderFactory=emailSenderFactory;
     }
 
+    @GetMapping("/pending")
+    public ResponseEntity<List<OrderInformationDTO>> getPendingOrders() {
+        return ResponseEntity.ok(orderService.getPendingOrders());
+    }
+
     @PutMapping("/{id}/approve")
     public ResponseEntity<Void> approveOrder(@PathVariable Long id,HttpSession session) {
         orderService.approveOrder(id);
+        orderService.prepareOrderSessionForEmail(id, session);
         emailSenderFactory.process("approveOrder", session);
         return ResponseEntity.ok().build();
     }
@@ -31,6 +40,7 @@ public class OrderPMController {
     @PutMapping("/{id}/reject")
     public ResponseEntity<Void> rejectOrder(@PathVariable Long id,HttpSession session) {
         orderService.rejectOrder(id);
+        orderService.prepareOrderSessionForEmail(id, session);
         emailSenderFactory.process("rejectOrder", session);
         return ResponseEntity.ok().build();
     }
