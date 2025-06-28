@@ -84,10 +84,13 @@ public class PlaceOrderController {
     public ResponseEntity<Map<String, Object>> handleNormalOrder(HttpSession session) {
         sessionValidatorService.validateDeliveryAndCartForCheckout(session);
         DeliveryFormDTO deliveryForm = (DeliveryFormDTO) session.getAttribute("deliveryForm");
-        CartRequestDTO cart = (CartRequestDTO) session.getAttribute("cartRequested");
+        //CartRequestDTO cart = (CartRequestDTO) session.getAttribute("cartRequested");
+        CartRequestDTO cart = (CartRequestDTO) session.getAttribute("cartNormal");
 
         InvoiceDTO invoice = normalOrderService.handleNormalOrder(deliveryForm, cart);
-        session.setAttribute("invoice", invoice);
+        //session.setAttribute("invoice", invoice);
+        session.setAttribute("invoiceNormal", invoice);
+
         Map<String, Object> response = new HashMap<>();
         response.put("cart", cart);
         response.put("invoice", invoice);
