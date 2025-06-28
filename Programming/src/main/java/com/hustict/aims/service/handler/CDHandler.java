@@ -20,6 +20,9 @@ public class CDHandler implements ProductHandler {
     }
 
     @Override
+    public String getType() { return "CD"; }
+
+    @Override
     public boolean supports(String type) { return "CD".equalsIgnoreCase(type); }
 
     @Override
