@@ -32,6 +32,10 @@ public class PaymentTransaction {
     @Column(name = "systems") 
     private String systems;
 
+    @Column(name = "payment_url", length = 255)
+    private String paymentUrl;
+
+
     public PaymentTransaction() {}
 
     public PaymentTransaction(String bankTransactionId, String content, 
@@ -64,5 +68,12 @@ public class PaymentTransaction {
 
     public void setSystems(String systems) {
         this.systems = systems;
+    }
+    public String getPaymentUrl() {
+        return paymentUrl;
+    }
+
+    public void setPaymentUrl(String paymentUrl) {
+        this.paymentUrl = paymentUrl;
     }
 } 

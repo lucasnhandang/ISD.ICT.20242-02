@@ -45,6 +45,8 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
+    
+  
     public Order() {}
 
     public Order(LocalDateTime orderDate, OrderStatus orderStatus, Boolean isRushOrder,
@@ -97,4 +99,5 @@ public class Order {
         orderItems.remove(item);
         item.setOrder(null);
     }
+
 }

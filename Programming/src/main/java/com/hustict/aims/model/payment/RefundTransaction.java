@@ -25,6 +25,11 @@ public class RefundTransaction {
 
     @Column(name = "systems") 
     private String systems;
+
+    @Column(name = "payment_url", length = 255)
+    private String paymentUrl;
+
+
     
     public RefundTransaction() {}
 
@@ -51,5 +56,12 @@ public class RefundTransaction {
 
     public void setSystems(String systems) {
         this.systems = systems;
+    }
+    public String getPaymentUrl() {
+        return paymentUrl;
+    }
+
+    public void setPaymentUrl(String paymentUrl) {
+        this.paymentUrl = paymentUrl;
     }
 } 
