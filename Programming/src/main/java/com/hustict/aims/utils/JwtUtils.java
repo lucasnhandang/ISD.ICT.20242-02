@@ -11,26 +11,31 @@ import javax.crypto.SecretKey;
 
 @Component
 public class JwtUtils {
-    private final JwtConfig jwtConfig;
+    private static final long TOKEN_EXPIRATION = 24 * 60 * 60 * 1000;
+    
     private final SecretKey secretKey;
 
-    public JwtUtils(JwtConfig jwtConfig) {
-        this.jwtConfig = jwtConfig;
-        // Generate a secure key that meets HS256 requirements
+    public JwtUtils() {
+        // Generate a secure key that meets HS256 requirements (256 bits)
         this.secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     }
 
-    public String generateToken(String subject, Map<String, Object> claims) {
+    // Generate JWT token with user information
+    public String generateToken(String userId, Map<String, Object> claims) {
         long now = System.currentTimeMillis();
+        Date issuedAt = new Date(now);
+        Date expiration = new Date(now + TOKEN_EXPIRATION);
+        
         return Jwts.builder()
-                .setSubject(subject)
+                .setSubject(userId)
                 .addClaims(claims)
-                .setIssuedAt(new Date(now))
-                .setExpiration(new Date(now + jwtConfig.getExpiration()))
+                .setIssuedAt(issuedAt)
+                .setExpiration(expiration)
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
+    // Extract claims from JWT token
     public Claims getClaimsFromToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(secretKey)

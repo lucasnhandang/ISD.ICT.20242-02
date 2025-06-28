@@ -3,7 +3,7 @@ package com.hustict.aims.controller;
 import com.hustict.aims.dto.PagedResponseDTO;
 import com.hustict.aims.dto.home.ProductSearchRequestDTO;
 import com.hustict.aims.dto.home.ProductSummaryDTO;
-import com.hustict.aims.service.HomeService;
+import com.hustict.aims.service.home.HomeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
