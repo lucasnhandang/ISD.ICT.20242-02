@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,6 +27,9 @@ public class PaymentController {
     private VnPayConfig vnPayConfig;
     @Autowired
     private PaymentResultService paymentResultService;
+    
+    // Frontend URL để redirect sau khi xử lý VnPay
+    private static final String FRONTEND_URL = "http://localhost:3000";
 
     @PostMapping("/vnpay-create")
     public ResponseEntity<?> createVnPayUrl(@RequestBody VnPayCreateRequestDTO req, HttpServletRequest request) {
@@ -40,12 +44,24 @@ public class PaymentController {
     }
 
     @GetMapping("/vnpay-return")
-    public ResponseEntity<PaymentResultDTO> vnPayReturn(HttpServletRequest request) {
+    public void vnPayReturn(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Map<String, String> params = new HashMap<>();
         request.getParameterMap().forEach((k, v) -> params.put(k, v[0]));
         
-        PaymentResultDTO response = paymentResultService.processPaymentReturn(params);
-        return ResponseEntity.ok(response);
+        // Xử lý kết quả thanh toán
+        PaymentResultDTO paymentResult = paymentResultService.processPaymentReturn(params);
+        
+        // Build redirect URL với parameters
+        StringBuilder redirectUrl = new StringBuilder(FRONTEND_URL + "/vnpay-return");
+        redirectUrl.append("?vnp_TxnRef=").append(params.getOrDefault("vnp_TxnRef", ""));
+        redirectUrl.append("&vnp_ResponseCode=").append(params.getOrDefault("vnp_ResponseCode", ""));
+        redirectUrl.append("&vnp_TransactionNo=").append(params.getOrDefault("vnp_TransactionNo", ""));
+        redirectUrl.append("&vnp_Amount=").append(params.getOrDefault("vnp_Amount", ""));
+        redirectUrl.append("&vnp_PayDate=").append(params.getOrDefault("vnp_PayDate", ""));
+        redirectUrl.append("&vnp_CardType=").append(params.getOrDefault("vnp_CardType", ""));
+        
+        // Redirect đến frontend
+        response.sendRedirect(redirectUrl.toString());
     }
 
     @GetMapping("/payment-result")

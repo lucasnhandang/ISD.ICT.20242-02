@@ -10,6 +10,9 @@ import OrderReviewPage from './pages/OrderReviewPage';
 import RushOrderPage from './pages/RushOrderPage';
 import InvoicePage from './pages/InvoicePage';
 
+
+import VnPayReturnPage from './pages/VnPayReturnPage';
+
 const theme = createTheme({
   palette: {
     primary: {
@@ -80,6 +83,7 @@ function App() {
           <Route path="/order-review" element={<OrderReviewPage />} />
           <Route path="/rush-order" element={<RushOrderPage />} />
           <Route path="/invoice" element={<InvoicePage />} />
+          <Route path="/vnpay-return" element={<VnPayReturnPage />} />
         </Routes>
       </Router>
     </ThemeProvider>

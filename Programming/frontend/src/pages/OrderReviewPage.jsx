@@ -115,8 +115,19 @@ const OrderReviewPage = () => {
 
   // Xử lý thanh toán
   const handlePayment = () => {
-    navigate('/payment', { 
-      state: { cart, invoice, deliveryForm } 
+    // Thêm productList vào invoice để hiển thị trong InvoicePage
+    const invoiceWithProducts = {
+      ...invoice,
+      productList: cart.productList || []
+    };
+
+    navigate('/invoice', { 
+      state: { 
+        invoice: invoiceWithProducts,
+        deliveryForm: deliveryForm,
+        cart: cart,
+        isRushOrder: false
+      } 
     });
   };
 
