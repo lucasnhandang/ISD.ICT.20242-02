@@ -5,6 +5,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import InvoiceList from './InvoiceList';
 import api from '../services/api';
 import {
   Search,
@@ -15,13 +17,14 @@ import {
   signInButtonStyles
 } from '../styles/Header.styles';
 
-const Header = ({ onSearch, onSignInClick, currentUser, onLogout, showLoginButton = true }) => {
+const Header = ({ onSearch, onSignInClick, currentUser, onLogout, showLoginButton = true, invoiceList = [] }) => {
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [debouncedValue, setDebouncedValue] = useState('');
   const [cartItemCount, setCartItemCount] = useState(0);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [openInvoiceList, setOpenInvoiceList] = useState(false);
 
   // Debounce search value
   useEffect(() => {
@@ -143,6 +146,14 @@ const Header = ({ onSearch, onSignInClick, currentUser, onLogout, showLoginButto
               <ShoppingCartIcon />
             </Badge>
           </IconButton>
+          <IconButton
+            color="primary"
+            onClick={() => setOpenInvoiceList(true)}
+            sx={{ mr: 2 }}
+          >
+            <ReceiptLongIcon />
+          </IconButton>
+          <InvoiceList open={openInvoiceList} onClose={() => setOpenInvoiceList(false)} invoiceList={invoiceList} />
 
           {currentUser ? (
             <>

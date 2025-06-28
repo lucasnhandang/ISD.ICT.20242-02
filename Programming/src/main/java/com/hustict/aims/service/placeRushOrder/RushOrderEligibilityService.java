@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.text.Normalizer;
 
 @Service
 public class RushOrderEligibilityService {
@@ -66,8 +67,17 @@ public class RushOrderEligibilityService {
     }
 
     private boolean isAddressEligibleForRushOrder(DeliveryFormDTO deliveryInfo) {
-        // Kiểm tra địa chỉ có phải là Hà Nội nội thành không
+        // So sánh mềm, không phân biệt dấu, hoa thường
         String province = deliveryInfo.getDeliveryProvince();
-        return "Hanoi".equalsIgnoreCase(province) || "Ha Noi".equalsIgnoreCase(province);
+        if (province == null) return false;
+        String normalized = Normalizer.normalize(province, Normalizer.Form.NFD)
+            .replaceAll("\\p{M}", "") // bỏ dấu tiếng Việt
+            .replaceAll("[^a-zA-Z ]", "") // bỏ ký tự đặc biệt
+            .toLowerCase()
+            .replace("tp", "")
+            .replace("thanh pho", "")
+            .replace("thanhphố", "")
+            .replace(" ", "");
+        return normalized.contains("hanoi");
     }
 } 
