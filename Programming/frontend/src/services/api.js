@@ -269,6 +269,41 @@ export const orderManagementAPI = {
       throw new Error(error.response?.data?.message || 'Failed to reject order');
     }
   }
+  
+// Place Order APIs
+export const submitDeliveryForm = async (data) => {
+  return api.post('/place-order/submit-form', data);
+};
+
+export const checkRushOrderEligibility = async () => {
+  return api.post('/place-rush-order/check-eligibility');
+};
+
+export const handleNormalOrder = async () => {
+  return api.post('/place-order/normal-order');
+};
+
+export const submitRushOrderInfo = async (data) => {
+  return api.post('/place-rush-order/submit-rush-info', data);
+};
+
+export const processRushOrder = async () => {
+  return api.post('/place-rush-order/process-rush-order');
+};
+
+export const requestToPlaceOrder = async (cart) => {
+  return api.post('/place-order/request', cart);
+};
+
+export const handlePayment = async () => {
+  return api.post('/place-order/handle-payment');
+};
+
+// Pay individual invoice for rush order
+export const payInvoice = async (invoiceId) => {
+  return api.post('/place-rush-order/pay-invoice', null, {
+    params: { invoiceId }
+  });
 };
 
 export default api;

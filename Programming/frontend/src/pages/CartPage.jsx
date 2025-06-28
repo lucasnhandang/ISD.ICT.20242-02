@@ -25,7 +25,8 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import Header from '../components/Header';
-import { getCart, removeFromCart, updateCartItem } from '../services/api';
+import { getCart, removeFromCart, updateCartItem, requestToPlaceOrder } from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('vi-VN', {
@@ -54,13 +55,15 @@ const CartPage = () => {
     item: null,
     quantity: 1
   });
+  const [invoiceList, setInvoiceList] = useState([]);
+  const navigate = useNavigate();
 
   const fetchCart = async () => {
     try {
       setLoading(true);
       const response = await getCart();
       setCart(response.data);
-      setError(null);
+      await requestToPlaceOrder(response.data);
     } catch (err) {
       setError('Failed to load cart. Please try again later.');
       console.error('Error loading cart:', err);
@@ -147,12 +150,7 @@ const CartPage = () => {
   };
 
   const handleProceedToCheckout = () => {
-    // Will be implemented later
-    setSnackbar({
-      open: true,
-      message: 'Proceeding to checkout...',
-      severity: 'info'
-    });
+    navigate('/checkout');
   };
 
   if (loading) {
@@ -165,7 +163,7 @@ const CartPage = () => {
 
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
-      <Header />
+      <Header invoiceList={invoiceList} />
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
         <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
           Shopping Cart
