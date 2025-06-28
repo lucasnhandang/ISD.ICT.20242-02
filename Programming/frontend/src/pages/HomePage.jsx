@@ -4,7 +4,9 @@ import Header from '../components/Header';
 import Navigation from '../components/Navigation';
 import ProductCard from '../components/ProductCard';
 import ConnectionStatus from '../components/ConnectionStatus';
+import LoginPage from './LoginPage';
 import { checkBackendConnection, getProducts, searchProducts } from '../services/api';
+import { authService } from '../services/authService';
 import {
   containerStyles,
   loadingContainerStyles,
@@ -25,6 +27,8 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState(null);
+  const [showLogin, setShowLogin] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState({
     checked: false,
     connected: false,
@@ -67,12 +71,11 @@ const HomePage = () => {
         setTotalPages(1);
       }
     } catch (error) {
-      console.error('Error fetching products:', error);
-      setError(error.message || 'Failed to fetch products');
+      setError(error.message);
       setConnectionStatus({
         ...connectionStatus,
         connected: false,
-        message: 'Failed to fetch products. Please try again later.',
+        message: error.message,
       });
       setProducts([]);
       setTotalPages(1);

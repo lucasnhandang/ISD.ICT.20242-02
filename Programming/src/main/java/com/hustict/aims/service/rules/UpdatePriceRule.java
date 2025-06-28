@@ -1,4 +1,4 @@
-package com.hustict.aims.service.validation;
+package com.hustict.aims.service.rules;
 
 import com.hustict.aims.model.user.ActionType;
 import com.hustict.aims.repository.ProductChecklogRepository;
@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.Map;
 
 @Component
-public class UpdatePriceRule implements ProductUpdateRule{
+public class UpdatePriceRule implements ProductUpdateRule {
     private final ProductChecklogRepository repo;
 
     public UpdatePriceRule(ProductChecklogRepository repo) {

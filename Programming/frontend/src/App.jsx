@@ -1,9 +1,10 @@
 import React from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import CssBaseline from '@mui/material/CssBaseline';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
-import CartPage from './pages/CartPage';
+import ManagementPanel from './pages/ManagementPanel';
 
 const theme = createTheme({
   palette: {
@@ -70,6 +71,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/management/*" element={<ManagementPanel />} />
         </Routes>
       </Router>
     </ThemeProvider>

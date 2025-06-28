@@ -1,10 +1,11 @@
-package com.hustict.aims.service;
+package com.hustict.aims.service.product;
 
 import com.hustict.aims.dto.product.ProductDetailDTO;
 import com.hustict.aims.model.product.Product;
 import com.hustict.aims.model.user.ActionType;
 import com.hustict.aims.repository.ReservationItemRepository;
 import com.hustict.aims.repository.product.ProductRepository;
+import com.hustict.aims.service.MessageService;
 import com.hustict.aims.service.handler.ProductHandler;
 import com.hustict.aims.service.handler.ProductHandlerRegistry;
 import com.hustict.aims.service.validation.ProductValidator;

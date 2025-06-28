@@ -2,7 +2,7 @@ package com.hustict.aims.controller;
 
 import com.hustict.aims.dto.product.ProductDetailDTO;
 import com.hustict.aims.utils.mapper.ProductSummaryMapper;
-import com.hustict.aims.service.ProductService;
+import com.hustict.aims.service.product.ProductService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
