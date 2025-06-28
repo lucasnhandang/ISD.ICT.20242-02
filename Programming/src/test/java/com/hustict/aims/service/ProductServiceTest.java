@@ -7,6 +7,8 @@ import com.hustict.aims.repository.ReservationItemRepository;
 import com.hustict.aims.repository.product.ProductRepository;
 import com.hustict.aims.service.handler.ProductHandler;
 import com.hustict.aims.service.handler.ProductHandlerRegistry;
+import com.hustict.aims.service.product.ProductActionService;
+import com.hustict.aims.service.product.ProductService;
 import com.hustict.aims.service.storage.ImageUploadStorage;
 import com.hustict.aims.service.validation.ProductValidator;
 import com.hustict.aims.service.validation.ProductValidatorRegistry;

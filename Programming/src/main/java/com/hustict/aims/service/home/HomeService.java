@@ -1,4 +1,4 @@
-package com.hustict.aims.service;
+package com.hustict.aims.service.home;
 
 import com.hustict.aims.dto.PagedResponseDTO;
 import com.hustict.aims.dto.home.ProductSearchRequestDTO;

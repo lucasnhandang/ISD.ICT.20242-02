@@ -20,6 +20,9 @@ public class BookHandler implements ProductHandler {
     }
 
     @Override
+    public String getType() { return "Book"; }
+
+    @Override
     public boolean supports(String type) { return "Book".equalsIgnoreCase(type); }
 
     @Override

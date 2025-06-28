@@ -12,6 +12,7 @@ import com.hustict.aims.service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import jakarta.servlet.http.HttpSession;
 
 import java.util.List;
 
@@ -37,23 +38,32 @@ public class RushOrderProcessingService {
     public RushOrderResponseDTO processRushOrder(CartRequestDTO cart, 
                                                 DeliveryFormDTO deliveryInfo,
                                                 List<CartItemRequestDTO> rushItems,
-                                                List<CartItemRequestDTO> normalItems) {
-        
+                                                List<CartItemRequestDTO> normalItems,
+                                                HttpSession session) {
+        List<InvoiceDTO> invoiceList = new java.util.ArrayList<>();
+        List<CartRequestDTO> cartList = new java.util.ArrayList<>();
+
         // Xử lý rush order
         CartRequestDTO rushCart = createRushCart(rushItems, cart);
-        
+        int rushShippingFee = rushShippingFeeCalculator.calculateShippingFee(deliveryInfo, rushCart);
+        InvoiceDTO rushInvoiceDTO = invoiceCalculationService.calculateInvoice(rushCart.getTotalPrice(), rushShippingFee);
+        invoiceList.add(rushInvoiceDTO);
+        cartList.add(rushCart);
+
         // Xử lý đơn thường nếu có
         if (!normalItems.isEmpty()) {
             CartRequestDTO normalCart = createNormalCart(normalItems, cart);
-            normalOrderService.handleNormalOrder(deliveryInfo, normalCart);
+            InvoiceDTO normalInvoiceDTO = normalOrderService.handleNormalOrder(deliveryInfo, normalCart);
+            invoiceList.add(normalInvoiceDTO);
+            cartList.add(normalCart);
         }
-        
-        // Tính phí và tạo invoice cho rush order
-        int rushShippingFee = rushShippingFeeCalculator.calculateShippingFee(deliveryInfo, rushCart);
-        InvoiceDTO rushInvoiceDTO = invoiceCalculationService.calculateInvoice(rushCart.getTotalPrice(), rushShippingFee);
-        
+
+        // Lưu vào session
+        session.setAttribute("invoiceList", invoiceList);
+        session.setAttribute("cartList", cartList);
+
         // Build response
-        return new RushOrderResponseDTO(rushInvoiceDTO, "SUCCESS", 
+        return new RushOrderResponseDTO(invoiceList, cartList, "SUCCESS", 
             messageService.getRushOrderSuccess(), deliveryInfo.getExpectedDateTime());
     }
 

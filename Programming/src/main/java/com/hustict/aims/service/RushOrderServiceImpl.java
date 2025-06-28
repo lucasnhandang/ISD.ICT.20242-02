@@ -31,7 +31,7 @@ public class RushOrderServiceImpl implements RushOrderService {
     }
 
     @Override
-    public RushOrderResponseDTO processRushOrder(RushOrderRequestDTO request) {
+    public RushOrderResponseDTO processRushOrder(RushOrderRequestDTO request, jakarta.servlet.http.HttpSession session) {
         CartRequestDTO cart = request.getCart();
         DeliveryFormDTO deliveryInfo = request.getDeliveryInfo();
         
@@ -43,11 +43,11 @@ public class RushOrderServiceImpl implements RushOrderService {
         
         // Bước 3: Xử lý rush order
         RushOrderResponseDTO response = rushOrderProcessingService.processRushOrder(
-            cart, deliveryInfo, eligibility.getRushItems(), eligibility.getNormalItems()
+            cart, deliveryInfo, eligibility.getRushItems(), eligibility.getNormalItems(), session
         );
         
         // Bước 4: Lưu rush order vào database
-        rushOrderSaveService.saveRushOrder(cart, deliveryInfo, response.getInvoice());
+        rushOrderSaveService.saveRushOrder(cart, deliveryInfo, response.getInvoiceList().get(0));
         
         return response;
     }

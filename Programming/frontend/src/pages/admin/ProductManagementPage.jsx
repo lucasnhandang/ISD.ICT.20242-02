@@ -9,9 +9,9 @@ const CATEGORY_CONFIG = {
   BOOK: {
     label: 'Book', icon: <Book />, fields: [
       { name: 'authors', label: 'Authors', required: true },
-      { name: 'coverType', label: 'Cover Type', required: false },
-      { name: 'publisher', label: 'Publisher', required: false },
-      { name: 'publicationDate', label: 'Publication Date', type: 'date', required: false },
+      { name: 'coverType', label: 'Cover Type', required: true },
+      { name: 'publisher', label: 'Publisher', required: true },
+      { name: 'publicationDate', label: 'Publication Date', type: 'date', required: true },
       { name: 'pages', label: 'Pages', type: 'number', required: false },
       { name: 'language', label: 'Language', required: false },
       { name: 'genre', label: 'Genre', required: false },
@@ -20,20 +20,20 @@ const CATEGORY_CONFIG = {
   CD: {
     label: 'CD', icon: <Album />, fields: [
       { name: 'artists', label: 'Artists', required: true },
-      { name: 'recordLabel', label: 'Record Label', required: false },
-      { name: 'trackList', label: 'Track List', required: false },
-      { name: 'genre', label: 'Genre', required: false },
+      { name: 'recordLabel', label: 'Record Label', required: true },
+      { name: 'trackList', label: 'Track List', required: true },
+      { name: 'genre', label: 'Genre', required: true },
       { name: 'releaseDate', label: 'Release Date', type: 'date', required: false },
     ]
   },
   DVD: {
     label: 'DVD', icon: <Movie />, fields: [
       { name: 'discType', label: 'Disc Type', required: true },
-      { name: 'director', label: 'Director', required: false },
-      { name: 'runtime', label: 'Runtime (minutes)', type: 'number', required: false },
-      { name: 'studio', label: 'Studio', required: false },
-      { name: 'language', label: 'Language', required: false },
-      { name: 'subtitles', label: 'Subtitles', required: false },
+      { name: 'director', label: 'Director', required: true },
+      { name: 'runtime', label: 'Runtime (minutes)', type: 'number', required: true },
+      { name: 'studio', label: 'Studio', required: true },
+      { name: 'language', label: 'Language', required: true },
+      { name: 'subtitles', label: 'Subtitles', required: true },
       { name: 'genre', label: 'Genre', required: false },
       { name: 'releaseDate', label: 'Release Date', type: 'date', required: false },
     ]
@@ -41,9 +41,9 @@ const CATEGORY_CONFIG = {
   LP: {
     label: 'LP', icon: <MusicNote />, fields: [
       { name: 'artists', label: 'Artists', required: true },
-      { name: 'recordLabel', label: 'Record Label', required: false },
-      { name: 'trackList', label: 'Track List', required: false },
-      { name: 'genre', label: 'Genre', required: false },
+      { name: 'recordLabel', label: 'Record Label', required: true },
+      { name: 'trackList', label: 'Track List', required: true },
+      { name: 'genre', label: 'Genre', required: true },
       { name: 'releaseDate', label: 'Release Date', type: 'date', required: false },
     ]
   }
@@ -54,11 +54,11 @@ const BASE_FIELDS = [
   { name: 'value', label: 'Value (no VAT)', type: 'number', required: true },
   { name: 'currentPrice', label: 'Current Price', type: 'number', required: true },
   { name: 'barcode', label: 'Barcode', required: true },
-  { name: 'description', label: 'Description', required: false },
+  { name: 'description', label: 'Description', required: true },
   { name: 'quantity', label: 'Quantity', type: 'number', required: true },
   { name: 'entryDate', label: 'Warehouse Entry Date', type: 'date', required: true },
-  { name: 'dimension', label: 'Dimensions', required: false },
-  { name: 'weight', label: 'Weight (kg)', type: 'number', required: false },
+  { name: 'dimension', label: 'Dimensions', required: true },
+  { name: 'weight', label: 'Weight (kg)', type: 'number', required: true },
   { name: 'rushOrderSupported', label: 'Rush Order Supported', type: 'boolean', required: false },
 ];
 
@@ -133,11 +133,14 @@ const ProductManagementPage = () => {
             newFormData[key] = newFormData[key].slice(0, 10);
           }
         });
+        if (newFormData.category) {
+          newFormData.category = newFormData.category.toUpperCase();
+        }
         setFormData(newFormData);
         setSelectedProduct(product);
       } catch (e) {
         setError(e.message);
-        setFormData({ category: product.category });
+        setFormData({ category: product.category?.toUpperCase() || 'BOOK' });
         setSelectedProduct(product);
       }
     } else {
@@ -152,7 +155,7 @@ const ProductManagementPage = () => {
     for (const field of BASE_FIELDS) {
       if (field.required && !formData[field.name]) return `${field.label} is required`;
     }
-    const catFields = CATEGORY_CONFIG[formData.category]?.fields || [];
+    const catFields = CATEGORY_CONFIG[formData.category?.toUpperCase()]?.fields || [];
     for (const field of catFields) {
       if (field.required && !formData[field.name]) return `${field.label} is required`;
     }
@@ -243,7 +246,7 @@ const ProductManagementPage = () => {
           label="Rush Order Supported"
           sx={{ mb: 1 }}
         />
-        {CATEGORY_CONFIG[formData.category]?.fields.map(field => (
+        {CATEGORY_CONFIG[formData.category?.toUpperCase()]?.fields?.map(field => (
           <TextField
             key={field.name}
             label={field.label}

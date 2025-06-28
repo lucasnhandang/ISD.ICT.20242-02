@@ -1,4 +1,4 @@
-package com.hustict.aims.service.validation;
+package com.hustict.aims.service.rules;
 
 import com.hustict.aims.model.user.ActionType;
 import com.hustict.aims.repository.ProductChecklogRepository;

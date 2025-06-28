@@ -1,10 +1,11 @@
-package com.hustict.aims.service;
+package com.hustict.aims.service.product;
 
 import com.hustict.aims.dto.product.ProductDetailDTO;
 import com.hustict.aims.model.product.Product;
 import com.hustict.aims.model.user.ActionType;
 import com.hustict.aims.repository.ReservationItemRepository;
 import com.hustict.aims.repository.product.ProductRepository;
+import com.hustict.aims.service.MessageService;
 import com.hustict.aims.service.handler.ProductHandler;
 import com.hustict.aims.service.handler.ProductHandlerRegistry;
 import com.hustict.aims.service.validation.ProductValidator;
@@ -156,16 +157,19 @@ public class ProductService {
                 }
         }
 
-        public boolean isProductAvailable(Long id, int requiredQty) {
+        public int getAvailableQuantity(Long id) {
                 Product product = productRepo.findByIdNotDeleted(id).orElseThrow(() -> new NoSuchElementException(
                                 messageService.getProductNotFound() + " with ID: " + id));
+
+                int reservedQty = reservationItemRepository.getReservedQuantityByProductId(id);
+                return Math.max(0, product.getQuantity() - reservedQty);
+        }
+
+        public boolean isProductAvailable(Long id, int requiredQty) {
                 if (requiredQty <= 0) {
                         throw new IllegalArgumentException(messageService.getInvalidInput() + ": Required quantity must be greater than 0");
                 }
-
-                int reservedQty = reservationItemRepository.getReservedQuantityByProductId(id);
-                int availQty = product.getQuantity() - reservedQty;
-                return availQty >= requiredQty;
+                return getAvailableQuantity(id) >= requiredQty;
         }
 
         public void decreaseProductQuantity(Long id, int quantity) {
