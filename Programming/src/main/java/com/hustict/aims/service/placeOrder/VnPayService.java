@@ -112,9 +112,7 @@ public class VnPayService {
                 .reduce("", (a, b) -> a + (a.isEmpty() ? "" : "&") + b);
             txnDTO.setPaymentUrl(returnUrl);
 
-            session.setAttribute("paymentTransaction", txnDTO);
-
-
+            
             return true;
         }
         return false;

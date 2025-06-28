@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.hustict.aims.utils.mapper.PaymentTransactionMapper;
+import com.hustict.aims.service.payment.SavePaymentTransaction;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.hustict.aims.dto.payment.PaymentTransactionDTO;
 import jakarta.servlet.http.HttpSession;
-import com.hustict.aims.utils.mapper.PaymentTransactionMapper;
+
 
 @RestController
 @RequestMapping("/api/payment")
@@ -41,6 +43,10 @@ public class PaymentController {
     @Autowired
     private PaymentTransactionMapper paymentTransactionMapper;
 
+    @Autowired
+    private SavePaymentTransaction savePaymentTransaction;
+
+
     @PostMapping("/vnpay-create")
     public ResponseEntity<?> createVnPayUrl(@RequestBody VnPayCreateRequestDTO req, HttpServletRequest request,HttpSession session) {
         String clientIp = request.getRemoteAddr();
@@ -48,11 +54,9 @@ public class PaymentController {
         String txnRef = String.valueOf(System.currentTimeMillis());
         String url = vnPayService.createPaymentUrl(req, clientIp, vnPayConfig.getReturnUrl(), txnRef, session);
         
-        // Log thông tin về URL
         logger.info("Generated VNPay URL length: {}", url.length());
         logger.info("Generated VNPay URL: {}", url);
         
-        // Lưu thông tin giao dịch vào database
         PaymentTransaction paymentTransaction = new PaymentTransaction();
         paymentTransaction.setBankTransactionId(txnRef);
         paymentTransaction.setContent(req.getOrderInfo());
@@ -63,13 +67,13 @@ public class PaymentController {
         paymentTransaction.setSystems("VNPay");
         paymentTransaction.setPaymentUrl(url);
         
-        // try {
-        //     paymentTransactionRepository.save(paymentTransaction);
-        //     logger.info("Payment transaction saved successfully with ID: {}", paymentTransaction.getId());
-        // } catch (Exception e) {
-        //     logger.error("Failed to save payment transaction. URL length: {}, Error: {}", url.length(), e.getMessage());
-        //     return ResponseEntity.badRequest().body("Failed to save payment transaction. URL length: " + url.length() + ", Error: " + e.getMessage());
-        // }
+        try {
+            paymentTransactionRepository.save(paymentTransaction);
+            logger.info("Payment transaction saved successfully with ID: {}", paymentTransaction.getId());
+        } catch (Exception e) {
+            logger.error("Failed to save payment transaction. URL length: {}, Error: {}", url.length(), e.getMessage());
+            return ResponseEntity.badRequest().body("Failed to save payment transaction. URL length: " + url.length() + ", Error: " + e.getMessage());
+        }
         
         Map<String, String> resp = new HashMap<>();
         resp.put("paymentUrl", url);
@@ -85,6 +89,28 @@ public class PaymentController {
         request.getParameterMap().forEach((k, v) -> params.put(k, v[0]));
         
         PaymentResultDTO response = paymentResultService.processPaymentReturn(params,session);
+        
+        PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO();
+        paymentTransaction.setBankTransactionId(params.get("vnp_TransactionNo"));
+        paymentTransaction.setContent(params.get("vnp_OrderInfo"));
+        try {
+            paymentTransaction.setPaymentAmount(Integer.parseInt(params.get("vnp_Amount")) / 100); // VNPay trả về *100
+        } catch (Exception e) {
+            paymentTransaction.setPaymentAmount(0);
+        }
+        paymentTransaction.setPaymentTime(java.time.LocalDateTime.now()); // hoặc parse từ vnp_PayDate nếu muốn chính xác
+        paymentTransaction.setCardType(params.get("vnp_CardType"));
+        paymentTransaction.setCurrency("VND");
+        paymentTransaction.setSystem("VNPay");
+        paymentTransaction.setPaymentUrl(request.getRequestURL() + (request.getQueryString() != null ? "?" + request.getQueryString() : ""));
+        
+        String orderInfo = params.get("vnp_OrderInfo");
+
+        
+        savePaymentTransaction.save(paymentTransaction, orderInfo);
+
+        logger.info("Insert paymentTransaction into database" );
+
         return ResponseEntity.ok(response);
     }
 
@@ -101,8 +127,6 @@ public class PaymentController {
     public ResponseEntity<Map<String, Object>> getPaymentStatus(@RequestParam String txnRef) {
         Map<String, Object> status = new HashMap<>();
         
-        // TODO: Implement logic to check payment status from database
-        // For now, return a mock response
         status.put("txnRef", txnRef);
         status.put("status", "PENDING");
         status.put("message", "Đang kiểm tra trạng thái thanh toán...");
@@ -126,7 +150,6 @@ public class PaymentController {
     @PostMapping("/save-transaction")
     public ResponseEntity<String> savePaymentTransactionToDatabase(@RequestBody PaymentTransactionDTO paymentTransactionDTO) {
         try {
-            // Log thông tin về payment URL
             if (paymentTransactionDTO.getPaymentUrl() != null) {
                 logger.info("Payment URL length: {}", paymentTransactionDTO.getPaymentUrl().length());
                 logger.info("Payment URL: {}", paymentTransactionDTO.getPaymentUrl());

@@ -52,6 +52,7 @@ public class SessionValidatorService {
         if (deliveryForm == null) missingFields.add("deliveryForm");
         if (cart == null) missingFields.add("cartRequested");
         if (invoice == null) missingFields.add("invoice");
+
         if (paymentTransaction == null) missingFields.add("paymentTransaction");
 
         if (!missingFields.isEmpty()) {

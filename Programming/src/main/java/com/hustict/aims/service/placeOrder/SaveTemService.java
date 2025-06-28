@@ -31,9 +31,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
-public class SaveOrderService {
+public class SaveTemService {
 
-    private final OrderRepository orderRepository;
+     private final OrderRepository orderRepository;
     private final PaymentTransactionRepository transactionRepository;
     private final InvoiceRepository invoiceRepository;
     private final OrderMapper orderMapper;
@@ -43,8 +43,8 @@ public class SaveOrderService {
     private final SessionValidatorService sessionValidatorService;
     private final DeliveryInfoRepository deliveryInfoRepository;
 
- 
-    public SaveOrderService(
+    @Autowired
+    public SaveTemService(
         OrderRepository orderRepository,
         PaymentTransactionRepository transactionRepository,
         InvoiceRepository invoiceRepository,
@@ -71,7 +71,7 @@ public class SaveOrderService {
         CartRequestDTO cartDTO = (CartRequestDTO) session.getAttribute("cartRequested");
         InvoiceDTO invoiceDTO = (InvoiceDTO) session.getAttribute("invoice");
         DeliveryFormDTO deliveryFormDTO = (DeliveryFormDTO) session.getAttribute("deliveryForm");
-        PaymentTransactionDTO paymentDTO = (PaymentTransactionDTO) session.getAttribute("paymentTransaction");
+        //PaymentTransactionDTO paymentDTO = (PaymentTransactionDTO) session.getAttribute("paymentTransaction");
         
         // Lưu delivery information trước
         DeliveryInfo deliveryEntity = deliveryInfoMapper.toEntity(deliveryFormDTO);
@@ -85,16 +85,16 @@ public class SaveOrderService {
             throw new IllegalStateException("Lưu DeliveryInfo thất bại, entity hoặc id trả về null");
         }
 
-        PaymentTransaction txn = paymentTxnMapper.toEntity(paymentDTO);
-        if (txn == null) {
-            throw new IllegalArgumentException("Không mapping từ paymentDTO qua payment được không được null");
-        }
-        PaymentTransaction paymentTransaction = transactionRepository.save(txn);
-        if (paymentTransaction.getId() == null) {
-            throw new IllegalArgumentException("Lưu paymentTransaction thất bại");
-        }
+        // PaymentTransaction txn = paymentTxnMapper.toEntity(paymentDTO);
+        // if (txn == null) {
+        //     throw new IllegalArgumentException("Không mapping từ paymentDTO qua payment được không được null");
+        // }
+        // PaymentTransaction paymentTransaction = transactionRepository.save(txn);
+        // if (paymentTransaction.getId() == null) {
+        //     throw new IllegalArgumentException("Lưu paymentTransaction thất bại");
+        // }
 
-        invoiceDTO.setPaymentTransactionId(paymentTransaction.getId());
+        // invoiceDTO.setPaymentTransactionId(paymentTransaction.getId());
 
         Invoice invoiceEntity = invoiceMapper.toEntity(invoiceDTO);
         if (invoiceEntity == null) {
@@ -106,7 +106,6 @@ public class SaveOrderService {
         }
 
         invoiceDTO.setId(savedInvoice.getId());
-        
 
         OrderInformationDTO orderInfoDTO = OrderInformationDTOMapper.toDTO(
             cartDTO,
@@ -124,22 +123,6 @@ public class SaveOrderService {
         session.setAttribute("invoice", invoiceDTO); 
         session.setAttribute("deliveryForm", deliveryFormDTO);  
 
-
-
-        // // xóa
-        // System.out.println("Order Information:");
-        // System.out.println("Order Date: " + orderInfoDTO.getOrderDate());
-        // System.out.println("Currency: " + orderInfoDTO.getCurrency());
-        // System.out.println("Rush Order: " + orderInfoDTO.isRushOrder());
-        // System.out.println("Delivery Info ID: " + orderInfoDTO.getDeliveryInfoId());
-        // System.out.println("Invoice ID: " + orderInfoDTO.getInvoiceId());
-
-        // System.out.println("Products:");
-        // for (CartItemRequestDTO item : orderInfoDTO.getProductList()) {
-        //     System.out.println("- Product ID: " + item.getProductID()
-        //                     + ", Quantity: " + item.getQuantity()
-        //                     + ", Price: " + item.getPrice());
-        // }
         return orderInfoDTO;
     }
     
