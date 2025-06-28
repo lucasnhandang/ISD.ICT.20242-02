@@ -158,9 +158,6 @@ const VnPayReturnPage = () => {
                     Mã GD VnPay: {paymentResult.transactionNo}
                   </Typography>
                 )}
-                <Typography variant="body2">
-                  Số tiền: {paymentResult.amount ? parseInt(paymentResult.amount)/100 : 'N/A'} VND
-                </Typography>
               </Box>
             )}
 
