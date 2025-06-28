@@ -13,8 +13,7 @@ import {
   VisibilityOff,
   Email,
   Lock,
-  AdminPanelSettings,
-  Person
+  Login
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
@@ -87,7 +86,7 @@ const LoginPage = ({ onLoginSuccess, onBackToHome }) => {
       
       if (response.success) {
         setUserInfo(response.userInfo);
-        setSuccess('Đăng nhập thành công! Redirecting to management panel...');
+        setSuccess('Login successful! Redirecting...');
         
         // Redirect to management panel after 2 seconds
         setTimeout(() => {
@@ -97,7 +96,24 @@ const LoginPage = ({ onLoginSuccess, onBackToHome }) => {
         setError(response.message || 'Login failed');
       }
     } catch (error) {
-      setError(error.message);
+      // Handle different types of errors
+      let errorMessage = 'Login failed';
+      
+      if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+        errorMessage = 'Invalid email or password';
+      } else if (error.message.includes('404') || error.message.includes('Not Found')) {
+        errorMessage = 'Account not found';
+      } else if (error.message.includes('403') || error.message.includes('Forbidden')) {
+        errorMessage = 'Account does not have access permission';
+      } else if (error.message.includes('500') || error.message.includes('Internal Server Error')) {
+        errorMessage = 'System error, please try again later';
+      } else if (error.message.includes('Network Error') || error.message.includes('timeout')) {
+        errorMessage = 'Cannot connect to server, please check your network connection';
+      } else {
+        errorMessage = error.message || 'Login failed';
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -122,16 +138,9 @@ const LoginPage = ({ onLoginSuccess, onBackToHome }) => {
           <LogoText>AIMS</LogoText>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
             <Chip 
-              icon={<AdminPanelSettings />} 
-              label="Admin" 
+              icon={<Login />} 
+              label="Login" 
               color="primary" 
-              size="small"
-              variant="outlined"
-            />
-            <Chip 
-              icon={<Person />} 
-              label="Product Manager" 
-              color="secondary" 
               size="small"
               variant="outlined"
             />
@@ -139,7 +148,7 @@ const LoginPage = ({ onLoginSuccess, onBackToHome }) => {
         </LogoContainer>
         
         <WelcomeText>
-          Welcome back! Please sign in to access management panel
+          Welcome back! Please sign in to access the system
         </WelcomeText>
 
         <form onSubmit={handleSubmit} style={{ width: '100%' }}>
@@ -157,7 +166,7 @@ const LoginPage = ({ onLoginSuccess, onBackToHome }) => {
                 </InputAdornment>
               ),
             }}
-            placeholder="Enter your admin email"
+            placeholder="Enter your email"
           />
 
           <StyledTextField
@@ -200,7 +209,7 @@ const LoginPage = ({ onLoginSuccess, onBackToHome }) => {
               {userInfo && (
                 <>
                   <br />
-                  Xin chào <b>{userInfo.name}</b>!<br />
+                  Welcome <b>{userInfo.name}</b>!<br />
                   Role: <b>{userInfo.roles?.join(', ')}</b>
                 </>
               )}
@@ -216,7 +225,7 @@ const LoginPage = ({ onLoginSuccess, onBackToHome }) => {
             {loading ? (
               <CircularProgress size={20} color="inherit" />
             ) : (
-              'Sign In'
+              'Log in'
             )}
           </LoginButton>
         </form>
