@@ -270,4 +270,11 @@ export const handlePayment = async () => {
   return api.post('/place-order/handle-payment');
 };
 
+// Pay individual invoice for rush order
+export const payInvoice = async (invoiceId) => {
+  return api.post('/place-rush-order/pay-invoice', null, {
+    params: { invoiceId }
+  });
+};
+
 export default api;

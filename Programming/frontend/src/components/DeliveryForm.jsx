@@ -14,7 +14,7 @@ import { submitDeliveryForm, checkRushOrderEligibility, handleNormalOrder } from
 
 // Danh sách tỉnh/thành mới nhất (cập nhật theo sáp nhập 2024)
 const provinces = [
-  'Hà Nội', 'TP. Hồ Chí Minh', 'Hải Phòng', 'Đà Nẵng', 'Cần Thơ',
+  'Hanoi', 'Hochiminh', 'Hải Phòng', 'Đà Nẵng', 'Cần Thơ',
   'Bình Dương', 'Đồng Nai', 'Hải Dương', 'Thanh Hóa', 'Nghệ An',
   'Thừa Thiên Huế', 'Quảng Ninh', 'Bắc Ninh', 'Quảng Nam', 'Lâm Đồng',
   'Nam Định', 'Thái Bình', 'Phú Thọ', 'Bắc Giang', 'Hưng Yên',
