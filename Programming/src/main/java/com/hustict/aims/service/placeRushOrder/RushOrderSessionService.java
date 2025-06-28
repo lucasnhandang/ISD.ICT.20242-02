@@ -22,7 +22,9 @@ public class RushOrderSessionService {
 
     public void saveRushOrderResponse(HttpSession session, RushOrderResponseDTO response) {
         session.setAttribute("rushOrderResponse", response);
-        session.setAttribute("invoice", response.getInvoice());
+        if (response.getInvoiceList() != null && !response.getInvoiceList().isEmpty()) {
+            session.setAttribute("invoice", response.getInvoiceList().get(0));
+        }
     }
 
     public void saveOrderInformation(HttpSession session, OrderInformationDTO orderInfo) {

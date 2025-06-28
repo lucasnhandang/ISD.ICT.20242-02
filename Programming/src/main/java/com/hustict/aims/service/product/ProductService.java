@@ -168,4 +168,24 @@ public class ProductService {
                 int availQty = product.getQuantity() - reservedQty;
                 return availQty >= requiredQty;
         }
+
+        public void decreaseProductQuantity(Long id, int quantity) {
+                if (quantity <= 0) {
+                        throw new IllegalArgumentException(messageService.getInvalidInput() + ": Decrease quantity must be greater than 0.");
+                }
+
+                Product product = productRepo.findById(id)
+                        .orElseThrow(() -> new NoSuchElementException("Product with ID " + id + " not found."));
+
+                        
+                int currentQuantity = product.getQuantity();
+                if (currentQuantity < quantity) {
+                        throw new IllegalStateException(messageService.getInvalidInput() + ": Not enough quantity to decrease.");
+                }
+
+                product.setQuantity(currentQuantity - quantity);
+
+                productRepo.save(product);
+        }
+
 }
