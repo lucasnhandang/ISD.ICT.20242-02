@@ -5,6 +5,10 @@ import CssBaseline from '@mui/material/CssBaseline';
 import HomePage from './pages/HomePage';
 import ManagementPanel from './pages/ManagementPanel';
 import CartPage from './pages/CartPage';
+import CheckoutPage from './pages/CheckoutPage';
+import OrderReviewPage from './pages/OrderReviewPage';
+import RushOrderPage from './pages/RushOrderPage';
+import InvoicePage from './pages/InvoicePage';
 
 const theme = createTheme({
   palette: {
@@ -71,7 +75,11 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/management/*" element={<ManagementPanel />} />
+          <Route path="/order-review" element={<OrderReviewPage />} />
+          <Route path="/rush-order" element={<RushOrderPage />} />
+          <Route path="/invoice" element={<InvoicePage />} />
         </Routes>
       </Router>
     </ThemeProvider>

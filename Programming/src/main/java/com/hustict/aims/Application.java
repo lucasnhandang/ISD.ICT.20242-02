@@ -12,9 +12,13 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @SpringBootApplication
 public class Application {
+
+    // Flag để đảm bảo chỉ start frontend 1 lần
+    private static final AtomicBoolean frontendStarted = new AtomicBoolean(false);
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
@@ -27,6 +31,20 @@ public class Application {
 
     @EventListener(ApplicationReadyEvent.class)
     public void startFrontendAndOpenBrowser(ApplicationReadyEvent event) {
+        // Kiểm tra nếu không phải main application context thì return
+        if (event.getApplicationContext().getParent() != null) {
+            System.out.println("Skipping frontend start - this is a child context (DevTools reload)");
+            return;
+        }
+
+        // Kiểm tra nếu đã start frontend rồi thì không start nữa
+        if (!frontendStarted.compareAndSet(false, true)) {
+            System.out.println("Frontend already started, skipping...");
+            return;
+        }
+
+        System.out.println("Starting frontend from main application context...");
+        
         // Get project root path (current working directory)
         Path projectRoot = Paths.get("").toAbsolutePath();
 
@@ -42,6 +60,7 @@ public class Application {
         if (!frontendDir.exists() || !frontendDir.isDirectory()) {
             System.err.println("Error: Frontend directory not found at " + frontendDir.getAbsolutePath());
             System.err.println("Current working directory: " + projectRoot.toFile().getAbsolutePath());
+            frontendStarted.set(false); // Reset flag nếu có lỗi
             return;
         }
 
@@ -50,6 +69,7 @@ public class Application {
         File packageJsonFile = new File(frontendDir, "package.json");
         if (!packageJsonFile.exists()) {
             System.err.println("Error: package.json not found in " + frontendDir.getAbsolutePath());
+            frontendStarted.set(false); // Reset flag nếu có lỗi
             return;
         }
 
@@ -72,15 +92,19 @@ public class Application {
                     try {
                         int exitCode = process.waitFor();
                         System.out.println("Frontend server stopped with exit code: " + exitCode);
+                        // Reset flag khi frontend process kết thúc
+                        frontendStarted.set(false);
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                         System.err.println("Frontend process monitoring was interrupted.");
+                        frontendStarted.set(false);
                     }
                 }).start();
 
             } catch (IOException e) {
                 System.err.println("Failed to start frontend server: " + e.getMessage());
                 e.printStackTrace();
+                frontendStarted.set(false); // Reset flag nếu có lỗi
             }
         }, "Frontend-Starter-Thread").start();
 

@@ -24,7 +24,9 @@ import com.hustict.aims.service.sessionValidator.SessionValidatorService;
 import com.hustict.aims.service.placeOrder.NormalOrderService;
 
 import java.util.List;
-
+import java.util.Map;
+import java.util.HashMap;
+        
 @RestController
 @RequestMapping("/api/v1/place-order")
 public class PlaceOrderController {
@@ -80,14 +82,18 @@ public class PlaceOrderController {
     }
 
     @PostMapping("/normal-order")
-    public ResponseEntity<String> handleNormalOrder(HttpSession session) {
+    public ResponseEntity<Map<String, Object>> handleNormalOrder(HttpSession session) {
         sessionValidatorService.validateDeliveryAndCartForCheckout(session);
         DeliveryFormDTO deliveryForm = (DeliveryFormDTO) session.getAttribute("deliveryForm");
         CartRequestDTO cart = (CartRequestDTO) session.getAttribute("cartRequested");
 
         InvoiceDTO invoice = normalOrderService.handleNormalOrder(deliveryForm, cart);
         session.setAttribute("invoice", invoice);
-        return ResponseEntity.ok("Normal order handled successfully with delivery info and shipping fee.");
+        Map<String, Object> response = new HashMap<>();
+        response.put("cart", cart);
+        response.put("invoice", invoice);
+        response.put("deliveryForm", deliveryForm);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/handle-payment")
