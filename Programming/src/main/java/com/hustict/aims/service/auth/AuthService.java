@@ -71,22 +71,6 @@ public class AuthService {
         return new LoginResponseDTO(true, "Token is valid.", token, userInfo);
     }
 
-    // Validate JWT token with role requirement
-    public LoginResponseDTO validateTokenAndGetUserInfo(String token, String requiredRole) {
-        Claims claims = jwtUtils.getClaimsFromToken(token);
-        Long userId = Long.parseLong(claims.getSubject());
-        
-        User user = findUserById(userId);
-        
-        // Check role if required
-        if (requiredRole != null && !requiredRole.isEmpty() && !AuthUtils.hasRole(user, requiredRole)) {
-            throw new SecurityException(messageService.getAuthFailed());
-        }
-        
-        UserInfoDTO userInfo = createUserInfo(user);
-        return new LoginResponseDTO(true, "Token is valid.", token, userInfo);
-    }
-
     // Private helper methods
     private User findUserByEmail(String email) {
         Optional<User> userOptional = userRepository.findByEmail(email);
