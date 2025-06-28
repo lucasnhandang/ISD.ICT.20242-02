@@ -13,7 +13,7 @@ import com.hustict.aims.model.reservation.Reservation;
 import com.hustict.aims.repository.ReservationRepository;
 import com.hustict.aims.model.reservation.Reservation.Status;
 import com.hustict.aims.model.reservation.ReservationItem;
-import com.hustict.aims.service.ProductService;
+import com.hustict.aims.service.product.ProductService;
 
 import jakarta.servlet.http.HttpSession;
 
