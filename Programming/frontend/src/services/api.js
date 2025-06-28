@@ -4,7 +4,23 @@ import axios from 'axios';
 const api = axios.create({
   baseURL: 'http://localhost:8080/api/v1',
   timeout: 10000,
+  headers: { 'Content-Type': 'application/json' },
+  withCredentials: true // Enable sending cookies with requests
 });
+
+// Add token to requests if available
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 // Global error handler
 api.interceptors.response.use(
@@ -15,6 +31,8 @@ api.interceptors.response.use(
       switch (error.response.status) {
         case 401:
           // Unauthorized - redirect to login
+          localStorage.removeItem('token');
+          localStorage.removeItem('userInfo');
           window.location.href = '/login';
           break;
         case 403:

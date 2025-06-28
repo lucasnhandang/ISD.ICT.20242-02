@@ -24,6 +24,7 @@ const HomePage = () => {
   const [category, setCategory] = useState('all');
   const [sortBy, setSortBy] = useState('title');
   const [sortDirection, setSortDirection] = useState('asc');
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState(null);
@@ -34,6 +35,17 @@ const HomePage = () => {
     connected: false,
     message: '',
   });
+
+  // Check authentication status on component mount
+  useEffect(() => {
+    const checkAuthStatus = () => {
+      const user = authService.getCurrentUser();
+      if (user) {
+        setCurrentUser(user);
+      }
+    };
+    checkAuthStatus();
+  }, []);
 
   useEffect(() => {
     const checkConnection = async () => {
@@ -111,9 +123,47 @@ const HomePage = () => {
     setPage(1);
   };
 
+  const handleSignInClick = () => {
+    setShowLogin(true);
+  };
+
+  const handleLoginSuccess = (userInfo) => {
+    setCurrentUser(userInfo);
+    setShowLogin(false);
+  };
+
+  const handleBackToHome = () => {
+    setShowLogin(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      setCurrentUser(null);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
   const handleCartUpdate = () => {
     // This will be handled by the parent component or global state management
   };
+
+  const handleSubscribe = (e) => {
+    e.preventDefault();
+    // Implement newsletter subscription logic here
+    console.log('Subscribe email:', email);
+    setEmail('');
+  };
+
+  if (showLogin) {
+    return (
+      <LoginPage 
+        onLoginSuccess={handleLoginSuccess}
+        onBackToHome={handleBackToHome}
+      />
+    );
+  }
 
   const renderContent = () => {
     if (loading) {
@@ -150,7 +200,7 @@ const HomePage = () => {
           {products.map((product) => (
             <Grid item key={product.id} xs={12} sm={6} md={3}>
               <ProductCard 
-                product={product} 
+                product={product}
                 onCartUpdate={handleCartUpdate}
               />
             </Grid>
@@ -171,7 +221,13 @@ const HomePage = () => {
 
   return (
     <Box sx={rootStyles}>
-      <Header onSearch={handleSearch} />
+      <Header 
+        onSearch={handleSearch}
+        onSignInClick={handleSignInClick}
+        currentUser={currentUser}
+        onLogout={handleLogout}
+        showLoginButton={true}
+      />
 
       <ConnectionStatus
         open={connectionStatus.checked}

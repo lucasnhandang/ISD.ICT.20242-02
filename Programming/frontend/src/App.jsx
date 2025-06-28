@@ -2,9 +2,9 @@ import React from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import CssBaseline from '@mui/material/CssBaseline';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import ManagementPanel from './pages/ManagementPanel';
+import CartPage from './pages/CartPage';
 
 const theme = createTheme({
   palette: {

@@ -3,6 +3,7 @@ package com.hustict.aims.service;
 import com.hustict.aims.dto.cart.CartRequestDTO;
 import com.hustict.aims.dto.cart.CartItemRequestDTO;
 import com.hustict.aims.model.product.Product;
+import com.hustict.aims.service.product.ProductService;
 import com.hustict.aims.repository.product.ProductRepository;
 import com.hustict.aims.exception.ProductOperationException;
 import org.springframework.stereotype.Service;
