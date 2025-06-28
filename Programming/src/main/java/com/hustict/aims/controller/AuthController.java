@@ -44,6 +44,9 @@ public class AuthController {
                     .body(new LoginResponseDTO(false, "Email or password is incorrect", null, null));
 
         } catch (Exception e) {
+            // Log the specific exception for debugging
+            System.err.println("Login error: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new LoginResponseDTO(false, "System error, please try again.", null, null));
         }
