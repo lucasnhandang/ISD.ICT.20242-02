@@ -1,7 +1,9 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { AppBar, Toolbar, Typography, Button, Badge, Box } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { AppBar, Toolbar, Typography, Button, Badge, Box, IconButton } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import SearchIcon from '@mui/icons-material/Search';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import api from '../services/api';
 import {
   Search,
   SearchIconWrapper,
@@ -12,25 +14,47 @@ import {
 } from '../styles/Header.styles';
 
 const Header = ({ onSearch }) => {
+  const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [debouncedValue, setDebouncedValue] = useState('');
+  const [cartItemCount, setCartItemCount] = useState(0);
 
   // Debounce search value
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedValue(searchValue);
-    }, 500); // Wait for 500ms after last change
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [searchValue]);
+
+  // Update cart count from API
+  useEffect(() => {
+    const fetchCartCount = async () => {
+      try {
+        const response = await api.get('/cart');
+        setCartItemCount(response.data.totalItem);
+      } catch (error) {
+        console.error('Error fetching cart count:', error);
+        setCartItemCount(0);
+      }
+    };
+
+    fetchCartCount();
+
+    // Poll for cart updates every 5 seconds
+    const interval = setInterval(fetchCartCount, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Trigger search when debounced value changes
   useEffect(() => {
     const performSearch = async () => {
       if (debouncedValue !== '') {
         setIsSearching(true);
-        await onSearch(debouncedValue);
+        await onSearch?.(debouncedValue);
         setIsSearching(false);
       }
     };
@@ -43,7 +67,7 @@ const Header = ({ onSearch }) => {
   };
 
   const handleSearchSubmit = (event) => {
-    if (event.key === 'Enter') {
+    if (event.key === 'Enter' && onSearch) {
       setIsSearching(true);
       onSearch(searchValue).finally(() => {
         setIsSearching(false);
@@ -51,52 +75,60 @@ const Header = ({ onSearch }) => {
     }
   };
 
-  const handleClearSearch = () => {
-    setSearchValue('');
-    onSearch('');
+  const handleLogoClick = () => {
+    navigate('/');
+  };
+
+  const handleCartClick = () => {
+    navigate('/cart');
   };
 
   return (
-    <AppBar position="static" color="default" elevation={0}>
+    <AppBar position="static" color="default" elevation={1}>
       <Toolbar>
         <Typography
           variant="h6"
           noWrap
           component="div"
           sx={logoStyles}
-          onClick={handleClearSearch}
+          onClick={handleLogoClick}
         >
           AIMS
         </Typography>
 
-        <Search>
-          <SearchIconWrapper>
-            <SearchIcon />
-          </SearchIconWrapper>
-          <StyledInputBase
-            placeholder="Search something here!"
-            inputProps={{ 'aria-label': 'search' }}
-            value={searchValue}
-            onChange={handleSearchChange}
-            onKeyPress={handleSearchSubmit}
-          />
-          {isSearching && <LoadingIndicator size="small" />}
-        </Search>
+        {onSearch && (
+          <Search>
+            <SearchIconWrapper>
+              <SearchIcon />
+            </SearchIconWrapper>
+            <StyledInputBase
+              placeholder="Search products..."
+              value={searchValue}
+              onChange={handleSearchChange}
+              onKeyPress={handleSearchSubmit}
+            />
+            {isSearching && <LoadingIndicator size={20} />}
+          </Search>
+        )}
 
         <Box sx={{ flexGrow: 1 }} />
 
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Badge badgeContent={0} color="error" sx={{ mr: 2 }}>
+        <IconButton 
+          color="primary"
+          onClick={handleCartClick}
+          sx={{ mr: 2 }}
+        >
+          <Badge badgeContent={cartItemCount} color="error">
             <ShoppingCartIcon />
           </Badge>
-          <Button 
-            variant="contained" 
-            color="primary"
-            sx={signInButtonStyles}
-          >
-            Sign In
-          </Button>
-        </Box>
+        </IconButton>
+
+        <Button
+          variant="contained"
+          sx={signInButtonStyles}
+        >
+          Sign In
+        </Button>
       </Toolbar>
     </AppBar>
   );

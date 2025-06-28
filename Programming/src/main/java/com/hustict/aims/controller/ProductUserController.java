@@ -29,14 +29,4 @@ public class ProductUserController {
             return ResponseEntity.notFound().build();
         }
     }
-
-    // Check product availability when adding to cart
-    @GetMapping("/{id}/availability")
-    public ResponseEntity<Boolean> checkProductAvailability(
-            @PathVariable Long id,
-            @RequestParam(defaultValue = "1") int quantity) {
-
-        boolean available = productService.isProductAvailable(id, quantity);
-        return ResponseEntity.ok(available);
-    }
 }

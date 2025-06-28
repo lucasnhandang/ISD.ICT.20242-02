@@ -156,16 +156,19 @@ public class ProductService {
                 }
         }
 
-        public boolean isProductAvailable(Long id, int requiredQty) {
+        public int getAvailableQuantity(Long id) {
                 Product product = productRepo.findByIdNotDeleted(id).orElseThrow(() -> new NoSuchElementException(
                                 messageService.getProductNotFound() + " with ID: " + id));
+
+                int reservedQty = reservationItemRepository.getReservedQuantityByProductId(id);
+                return Math.max(0, product.getQuantity() - reservedQty);
+        }
+
+        public boolean isProductAvailable(Long id, int requiredQty) {
                 if (requiredQty <= 0) {
                         throw new IllegalArgumentException(messageService.getInvalidInput() + ": Required quantity must be greater than 0");
                 }
-
-                int reservedQty = reservationItemRepository.getReservedQuantityByProductId(id);
-                int availQty = product.getQuantity() - reservedQty;
-                return availQty >= requiredQty;
+                return getAvailableQuantity(id) >= requiredQty;
         }
 
         public void decreaseProductQuantity(Long id, int quantity) {

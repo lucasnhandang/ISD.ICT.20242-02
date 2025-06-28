@@ -5,15 +5,43 @@ const api = axios.create({
   baseURL: 'http://localhost:8080/api/v1',
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
+  withCredentials: true // Enable sending cookies with requests
 });
 
 // Global error handler
 api.interceptors.response.use(
-    (response) => response,
-    (error) => {
-      console.error('API Error:', error);
-      return Promise.reject(error);
+  (response) => response,
+  (error) => {
+    if (error.response) {
+      // Handle specific error cases
+      switch (error.response.status) {
+        case 401:
+          // Unauthorized - redirect to login
+          window.location.href = '/login';
+          break;
+        case 403:
+          // Forbidden - show error message
+          console.error('Access denied');
+          break;
+        case 400:
+          // Bad request - likely validation error
+          console.error('Validation error:', error.response.data);
+          break;
+        case 404:
+          // Not found
+          console.error('Resource not found:', error.response.data);
+          break;
+        case 409:
+          // Conflict - likely product availability issue
+          console.error('Product availability conflict:', error.response.data);
+          break;
+        default:
+          // Other errors
+          console.error('API Error:', error.response.data);
+      }
     }
+    return Promise.reject(error);
+  }
 );
 
 // Health check
@@ -83,6 +111,117 @@ export const getProductsByCategory = async (category, page = 0, size = 12, sortB
   } catch (error) {
     console.error('API Error:', error);
     throw new Error('Failed to fetch products by category');
+  }
+};
+
+// Product APIs
+export const getProductDetails = async (id) => {
+  try {
+    const response = await api.get(`/products/${id}`);
+    return response;
+  } catch (error) {
+    console.error('API Error:', error);
+    throw new Error('Failed to fetch product details');
+  }
+};
+
+export const getProductAvailability = async (id) => {
+  try {
+    console.log('Checking availability for product:', id); // Debug log
+    const response = await api.get(`/products/${id}/availability`);
+    console.log('Raw API response:', response); // Debug log
+    return response;
+  } catch (error) {
+    console.error('API Error:', error);
+    throw new Error('Failed to check product availability');
+  }
+};
+
+// Cart APIs
+export const getCart = async () => {
+  try {
+    const response = await api.get('/cart');
+    return response;
+  } catch (error) {
+    console.error('API Error:', error);
+    throw new Error('Failed to fetch cart');
+  }
+};
+
+export const addToCart = async (item) => {
+  try {
+    const response = await api.post('/cart/add', item);
+    return response;
+  } catch (error) {
+    if (error.response?.status === 409) {
+      throw new Error('Product is not available in the requested quantity');
+    }
+    console.error('API Error:', error);
+    throw new Error('Failed to add item to cart');
+  }
+};
+
+export const updateCartItem = async (item) => {
+  try {
+    const response = await api.post('/cart/update', item);
+    return response;
+  } catch (error) {
+    if (error.response?.status === 409) {
+      throw new Error('Product is not available in the requested quantity');
+    }
+    console.error('API Error:', error);
+    throw new Error('Failed to update cart item');
+  }
+};
+
+export const removeFromCart = async (productId) => {
+  try {
+    const response = await api.delete(`/cart/items/${productId}`);
+    return response;
+  } catch (error) {
+    console.error('API Error:', error);
+    throw new Error('Failed to remove item from cart');
+  }
+};
+
+export const clearCart = async () => {
+  try {
+    const response = await api.delete('/cart/clear');
+    return response;
+  } catch (error) {
+    console.error('API Error:', error);
+    throw new Error('Failed to clear cart');
+  }
+};
+
+// Auth APIs
+export const login = async (credentials) => {
+  try {
+    const response = await api.post('/auth/login', credentials);
+    return response;
+  } catch (error) {
+    console.error('API Error:', error);
+    throw new Error('Failed to login');
+  }
+};
+
+export const logout = async () => {
+  try {
+    const response = await api.post('/auth/logout');
+    return response;
+  } catch (error) {
+    console.error('API Error:', error);
+    throw new Error('Failed to logout');
+  }
+};
+
+export const validateToken = async () => {
+  try {
+    const response = await api.get('/auth/validate');
+    return response;
+  } catch (error) {
+    console.error('API Error:', error);
+    throw new Error('Failed to validate token');
   }
 };
 
