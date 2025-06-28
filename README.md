@@ -81,17 +81,21 @@ This project is a **Web Application** that combines **Spring Boot (Java)** for b
 #### 1. Clone the repository
 ```bash
 git clone https://github.com/lucasnhandang/ISD.ICT.20242-02.git
-cd ISD.ICT.20242-02/Programming
+cd ISD.ICT.20242-02/Coding
 ```
 
-#### 2. Run Backend (Spring Boot)
+#### 2. Database setup
+- Import the SQL scripts in `docs/G2-AIMS-CreateDB.sql` and `docs/G2-AIMS-DataForDB.sql` into your PostgreSQL instance.
+- Update database connection info in `src/main/resources/application.properties` if needed.
+
+#### 3. Run Backend (Spring Boot)
 ```bash
 cd src
 mvn spring-boot:run
 ```
 - The backend API will be available at: http://localhost:8080
 
-#### 3. Run Frontend (React)
+#### 4. Run Frontend (React)
 ```bash
 cd frontend
 npm install
@@ -99,9 +103,121 @@ npm start
 ```
 - The frontend will be available at: http://localhost:3000
 
-#### 4. Access the Application
+#### 5. Access the Application
 - **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:8080/api/*
+
+---
+
+## Ngrok Configuration for Payment Gateway
+
+### What is Ngrok?
+Ngrok is a tool that creates secure tunnels to expose your local server to the internet. In this project, ngrok is used to expose the local Spring Boot server so that VNPay payment gateway can send callbacks to our application.
+
+### Why Ngrok is Needed?
+- VNPay payment gateway needs to send payment callbacks to our server
+- These callbacks include payment success/failure notifications
+- Since our server runs locally, we need ngrok to make it accessible from the internet
+
+### Current Ngrok Configuration
+The project is currently configured with the following ngrok URL:
+```
+https://89cf-42-114-34-135.ngrok-free.app
+```
+
+This URL is used in the following endpoints:
+- **Return URL**: `${app.ngrok.url}/api/payment/vnpay-return`
+- **IPN URL**: `${app.ngrok.url}/api/payment/vnpay-ipn`
+
+### How to Set Up Ngrok
+
+#### 1. Install Ngrok
+```bash
+# Download from https://ngrok.com/download
+```
+
+#### 2. Sign Up for Free Account
+- Go to https://ngrok.com/
+- Create a free account
+- Get your authtoken from the dashboard
+
+#### 3. Authenticate Ngrok
+```bash
+ngrok config add-authtoken YOUR_AUTH_TOKEN
+```
+
+#### 4. Start Ngrok Tunnel
+```bash
+# Expose port 8080 (Spring Boot server)
+ngrok http 8080
+```
+
+After running this command, ngrok will provide you with a public URL like:
+```
+Forwarding    https://abc123-def456.ngrok-free.app -> http://localhost:8080
+```
+
+### How to Update Ngrok URL for Other Developers
+
+#### Step 1: Get Your Ngrok URL
+When you start ngrok, you'll get a URL like:
+```
+https://your-unique-id.ngrok-free.app
+```
+
+#### Step 2: Update Configuration
+Edit the file: `Programming/src/main/resources/application.properties`
+
+Find this line:
+```properties
+app.ngrok.url=https://89cf-42-114-34-135.ngrok-free.app
+```
+
+Replace it with your ngrok URL:
+```properties
+app.ngrok.url=https://your-unique-id.ngrok-free.app
+```
+
+#### Step 3: Restart the Application
+After updating the configuration, restart your Spring Boot application:
+```bash
+# Stop the current server (Ctrl+C)
+# Then restart
+mvn spring-boot:run
+```
+
+### Important Notes
+
+#### 1. Ngrok URL Changes
+- **Free ngrok accounts**: URL changes every time you restart ngrok
+- **Paid ngrok accounts**: Can have fixed subdomains
+- You must update the configuration file each time the URL changes
+
+#### 2. Security Considerations
+- Ngrok exposes your local server to the internet
+- Only use it for development/testing
+- Never use ngrok in production environments
+- Be careful with sensitive data when using ngrok
+
+#### 3. VNPay Configuration
+- VNPay sandbox environment accepts ngrok URLs
+- Make sure your ngrok URL is accessible (test by visiting it in browser)
+- The URL must be HTTPS (ngrok provides this automatically)
+
+#### 4. Troubleshooting
+If payment callbacks are not working:
+1. Check if ngrok is running: `ngrok http 8080`
+2. Verify the URL in `application.properties` matches your ngrok URL
+3. Test the URL in browser: `https://your-ngrok-url.ngrok-free.app/api/health`
+4. Check ngrok dashboard for any errors
+5. Restart both ngrok and Spring Boot application
+
+### Alternative Solutions for Production
+For production deployment, consider:
+- **Cloud hosting**: Deploy to AWS, Azure, or Google Cloud
+- **Domain name**: Use a proper domain name instead of ngrok
+- **Load balancer**: Use services like Cloudflare or AWS ALB
+- **VPN**: Set up VPN for secure communication
 
 ---
 
