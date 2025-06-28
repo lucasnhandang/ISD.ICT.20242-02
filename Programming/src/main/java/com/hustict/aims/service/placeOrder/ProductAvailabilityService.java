@@ -2,7 +2,7 @@ package com.hustict.aims.service.placeOrder;
 import com.hustict.aims.dto.cart.CartRequestDTO;
 import com.hustict.aims.exception.CartAvailabilityException;
 
-import com.hustict.aims.service.ProductService;
+import com.hustict.aims.service.product.ProductService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

@@ -1,7 +1,6 @@
-package com.hustict.aims.service.validation;
+package com.hustict.aims.service.rules;
 
 import java.util.List;
-import java.util.Map;
 
 public interface ProductDeleteRule {
     void validate(Long userId, List<Long> productId);
