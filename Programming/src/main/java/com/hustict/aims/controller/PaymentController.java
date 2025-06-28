@@ -4,7 +4,7 @@ import com.hustict.aims.dto.payment.PaymentResultDTO;
 import com.hustict.aims.dto.payment.VnPayCreateRequestDTO;
 import com.hustict.aims.dto.payment.VnPayIpnResponseDTO;
 import com.hustict.aims.dto.payment.VnPayReturnResponseDTO;
-import com.hustict.aims.service.payment.PaymentResultService;
+import com.hustict.aims.service.PaymentResultService;
 import com.hustict.aims.service.placeOrder.VnPayService;
 import com.hustict.aims.utils.VnPayConfig;
 import org.springframework.beans.factory.annotation.Autowired;
