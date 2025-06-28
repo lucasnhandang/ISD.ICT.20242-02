@@ -24,7 +24,7 @@ public class OrderPMController {
     @PutMapping("/{id}/approve")
     public ResponseEntity<Void> approveOrder(@PathVariable Long id,HttpSession session) {
         orderService.approveOrder(id);
-        //emailSenderFactory.process("approveOrder", session);
+        emailSenderFactory.process("approveOrder", session);
         return ResponseEntity.ok().build();
     }
 

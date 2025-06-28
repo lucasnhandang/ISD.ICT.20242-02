@@ -5,9 +5,11 @@ import java.text.DecimalFormat;
 import com.hustict.aims.dto.cart.CartItemRequestDTO;
 import com.hustict.aims.dto.email.ApproveOrderEmailRequest;
 import com.hustict.aims.dto.order.OrderInformationDTO;
+import org.springframework.stereotype.Service;
 
 import jakarta.servlet.http.HttpSession;
 
+@Service("approveOrder")
 public class ApproveOrderEmailService extends SendEmailServiceImpl<ApproveOrderEmailRequest> {
     
     @Override
@@ -69,13 +71,12 @@ public class ApproveOrderEmailService extends SendEmailServiceImpl<ApproveOrderE
         // Add Invoice details
         body.append("<p><strong>Invoice Details:</strong></p>");
         body.append("<table border='1' cellpadding='5' cellspacing='0'>");
-        body.append("<tr><th>Invoice Number</th><th>Total Amount (VND)</th><th>VAT Amount (VND)</th><th>Total Amount (Including VAT)</th><th>Shipping Fee (VND)</th></tr>");
+        body.append("<tr><th>Invoice Number</th><th>Total Amount (Excluding VAT) (VND)</th><th>Total Amount (Including VAT)</th><th>Shipping Fee (VND)</th><th>Total Amount (VND)</th></tr>");
         body.append(String.format("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
             invoice.getId(), formatter.format(invoice.getProductPriceExVAT()), 
             formatter.format(invoice.getProductPriceIncVAT()), 
-            formatter.format(invoice.getTotalAmount()), 
-            formatter.format(invoice.getShippingFee())));  
-
+            formatter.format(invoice.getShippingFee()),
+            formatter.format(invoice.getTotalAmount())));  
         body.append("</table>");
 
         // Add Payment Transaction details
