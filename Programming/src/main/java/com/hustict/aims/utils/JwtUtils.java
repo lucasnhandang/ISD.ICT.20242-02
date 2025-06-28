@@ -3,22 +3,21 @@ package com.hustict.aims.utils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import java.util.Date;
 import java.util.Map;
 import org.springframework.stereotype.Component;
-import javax.crypto.spec.SecretKeySpec;
 import javax.crypto.SecretKey;
 
 @Component
 public class JwtUtils {
     private final JwtConfig jwtConfig;
+    private final SecretKey secretKey;
 
     public JwtUtils(JwtConfig jwtConfig) {
         this.jwtConfig = jwtConfig;
-    }
-
-    private SecretKey getSecretKey() {
-        return new SecretKeySpec(jwtConfig.getSecret().getBytes(), SignatureAlgorithm.HS256.getJcaName());
+        // Generate a secure key that meets HS256 requirements
+        this.secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     }
 
     public String generateToken(String subject, Map<String, Object> claims) {
@@ -28,13 +27,13 @@ public class JwtUtils {
                 .addClaims(claims)
                 .setIssuedAt(new Date(now))
                 .setExpiration(new Date(now + jwtConfig.getExpiration()))
-                .signWith(getSecretKey(), SignatureAlgorithm.HS256)
+                .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public Claims getClaimsFromToken(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(getSecretKey())
+                .setSigningKey(secretKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();

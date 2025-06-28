@@ -31,10 +31,12 @@ public class PaymentHandlerService {
         OrderInformationDTO savedOrderInfo = saveOrderService.saveAll(session);
         
         reservationService.confirmReservation(session);
+        
         session.setAttribute("orderInformation", savedOrderInfo);
-        session.setAttribute("deliveryForm", session.getAttribute("deliveryForm"));
-
+        //session.setAttribute("deliveryForm", session.getAttribute("deliveryForm"));
+        
         cartCleanupService.removePurchasedItems(session);
+
         emailSenderFactory.process("orderSuccess", session);
     }
 }
