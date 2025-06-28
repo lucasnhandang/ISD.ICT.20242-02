@@ -1,4 +1,4 @@
-package com.hustict.aims.service.payment;
+package com.hustict.aims.service;
 
 import com.hustict.aims.dto.payment.PaymentResultDTO;
 import com.hustict.aims.service.placeOrder.VnPayService;
