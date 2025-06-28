@@ -1,0 +1,117 @@
+package com.hustict.aims.service.email;
+
+import com.hustict.aims.dto.cart.CartItemRequestDTO;
+import com.hustict.aims.dto.email.RefundEmailRequest;
+import com.hustict.aims.dto.order.OrderInformationDTO;
+
+import jakarta.servlet.http.HttpSession;
+
+import java.text.DecimalFormat;
+
+import org.springframework.stereotype.Service;
+
+
+@Service("rejectOrder")
+public class RefundEmailService extends SendEmailServiceImpl<RefundEmailRequest> {
+
+    @Override
+    public RefundEmailRequest buildRequest(HttpSession session) {
+        RefundEmailRequest req = instantiateRequest();
+        populateCommonFields(req);
+        return req;
+    }
+
+    @Override
+    protected RefundEmailRequest instantiateRequest() {
+        return new RefundEmailRequest();
+    }
+
+    @Override
+    protected String buildSubject(RefundEmailRequest request) {
+        OrderInformationDTO orderInfo = (OrderInformationDTO) session.getAttribute("orderInformation");
+        Long orderId = orderInfo.getOrderId();
+        return "Your Order #" + orderId + " is Refunded Successfully";
+    }
+    
+    @Override
+    protected String buildBody(RefundEmailRequest request) {
+        var info = request.getOrder();
+        var delivery = request.getDeliveryInfor();
+        var items = info.getProductList();
+        var invoice = request.getInvoice();
+        var paymentTransaction = request.getPayment(); // Lấy thông tin thanh toán từ request
+        var refundPayment = request.getRefundPayment();  // Lấy thông tin hoàn tiền từ request
+        StringBuilder body = new StringBuilder();
+
+        // Định dạng tiền tệ
+        DecimalFormat formatter = new DecimalFormat("#,###");
+
+        body.append("<html><body>");
+        body.append("<p>Dear ").append(delivery.getCustomerName()).append(",</p>");
+
+        // Thông báo từ chối đơn hàng và quá trình hoàn tiền
+        body.append("<p>We regret to inform you that your order has been rejected. Here are the details of your order:</p>");
+        body.append("<p><strong>Refund Notice:</strong> A refund will be processed soon, and you will be notified once the process is complete.</p>");
+
+        // Create a table to list products
+        body.append("<table border='1' cellpadding='5' cellspacing='0'>");
+        body.append("<tr><th>Product</th><th>Quantity</th><th>Price (VND)</th></tr>");
+        
+        // Loop through items and display each in a table row
+        for (CartItemRequestDTO item : items) {
+            body.append(String.format("<tr><td>%s</td><td>%d</td><td>%s VND</td></tr>",
+                    item.getProductName(), item.getQuantity(), formatter.format(item.getPrice())));
+        }
+        body.append("</table>");
+
+        // Additional delivery and rush order information
+        body.append("<p><strong>Delivery Address:</strong> ").append(delivery.getDeliveryAddress()).append(", ")
+            .append(delivery.getDeliveryProvince()).append("</p>");
+        
+        if (delivery.isRushOrder()) {
+            body.append("<p><strong>Note:</strong> This is a rush order.</p>");
+        }
+
+        // Add Invoice details
+        body.append("<p><strong>Invoice Details:</strong></p>");
+        body.append("<table border='1' cellpadding='5' cellspacing='0'>");
+        body.append("<tr><th>Invoice Number</th><th>Total Amount (Excluding VAT) (VND)</th><th>Total Amount (Including VAT)</th><th>Shipping Fee (VND)</th><th>Total Amount (VND)</th></tr>");
+        body.append(String.format("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
+            invoice.getId(), formatter.format(invoice.getProductPriceExVAT()), 
+            formatter.format(invoice.getProductPriceIncVAT()), 
+            formatter.format(invoice.getShippingFee()),
+            formatter.format(invoice.getTotalAmount())));   
+
+        body.append("</table>");
+
+        // Add Payment Transaction details
+        if (paymentTransaction != null) {
+            body.append("<p><strong>Payment Transaction Details:</strong></p>");
+            body.append("<table border='1' cellpadding='5' cellspacing='0'>");
+            body.append("<tr><th>Bank Transaction ID</th><th>Content</th><th>Payment Time</th><th>Payment Amount (VND)</th><th>Card Type</th><th>Currency</th></tr>");
+            body.append(String.format("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
+                    paymentTransaction.getBankTransactionId(), paymentTransaction.getContent(), paymentTransaction.getPaymentTime(),
+                    formatter.format(paymentTransaction.getPaymentAmount()), paymentTransaction.getCardType(), paymentTransaction.getCurrency()));
+            body.append("</table>");
+        }
+
+        // Add Refund Payment details if available
+        if (refundPayment != null) {
+            body.append("<p><strong>Refund Payment Details:</strong></p>");
+            body.append("<table border='1' cellpadding='5' cellspacing='0'>");
+            body.append("<tr><th>Bank Transaction ID</th><th>Content</th><th>Refund Time</th><th>Refund Amount (VND)</th><th>Card Type</th><th>Currency</th></tr>");
+            body.append(String.format("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
+                    refundPayment.getBankTransactionId(), refundPayment.getContent(), refundPayment.getPaymentTime(),
+                    formatter.format(refundPayment.getPaymentAmount()), refundPayment.getCardType(), refundPayment.getCurrency()));
+            body.append("</table>");
+        }
+
+        // Closing email
+        body.append("<p>Best regards,<br>Your Shop Team</p>");
+        body.append("</body></html>");
+
+        return body.toString();
+    }
+
+
+}

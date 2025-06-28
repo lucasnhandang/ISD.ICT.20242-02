@@ -4,7 +4,9 @@ import Header from '../components/Header';
 import Navigation from '../components/Navigation';
 import ProductCard from '../components/ProductCard';
 import ConnectionStatus from '../components/ConnectionStatus';
+import LoginPage from './LoginPage';
 import { checkBackendConnection, getProducts, searchProducts } from '../services/api';
+import { authService } from '../services/authService';
 import {
   containerStyles,
   loadingContainerStyles,
@@ -26,13 +28,25 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState(null);
+  const [showLogin, setShowLogin] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState({
     checked: false,
     connected: false,
     message: '',
   });
 
-  // Check backend connection on component mount
+  // Check authentication status on component mount
+  useEffect(() => {
+    const checkAuthStatus = () => {
+      const user = authService.getCurrentUser();
+      if (user) {
+        setCurrentUser(user);
+      }
+    };
+    checkAuthStatus();
+  }, []);
+
   useEffect(() => {
     const checkConnection = async () => {
       const status = await checkBackendConnection();
@@ -69,12 +83,11 @@ const HomePage = () => {
         setTotalPages(1);
       }
     } catch (error) {
-      console.error('Error fetching products:', error);
-      setError(error.message || 'Failed to fetch products');
+      setError(error.message);
       setConnectionStatus({
         ...connectionStatus,
         connected: false,
-        message: 'Failed to fetch products. Please try again later.',
+        message: error.message,
       });
       setProducts([]);
       setTotalPages(1);
@@ -83,7 +96,6 @@ const HomePage = () => {
     }
   }, [page, category, searchQuery, sortBy, sortDirection, connectionStatus]);
 
-  // Fetch products when page, category, search query, or sort changes
   useEffect(() => {
     if (connectionStatus.connected) {
       fetchProducts();
@@ -103,12 +115,38 @@ const HomePage = () => {
   const handleSortChange = (newSortBy, newSortDirection) => {
     setSortBy(newSortBy);
     setSortDirection(newSortDirection);
-    setPage(1); // Reset to first page when sorting changes
+    setPage(1);
   };
 
   const handleSearch = async (query) => {
     setSearchQuery(query);
     setPage(1);
+  };
+
+  const handleSignInClick = () => {
+    setShowLogin(true);
+  };
+
+  const handleLoginSuccess = (userInfo) => {
+    setCurrentUser(userInfo);
+    setShowLogin(false);
+  };
+
+  const handleBackToHome = () => {
+    setShowLogin(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      setCurrentUser(null);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
+  const handleCartUpdate = () => {
+    // This will be handled by the parent component or global state management
   };
 
   const handleSubscribe = (e) => {
@@ -118,85 +156,103 @@ const HomePage = () => {
     setEmail('');
   };
 
+  if (showLogin) {
+    return (
+      <LoginPage 
+        onLoginSuccess={handleLoginSuccess}
+        onBackToHome={handleBackToHome}
+      />
+    );
+  }
+
   const renderContent = () => {
     if (loading) {
       return (
-          <Box sx={loadingContainerStyles}>
-            <CircularProgress />
-          </Box>
+        <Box sx={loadingContainerStyles}>
+          <CircularProgress />
+        </Box>
       );
     }
 
     if (error) {
       return (
-          <Box sx={messageContainerStyles}>
-            <Typography color="error">{error}</Typography>
-          </Box>
+        <Box sx={messageContainerStyles}>
+          <Typography color="error">{error}</Typography>
+        </Box>
       );
     }
 
     if (products.length === 0) {
       return (
-          <Box sx={messageContainerStyles}>
-            <Typography>
-              {searchQuery
-                  ? `No products found for "${searchQuery}"`
-                  : `No products found in category "${category}"`}
-            </Typography>
-          </Box>
+        <Box sx={messageContainerStyles}>
+          <Typography>
+            {searchQuery
+              ? `No products found for "${searchQuery}"`
+              : `No products found in category "${category}"`}
+          </Typography>
+        </Box>
       );
     }
 
     return (
-        <>
-          <Grid container spacing={3}>
-            {products.map((product) => (
-                <Grid item key={product.id} xs={12} sm={6} md={3}>
-                  <ProductCard product={product} />
-                </Grid>
-            ))}
-          </Grid>
+      <>
+        <Grid container spacing={3}>
+          {products.map((product) => (
+            <Grid item key={product.id} xs={12} sm={6} md={3}>
+              <ProductCard 
+                product={product}
+                onCartUpdate={handleCartUpdate}
+              />
+            </Grid>
+          ))}
+        </Grid>
 
-          <Box sx={paginationContainerStyles}>
-            <Pagination
-                count={totalPages}
-                page={page}
-                onChange={handlePageChange}
-                color="primary"
-            />
-          </Box>
-        </>
+        <Box sx={paginationContainerStyles}>
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={handlePageChange}
+            color="primary"
+          />
+        </Box>
+      </>
     );
   };
 
   return (
-      <Box sx={rootStyles}>
-        <Header onSearch={handleSearch} />
+    <Box sx={rootStyles}>
+      <Header 
+        onSearch={handleSearch}
+        onSignInClick={handleSignInClick}
+        currentUser={currentUser}
+        onLogout={handleLogout}
+        showLoginButton={true}
+      />
 
-        <ConnectionStatus
-            open={connectionStatus.checked}
-            message={connectionStatus.message}
-            severity={connectionStatus.connected ? 'success' : 'error'}
+      <ConnectionStatus
+        open={connectionStatus.checked}
+        message={connectionStatus.message}
+        severity={connectionStatus.connected ? 'success' : 'error'}
+      />
+
+      <Container maxWidth="lg" sx={containerStyles}>
+        <Navigation
+          onCategoryChange={handleCategoryChange}
+          onSortChange={handleSortChange}
         />
+        {renderContent()}
+      </Container>
 
-        <Container maxWidth="lg" sx={containerStyles}>
-          <Navigation
-              onCategoryChange={handleCategoryChange}
-              onSortChange={handleSortChange}
-          />
-          {renderContent()}
-        </Container>
-
-        <Box
-            component="footer"
-            sx={{
-              py: 4,
-              bgcolor: '#f5f5f5',
-              mt: 'auto'
-            }}
-        >
-        </Box>
+      <Box
+        component="footer"
+        sx={{
+          py: 4,
+          bgcolor: '#f5f5f5',
+          mt: 'auto'
+        }}
+      >
       </Box>
+    </Box>
   );
 };
 

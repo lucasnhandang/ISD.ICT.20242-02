@@ -1,17 +1,22 @@
 package com.hustict.aims.service.validation;
 
 import org.springframework.stereotype.Component;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 
 @Component
 public class ProductValidatorRegistry {
-    private final List<ProductValidator<?>> validators;
+    private final Map<String, ProductValidator<?>> validators;
 
-    // Spring sẽ tự động inject TẤT CẢ các bean implement ProductValidator vào đây
     public ProductValidatorRegistry(List<ProductValidator<?>> validators) {
-        this.validators = validators;
+        this.validators = new HashMap<>();
+        
+        for (ProductValidator<?> validator : validators) {
+            this.validators.put(validator.getType().toLowerCase(), validator);
+        }
     }
 
     public Optional<ProductValidator<?>> getValidator(String type) {
@@ -19,12 +24,6 @@ public class ProductValidatorRegistry {
             return Optional.empty();
         }
 
-        for (ProductValidator<?> validator : validators) {
-            if (validator.getType().equalsIgnoreCase(type)) {
-                return Optional.of(validator);
-            }
-        }
-
-        return Optional.empty();
+        return Optional.ofNullable(validators.get(type.toLowerCase()));
     }
 }

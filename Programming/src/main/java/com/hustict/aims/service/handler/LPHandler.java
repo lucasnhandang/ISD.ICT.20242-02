@@ -20,6 +20,9 @@ public class LPHandler implements ProductHandler {
     }
 
     @Override
+    public String getType() { return "LP"; }
+
+    @Override
     public boolean supports(String type) { return "LP".equalsIgnoreCase(type); }
 
     @Override

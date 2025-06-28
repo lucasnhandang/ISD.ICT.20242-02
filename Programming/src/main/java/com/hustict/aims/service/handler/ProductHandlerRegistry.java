@@ -2,23 +2,28 @@ package com.hustict.aims.service.handler;
 
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Component
 public class ProductHandlerRegistry {
-    private final List<ProductHandler> handlers;
+    private final Map<String, ProductHandler> handlers;
 
     public ProductHandlerRegistry(List<ProductHandler> handlers) {
-        this.handlers = handlers;
+        this.handlers = new HashMap<>();
+
+        for (ProductHandler handler : handlers) {
+            this.handlers.put(handler.getType().toLowerCase(), handler);
+        }
     }
 
     public Optional<ProductHandler> getHandler(String type) {
-        for (ProductHandler handler : handlers) {
-            if (handler.supports(type)) {
-                return Optional.of(handler);
-            }
+        if (type == null || type.trim().isEmpty()) {
+            return Optional.empty();
         }
-        return Optional.empty();
+        
+        return Optional.ofNullable(handlers.get(type.toLowerCase()));
     }
 }

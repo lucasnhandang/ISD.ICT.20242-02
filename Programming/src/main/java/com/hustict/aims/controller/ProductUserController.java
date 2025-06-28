@@ -2,7 +2,7 @@ package com.hustict.aims.controller;
 
 import com.hustict.aims.dto.product.ProductDetailDTO;
 import com.hustict.aims.utils.mapper.ProductSummaryMapper;
-import com.hustict.aims.service.ProductService;
+import com.hustict.aims.service.product.ProductService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,15 +28,5 @@ public class ProductUserController {
         } catch (NoSuchElementException e) {
             return ResponseEntity.notFound().build();
         }
-    }
-
-    // Check product availability when adding to cart
-    @GetMapping("/{id}/availability")
-    public ResponseEntity<Boolean> checkProductAvailability(
-            @PathVariable Long id,
-            @RequestParam(defaultValue = "1") int quantity) {
-
-        boolean available = productService.isProductAvailable(id, quantity);
-        return ResponseEntity.ok(available);
     }
 }

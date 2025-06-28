@@ -20,6 +20,9 @@ public class DVDHandler implements ProductHandler {
     }
 
     @Override
+    public String getType() { return "DVD"; }
+
+    @Override
     public boolean supports(String type) { return "DVD".equalsIgnoreCase(type); }
 
     @Override

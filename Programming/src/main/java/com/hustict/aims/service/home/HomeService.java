@@ -1,4 +1,4 @@
-package com.hustict.aims.service;
+package com.hustict.aims.service.home;
 
 import com.hustict.aims.dto.PagedResponseDTO;
 import com.hustict.aims.dto.home.ProductSearchRequestDTO;
@@ -57,9 +57,9 @@ public class HomeService {
         Page<Product> page;
 
         if (searchRequest.getCategory() != null && !searchRequest.getCategory().isEmpty()) {
-            page = homeRepo.findByTitleContainingIgnoreCaseAndCategoryIgnoreCase(searchRequest.getSearchQuery(), searchRequest.getCategory(), pageable);
+            page = homeRepo.searchByTitleAndCategory(searchRequest.getSearchQuery(), searchRequest.getCategory(), pageable);
         } else {
-            page = homeRepo.findByTitleContainingIgnoreCase(searchRequest.getSearchQuery(), pageable);
+            page = homeRepo.searchByTitle(searchRequest.getSearchQuery(), pageable);
         }
         return PagedResponseBuilder.fromPage(page, productSummaryMapper::toSummaryDTO);
     }

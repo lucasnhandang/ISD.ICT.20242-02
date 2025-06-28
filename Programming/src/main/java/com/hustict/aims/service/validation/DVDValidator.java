@@ -20,6 +20,5 @@ public class DVDValidator extends ProductValidator<DVD> {
         rejectIfBlank(d.getStudio(), "Studio", 100, errs);
         rejectIfBlank(d.getLanguage(), "Language", 50, errs);
         rejectIfBlank(d.getSubtitles(), "Subtitles", 255, errs);
-        rejectIfNull(d.getReleaseDate(), "Release date", errs);
     }
 }

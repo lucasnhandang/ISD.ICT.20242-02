@@ -4,9 +4,8 @@ import com.hustict.aims.dto.cart.CartRequestDTO;
 import com.hustict.aims.dto.deliveryForm.DeliveryFormDTO;
 import com.hustict.aims.dto.invoice.InvoiceDTO;
 import com.hustict.aims.dto.order.OrderInformationDTO;
-import com.hustict.aims.dto.order.OrderItemDTO;
-import com.hustict.aims.dto.cart.CartItemRequestDTO;
 import com.hustict.aims.dto.payment.PaymentTransactionDTO;
+
 import com.hustict.aims.model.invoice.Invoice;
 import com.hustict.aims.model.order.Order;
 import com.hustict.aims.model.payment.PaymentTransaction;
@@ -14,22 +13,21 @@ import com.hustict.aims.model.shipping.DeliveryInfo;
 import com.hustict.aims.repository.InvoiceRepository;
 import com.hustict.aims.repository.OrderRepository;
 import com.hustict.aims.repository.PaymentTransactionRepository;
+import com.hustict.aims.service.reservation.ReservationService;
 import com.hustict.aims.service.sessionValidator.SessionValidatorService;
 import com.hustict.aims.utils.mapper.DeliveryInfoMapper;
 import com.hustict.aims.utils.mapper.InvoiceMapper;
+import com.hustict.aims.utils.mapper.OrderInformationDTOMapper;
 import com.hustict.aims.utils.mapper.OrderMapper;
 import com.hustict.aims.utils.mapper.PaymentTransactionMapper;
 import com.hustict.aims.repository.DeliveryInfoRepository;
 
 import jakarta.servlet.http.HttpSession;
 
-import java.time.LocalDateTime;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
 
 
 @Service
@@ -45,7 +43,7 @@ public class SaveOrderService {
     private final SessionValidatorService sessionValidatorService;
     private final DeliveryInfoRepository deliveryInfoRepository;
 
-    @Autowired
+ 
     public SaveOrderService(
         OrderRepository orderRepository,
         PaymentTransactionRepository transactionRepository,
@@ -76,9 +74,6 @@ public class SaveOrderService {
         PaymentTransactionDTO paymentDTO = (PaymentTransactionDTO) session.getAttribute("paymentTransaction");
         
         // Lưu delivery information trước
-        if (deliveryFormDTO == null) {
-            throw new IllegalArgumentException("DeliveryFormDTO không được null");
-        }
         DeliveryInfo deliveryEntity = deliveryInfoMapper.toEntity(deliveryFormDTO);
         
         if (deliveryEntity == null) {
@@ -90,10 +85,17 @@ public class SaveOrderService {
             throw new IllegalStateException("Lưu DeliveryInfo thất bại, entity hoặc id trả về null");
         }
 
-        // Lưu Invoice trước
-        if (invoiceDTO == null) {
-            throw new IllegalArgumentException("InvoiceDTO không được null");
+        PaymentTransaction txn = paymentTxnMapper.toEntity(paymentDTO);
+        if (txn == null) {
+            throw new IllegalArgumentException("Không mapping từ paymentDTO qua payment được không được null");
         }
+        PaymentTransaction paymentTransaction = transactionRepository.save(txn);
+        if (paymentTransaction.getId() == null) {
+            throw new IllegalArgumentException("Lưu paymentTransaction thất bại");
+        }
+
+        invoiceDTO.setPaymentTransactionId(paymentTransaction.getId());
+
         Invoice invoiceEntity = invoiceMapper.toEntity(invoiceDTO);
         if (invoiceEntity == null) {
             throw new IllegalArgumentException("Mapping InvoiceDTO sang Invoice trả về null");
@@ -103,69 +105,41 @@ public class SaveOrderService {
             throw new IllegalStateException("Lưu Invoice thất bại, id trả về null");
         }
 
-        OrderInformationDTO orderInfoDTO = new OrderInformationDTO();
-        List<CartItemRequestDTO> items = cartDTO.getProductList();
-        orderInfoDTO.setProductList(items);
+        invoiceDTO.setId(savedInvoice.getId());
+        
 
-        orderInfoDTO.setTotalPriceExVAT(invoiceDTO.getProductPriceExVAT());
-        orderInfoDTO.setTotalPriceInVAT(invoiceDTO.getProductPriceIncVAT());
-        orderInfoDTO.setShippingFee(invoiceDTO.getShippingFee());
-        orderInfoDTO.setRushOrder(false);
-        orderInfoDTO.setTotalAmount(invoiceDTO.getTotalAmount());
-        orderInfoDTO.setCurrency(cartDTO.getCurrency());
-        // thời gian đang set now
-        orderInfoDTO.setOrderDate(LocalDateTime.now());
-        orderInfoDTO.setDeliveryInfoId(savedDelivery.getId());
-        orderInfoDTO.setInvoiceId(savedInvoice.getId());
+        OrderInformationDTO orderInfoDTO = OrderInformationDTOMapper.toDTO(
+            cartDTO,
+            invoiceDTO,
+            deliveryFormDTO,
+            savedInvoice.getId(),
+            savedDelivery.getId()
+        );
 
-        session.setAttribute("orderInformation", orderInfoDTO);
+        Order order = orderMapper.toEntity(orderInfoDTO);
+        Order orderEntity = orderRepository.save(order);
+        orderInfoDTO.setOrderId(orderEntity.getId());
 
-  
-        sessionValidatorService.validateAfterPayment(session);
-
-        // Order order = orderMapper.toEntity(orderInfoDTO, deliveryFormDTO);
-        // Order savedOrder = orderRepository.save(order);
-
-        // // 5. Lưu PaymentTransaction
-        // PaymentTransaction txn = paymentTxnMapper.toEntity(paymentDTO);
-        // txn.setOrder(savedOrder);
-        // transactionRepository.save(txn);
-
-        // // 6. Lưu Invoice
-        // Invoice inv = invoiceMapper.toEntity(invoiceDTO);
-        // inv.setOrder(savedOrder);
-        // invoiceRepository.save(inv);
-
-        // // 7. Dọn session
-        // session.removeAttribute("cartRequested");
-        // session.removeAttribute("invoice");
-        // session.removeAttribute("deliveryForm");
-        // session.removeAttribute("paymentTransaction");
-        // session.removeAttribute("orderInformation");
-
-        // // 8. Trả về DTO kết quả
-        // return orderMapper.toDTO(savedOrder);
+        session.setAttribute("orderInformation", orderInfoDTO);  
+        session.setAttribute("invoice", invoiceDTO); 
+        session.setAttribute("deliveryForm", deliveryFormDTO);  
 
 
 
-        // xóa
-        System.out.println("Order Information:");
-        System.out.println("Order Date: " + orderInfoDTO.getOrderDate());
-        System.out.println("Total Price Ex VAT: " + orderInfoDTO.getTotalPriceExVAT());
-        System.out.println("Total Price In VAT: " + orderInfoDTO.getTotalPriceInVAT());
-        System.out.println("Shipping Fee: " + orderInfoDTO.getShippingFee());
-        System.out.println("Total Amount: " + orderInfoDTO.getTotalAmount());
-        System.out.println("Currency: " + orderInfoDTO.getCurrency());
-        System.out.println("Rush Order: " + orderInfoDTO.isRushOrder());
-        System.out.println("Delivery Info ID: " + orderInfoDTO.getDeliveryInfoId());
-        System.out.println("Invoice ID: " + orderInfoDTO.getInvoiceId());
+        // // xóa
+        // System.out.println("Order Information:");
+        // System.out.println("Order Date: " + orderInfoDTO.getOrderDate());
+        // System.out.println("Currency: " + orderInfoDTO.getCurrency());
+        // System.out.println("Rush Order: " + orderInfoDTO.isRushOrder());
+        // System.out.println("Delivery Info ID: " + orderInfoDTO.getDeliveryInfoId());
+        // System.out.println("Invoice ID: " + orderInfoDTO.getInvoiceId());
 
-        System.out.println("Products:");
-        for (CartItemRequestDTO item : orderInfoDTO.getProductList()) {
-            System.out.println("- Product ID: " + item.getProductID()
-                            + ", Quantity: " + item.getQuantity()
-                            + ", Price: " + item.getPrice());
-        }
+        // System.out.println("Products:");
+        // for (CartItemRequestDTO item : orderInfoDTO.getProductList()) {
+        //     System.out.println("- Product ID: " + item.getProductID()
+        //                     + ", Quantity: " + item.getQuantity()
+        //                     + ", Price: " + item.getPrice());
+        // }
         return orderInfoDTO;
     }
 }

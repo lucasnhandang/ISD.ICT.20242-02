@@ -1,9 +1,16 @@
 import React from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import CssBaseline from '@mui/material/CssBaseline';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
+<<<<<<< HEAD
 import PaymentResult from './pages/PaymentResult';
+=======
+import ManagementPanel from './pages/ManagementPanel';
+import CartPage from './pages/CartPage';
+import LoginPage from './pages/LoginPage';
+>>>>>>> b22ef1d0e0c8121cb3584607270b2075fbd496ca
 
 const theme = createTheme({
   palette: {
@@ -55,6 +62,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 12,
+          boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
         },
       },
     },
@@ -68,7 +76,13 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<HomePage />} />
+<<<<<<< HEAD
           <Route path="/payment-result" element={<PaymentResult />} />
+=======
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/management/*" element={<ManagementPanel />} />
+          <Route path="/login" element={<LoginPage />} />
+>>>>>>> b22ef1d0e0c8121cb3584607270b2075fbd496ca
         </Routes>
       </Router>
     </ThemeProvider>
