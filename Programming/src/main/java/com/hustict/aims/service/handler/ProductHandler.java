@@ -10,5 +10,6 @@ public interface ProductHandler {
     boolean supports(String type);
     Product toEntity(Map<String, Object> data);
     Product updateEntity(Product existing, Map<String, Object> data);
-    ProductDetailDTO saveAndReturnDTO(Product product);
+    Product save(Product product);
+    ProductDetailDTO toDTO(Product product);
 }
