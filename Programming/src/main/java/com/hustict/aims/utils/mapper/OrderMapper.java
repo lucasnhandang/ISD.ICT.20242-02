@@ -2,6 +2,7 @@ package com.hustict.aims.utils.mapper;
 
 import com.hustict.aims.dto.invoice.InvoiceDTO;
 import com.hustict.aims.dto.order.OrderInformationDTO;
+import com.hustict.aims.dto.cart.CartItemRequestDTO;
 
 import com.hustict.aims.model.order.Order;
 import com.hustict.aims.model.order.OrderItem;
@@ -63,22 +64,24 @@ public class OrderMapper {
 
         return order;
     }
-    // public OrderInformationDTO toDTO(Order entity) {
-    //     if (entity == null) return null;
 
-    //     List<CartItemRequestDTO> items = entity.getOrderItems().stream()
-    //         .map(orderItemMapper::toDTO)
-    //         .collect(Collectors.toList());
+    public OrderInformationDTO toDTO(Order entity) {
+        if (entity == null) return null;
 
-    //     InvoiceDTO invoiceDTO = invoiceMapper.toDTO(entity.getInvoice());
+        List<CartItemRequestDTO> items = entity.getOrderItems().stream()
+            .map(orderItemMapper::toDTO)
+            .collect(Collectors.toList());
 
-    //     OrderInformationDTO dto = new OrderInformationDTO();
-    //     dto.setOrderId(entity.getId());
-    //     dto.setProductList(items);
-    //     dto.setCurrency(entity.getCurrency());
-    //     dto.setOrderDate(entity.getOrderDate());
-    //     dto.setRushOrder(entity.getIsRushOrder());
-        
-    //     return dto;
-    // }
+        OrderInformationDTO dto = new OrderInformationDTO();
+        dto.setOrderId(entity.getId());
+        dto.setProductList(items);
+        dto.setRushOrder(entity.getIsRushOrder());
+        dto.setCurrency(entity.getCurrency());
+        dto.setOrderDate(entity.getOrderDate());
+        dto.setRushDeliveryTime(entity.getRushDeliveryTime());
+        dto.setDeliveryInfoId(entity.getDeliveryInfo().getId());
+        dto.setInvoiceId(entity.getInvoice().getId());
+
+        return dto;
+    }
 }
