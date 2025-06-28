@@ -4,18 +4,16 @@ import com.hustict.aims.dto.product.ProductDetailDTO;
 import com.hustict.aims.model.product.CD;
 import com.hustict.aims.model.product.Product;
 import com.hustict.aims.repository.product.CDRepository;
-import com.hustict.aims.utils.mapper.CDMapper;
-import org.springframework.stereotype.Component;
+import com.hustict.aims.utils.mapper.product.CDMapper;
 
 import java.util.Map;
 
-@Component
 public class CDHandler implements ProductHandler {
-    private final CDRepository cdRepo;
+    private final CDRepository repository;
     private final CDMapper cdMapper;
 
     public CDHandler(CDRepository cdRepo, CDMapper cdMapper) {
-        this.cdRepo = cdRepo;
+        this.repository = cdRepo;
         this.cdMapper = cdMapper;
     }
 
@@ -34,8 +32,12 @@ public class CDHandler implements ProductHandler {
     }
 
     @Override
-    public ProductDetailDTO saveAndReturnDTO(Product product) {
-        CD saved = cdRepo.save((CD) product);
-        return cdMapper.toDetailDTO(saved);
+    public Product save(Product product) {
+        return repository.save((CD) product);
+    }
+
+    @Override
+    public ProductDetailDTO toDTO(Product product) {
+        return cdMapper.toDetailDTO((CD) product);
     }
 }
