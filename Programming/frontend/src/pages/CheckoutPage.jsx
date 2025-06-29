@@ -12,7 +12,7 @@ import {
   CardMedia,
   Grid
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import DeliveryForm from '../components/DeliveryForm';
 import { 
@@ -38,6 +38,10 @@ const CheckoutPage = () => {
   const [error, setError] = useState('');
   const [fetchingProducts, setFetchingProducts] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Lấy thông tin form đã lưu từ OrderReviewPage (nếu có)
+  const preservedDeliveryForm = location.state?.preservedDeliveryForm;
 
   // Fetch cart data
   useEffect(() => {
@@ -47,14 +51,14 @@ const CheckoutPage = () => {
         const response = await getCart();
         
         if (!response.data || !response.data.productList) {
-          setError('Giỏ hàng trống hoặc không hợp lệ.');
+          setError('Cart is empty or invalid.');
           return;
         }
         
         setCart(response.data);
       } catch (err) {
         console.error('Error fetching cart:', err);
-        setError(err.response?.data?.message || 'Không thể tải giỏ hàng.');
+        setError(err.response?.data?.message || 'Unable to load cart.');
       } finally {
         setLoading(false);
       }
@@ -102,7 +106,7 @@ const CheckoutPage = () => {
       const response = await handleNormalOrder(cart);
       
       if (!response.data) {
-        throw new Error('Không nhận được phản hồi từ server');
+        throw new Error('No response received from server');
       }
       
       const { cart: apiCart, invoice, deliveryForm, orderid } = response.data;
@@ -121,7 +125,7 @@ const CheckoutPage = () => {
       
     } catch (error) {
       console.error('Failed to process normal order:', error);
-      setError(error.response?.data?.message || 'Có lỗi xảy ra khi xử lý đơn hàng');
+      setError(error.response?.data?.message || 'An error occurred while processing the order');
     } finally {
       setProcessingOrder(false);
     }
@@ -134,7 +138,7 @@ const CheckoutPage = () => {
       setError('');
       
       if (!cart) {
-        throw new Error('Không tìm thấy thông tin giỏ hàng');
+        throw new Error('Cart information not found');
       }
 
       // Submit delivery form and process order
@@ -144,7 +148,7 @@ const CheckoutPage = () => {
       const invoiceResponse = await handleNormalOrder(cart);
       
       if (!invoiceResponse.data) {
-        throw new Error('Không nhận được thông tin hóa đơn');
+        throw new Error('Invoice information not received');
       }
 
       // Navigate with complete data
@@ -159,7 +163,7 @@ const CheckoutPage = () => {
       
     } catch (err) {
       console.error('Error processing delivery form:', err);
-      setError(err.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại.');
+      setError(err.response?.data?.message || 'An error occurred, please try again.');
     } finally {
       setProcessingOrder(false);
     }
@@ -170,7 +174,7 @@ const CheckoutPage = () => {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
         <CircularProgress size={60} />
-        <Typography sx={{ ml: 2 }}>Đang tải giỏ hàng...</Typography>
+        <Typography sx={{ ml: 2 }}>Loading cart...</Typography>
       </Box>
     );
   }
@@ -185,7 +189,7 @@ const CheckoutPage = () => {
             {error}
           </Alert>
           <Button variant="contained" onClick={() => navigate('/cart')}>
-            Quay lại giỏ hàng
+            Back to Cart
           </Button>
         </Box>
       </Box>
@@ -199,10 +203,10 @@ const CheckoutPage = () => {
         <Header />
         <Box sx={{ maxWidth: '1200px', mx: 'auto', mt: 4, p: 2, textAlign: 'center' }}>
           <Alert severity="info" sx={{ mb: 2 }}>
-            Giỏ hàng của bạn đang trống
+            Your cart is empty
           </Alert>
           <Button variant="contained" onClick={() => navigate('/products')}>
-            Tiếp tục mua sắm
+            Continue Shopping
           </Button>
         </Box>
       </Box>
@@ -226,7 +230,7 @@ const CheckoutPage = () => {
         <Paper elevation={2} sx={{ flex: 1, minWidth: { xs: '100%', md: '350px' } }}>
           <Box sx={{ p: 3 }}>
             <Typography variant="h5" fontWeight={600} gutterBottom>
-              Thông tin đơn hàng
+              Order Information
             </Typography>
             <Divider sx={{ mb: 2 }} />
             
@@ -236,7 +240,7 @@ const CheckoutPage = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <CircularProgress size={20} sx={{ mr: 1 }} />
                   <Typography variant="body2" color="text.secondary">
-                    Đang tải thông tin sản phẩm...
+                    Loading product information...
                   </Typography>
                 </Box>
               )}
@@ -269,19 +273,16 @@ const CheckoutPage = () => {
                           <Typography variant="subtitle1" fontWeight={500} gutterBottom>
                             {item.productName}
                           </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            ID: {item.productID}
-                          </Typography>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
                             <Typography variant="body2">
-                              Số lượng: <strong>{item.quantity}</strong>
+                              Quantity: <strong>{item.quantity}</strong>
                             </Typography>
                             <Typography variant="body2">
-                              Đơn giá: {formatPrice(item.price, cart.currency)}
+                              Unit Price: {formatPrice(item.price, cart.currency)}
                             </Typography>
                           </Box>
                           <Typography variant="body2" color="primary" fontWeight={500}>
-                            Thành tiền: {formatPrice(item.price * item.quantity, cart.currency)}
+                            Subtotal: {formatPrice(item.price * item.quantity, cart.currency)}
                           </Typography>
                         </Grid>
                       </Grid>
@@ -295,7 +296,7 @@ const CheckoutPage = () => {
             <Divider sx={{ my: 2 }} />
             <Box sx={{ mb: 2 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography>Giá sản phẩm (chưa VAT):</Typography>
+                <Typography>Product Price (excl. VAT):</Typography>
                 <Typography>
                   {formatPrice(cart.totalPrice - (cart.discount || 0), cart.currency)}
                 </Typography>
@@ -303,29 +304,29 @@ const CheckoutPage = () => {
               
               {cart.discount > 0 && (
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography color="success.main">Giảm giá:</Typography>
+                  <Typography color="success.main">Discount:</Typography>
                   <Typography color="success.main">
                     -{formatPrice(cart.discount, cart.currency)}
                   </Typography>
                 </Box>
               )}
               
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+              {/* <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography>Giá sản phẩm (đã VAT):</Typography>
                 <Typography>
                   {formatPrice(cart.totalPrice, cart.currency)}
                 </Typography>
-              </Box>
+              </Box> */}
               
               <Typography color="text.secondary" variant="body2" sx={{ mt: 2, fontStyle: 'italic' }}>
-                * Phí giao hàng, phí giao nhanh (nếu có) sẽ được tính sau khi nhập địa chỉ giao hàng.
+                * Shipping fee, VAT, rush delivery fee (if applicable) will be calculated after entering delivery address.
               </Typography>
             </Box>
 
             <Divider sx={{ my: 2 }} />
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography variant="h6" color="primary" fontWeight={600}>
-                Tổng cộng:
+                Total:
               </Typography>
               <Typography variant="h6" color="primary" fontWeight={600}>
                 {formatPrice(cart.totalPrice - (cart.discount || 0), cart.currency)}
@@ -336,7 +337,7 @@ const CheckoutPage = () => {
             <Divider sx={{ my: 2 }} />
             <Box>
               <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                📋 Quy định về phí giao hàng và giao nhanh:
+                📋 Shipping and Rush Delivery Policy:
               </Typography>
               <Box component="ul" sx={{ 
                 pl: 2, 
@@ -344,11 +345,11 @@ const CheckoutPage = () => {
                 fontSize: '0.875rem',
                 '& li': { mb: 0.5 }
               }}>
-                <li>Phí giao hàng không chịu thuế.</li>
-                <li>Đơn hàng trên 100,000 VND được miễn phí ship tối đa 25,000 VND (không áp dụng cho giao nhanh).</li>
-                <li>Phí giao hàng tính theo cân nặng và địa chỉ nhận hàng.</li>
-                <li>Giao nhanh chỉ áp dụng cho nội thành Hà Nội, phí cộng thêm 10,000 VND/món.</li>
-                <li>Chi tiết phí sẽ hiển thị sau khi nhập địa chỉ giao hàng.</li>
+                <li>Shipping fees are not subject to tax.</li>
+                <li>Orders above 100,000 VND get free shipping up to 25,000 VND (not applicable for rush delivery).</li>
+                <li>Shipping fee calculated based on weight and delivery address.</li>
+                <li>Rush delivery only available in Hanoi city center, additional 10,000 VND per item.</li>
+                <li>Detailed fees will be displayed after entering delivery address.</li>
               </Box>
             </Box>
           </Box>
@@ -358,23 +359,24 @@ const CheckoutPage = () => {
         <Paper elevation={2} sx={{ flex: 1, minWidth: { xs: '100%', md: '350px' } }}>
           <Box sx={{ p: 3 }}>
             <Typography variant="h5" fontWeight={600} gutterBottom>
-              Thông tin giao hàng
+              Delivery Information
             </Typography>
             <Divider sx={{ mb: 2 }} />
             
             {processingOrder && (
-              <Alert severity="info" sx={{ mb: 2 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <CircularProgress size={20} sx={{ mr: 1 }} />
-                  Đang xử lý đơn hàng...
-                </Box>
-              </Alert>
+                              <Alert severity="info" sx={{ mb: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <CircularProgress size={20} sx={{ mr: 1 }} />
+                    Processing order...
+                  </Box>
+                </Alert>
             )}
             
             <DeliveryForm 
               onClose={() => navigate('/cart')} 
               onSuccess={handleDeliveryFormSuccess}
               disabled={processingOrder}
+              initialValues={preservedDeliveryForm}
             />
           </Box>
         </Paper>

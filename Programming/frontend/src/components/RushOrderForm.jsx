@@ -29,14 +29,14 @@ const RushOrderForm = ({ open, onClose, onSuccess }) => {
     setLoading(true);
     setError('');
     try {
-      // Gửi thông tin rush order lên backend
+      // Send rush order information to backend
       await submitRushOrderInfo(form);
-      // Xử lý rush order và nhận về invoice list
+      // Process rush order and receive invoice list
       const res = await processRushOrder();
       onSuccess(res.data.invoiceList || []);
       onClose();
     } catch (err) {
-      setError(err.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại.');
+      setError(err.response?.data?.message || 'An error occurred, please try again.');
     } finally {
       setLoading(false);
     }
@@ -44,11 +44,11 @@ const RushOrderForm = ({ open, onClose, onSuccess }) => {
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Thông tin giao nhanh (Rush Order)</DialogTitle>
+      <DialogTitle>Rush Order Information</DialogTitle>
       <DialogContent>
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
           <TextField
-            label="Thời gian mong muốn nhận hàng"
+            label="Expected Delivery Date & Time"
             name="expectedDateTime"
             type="datetime-local"
             value={form.expectedDateTime}
@@ -59,7 +59,7 @@ const RushOrderForm = ({ open, onClose, onSuccess }) => {
             InputLabelProps={{ shrink: true }}
           />
           <TextField
-            label="Hướng dẫn giao hàng (tuỳ chọn)"
+            label="Delivery Instructions (Optional)"
             name="deliveryInstructions"
             value={form.deliveryInstructions}
             onChange={handleChange}
@@ -72,9 +72,9 @@ const RushOrderForm = ({ open, onClose, onSuccess }) => {
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} disabled={loading}>Hủy</Button>
+        <Button onClick={onClose} disabled={loading}>Cancel</Button>
         <Button onClick={handleSubmit} variant="contained" disabled={loading}>
-          {loading ? <CircularProgress size={24} /> : 'Xác nhận'}
+          {loading ? <CircularProgress size={24} /> : 'Confirm'}
         </Button>
       </DialogActions>
     </Dialog>

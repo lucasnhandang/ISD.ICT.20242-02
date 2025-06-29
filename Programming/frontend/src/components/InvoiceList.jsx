@@ -22,10 +22,10 @@ const formatPrice = (price) => {
 const InvoiceList = ({ open, onClose, invoiceList = [] }) => {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Danh sách hóa đơn</DialogTitle>
+      <DialogTitle>Invoice List</DialogTitle>
       <DialogContent>
         {invoiceList.length === 0 ? (
-          <Typography color="text.secondary">Không có hóa đơn nào.</Typography>
+          <Typography color="text.secondary">No invoices available.</Typography>
         ) : (
           <List>
             {invoiceList.map((invoice, idx) => (
@@ -35,20 +35,20 @@ const InvoiceList = ({ open, onClose, invoiceList = [] }) => {
                     primary={
                       <>
                         <Typography variant="subtitle1" fontWeight={600}>
-                          Mã hóa đơn: {invoice.id || 'N/A'}
+                          Invoice ID: {invoice.id || 'N/A'}
                         </Typography>
                         <Typography variant="body2">
-                          Tổng tiền: {formatPrice(invoice.totalAmount)}
+                          Total Amount: {formatPrice(invoice.totalAmount)}
                         </Typography>
                         <Typography variant="body2">
-                          Trạng thái: {invoice.status || 'Chưa thanh toán'}
+                          Status: {invoice.status || 'Unpaid'}
                         </Typography>
                       </>
                     }
                     secondary={
                       <>
                         <Typography variant="caption" color="text.secondary">
-                          Sản phẩm: {invoice.productList ? invoice.productList.map(p => p.productName).join(', ') : 'N/A'}
+                          Products: {invoice.productList ? invoice.productList.map(p => p.productName).join(', ') : 'N/A'}
                         </Typography>
                       </>
                     }
@@ -61,7 +61,7 @@ const InvoiceList = ({ open, onClose, invoiceList = [] }) => {
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} variant="contained">Đóng</Button>
+        <Button onClick={onClose} variant="contained">Close</Button>
       </DialogActions>
     </Dialog>
   );
