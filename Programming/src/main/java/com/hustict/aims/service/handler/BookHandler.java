@@ -5,9 +5,11 @@ import com.hustict.aims.model.product.Book;
 import com.hustict.aims.model.product.Product;
 import com.hustict.aims.repository.product.BookRepository;
 import com.hustict.aims.utils.mapper.product.BookMapper;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+@Component
 public class BookHandler implements ProductHandler {
     private final BookRepository repository;
     private final BookMapper mapper;

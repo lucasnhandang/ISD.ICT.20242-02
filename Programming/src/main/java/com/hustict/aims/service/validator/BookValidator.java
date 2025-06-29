@@ -1,8 +1,10 @@
-package com.hustict.aims.service.validation;
+package com.hustict.aims.service.validator;
 
 import com.hustict.aims.model.product.Book;
+import org.springframework.stereotype.Service;
 import java.util.List;
 
+@Service
 public class BookValidator extends ProductValidator<Book> {
     @Override
     public String getType() { return "Book"; }

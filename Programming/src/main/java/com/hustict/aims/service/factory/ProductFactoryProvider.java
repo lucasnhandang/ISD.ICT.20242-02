@@ -29,13 +29,6 @@ public class ProductFactoryProvider {
         ProductFactory<?, ?> factory = factories.get(productType.toLowerCase());
         return Optional.ofNullable((ProductFactory<T, D>) factory);
     }
-    
-
-    @SuppressWarnings("unchecked")
-    public <T extends Product, D extends ProductDetailDTO> Optional<ProductBundle<T, D>> createBundle(String productType) {
-        return getFactory(productType)
-                .map(factory -> (ProductBundle<T, D>) factory.createBundle());
-    }
 
     public boolean supports(String productType) {
         return productType != null && factories.containsKey(productType.toLowerCase());

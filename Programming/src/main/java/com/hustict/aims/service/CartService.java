@@ -3,7 +3,7 @@ package com.hustict.aims.service;
 import com.hustict.aims.dto.cart.CartRequestDTO;
 import com.hustict.aims.dto.cart.CartItemRequestDTO;
 import com.hustict.aims.model.product.Product;
-import com.hustict.aims.service.product.ProductService;
+import com.hustict.aims.service.product.InventoryService;
 import com.hustict.aims.repository.product.ProductRepository;
 import com.hustict.aims.exception.ProductOperationException;
 import org.springframework.stereotype.Service;
@@ -14,11 +14,11 @@ import java.util.NoSuchElementException;
 @Service
 public class CartService {
     
-    private final ProductService productService;
+    private final InventoryService inventoryService;
     private final ProductRepository productRepository;
 
-    public CartService(ProductService productService, ProductRepository productRepository) {
-        this.productService = productService;
+    public CartService(InventoryService inventoryService, ProductRepository productRepository) {
+        this.inventoryService = inventoryService;
         this.productRepository = productRepository;
     }
 
@@ -42,7 +42,7 @@ public class CartService {
             .orElseThrow(() -> new NoSuchElementException("Product not found with ID: " + item.getProductID()));
 
         // Kiểm tra số lượng có sẵn
-        if (!productService.isProductAvailable(item.getProductID(), item.getQuantity())) {
+        if (!inventoryService.isAvailable(item.getProductID(), item.getQuantity())) {
             throw new ProductOperationException("Not enough quantity available");
         }
 
@@ -57,7 +57,7 @@ public class CartService {
         if (existingItem != null) {
             // Cập nhật số lượng nếu sản phẩm đã tồn tại
             int newQuantity = existingItem.getQuantity() + item.getQuantity();
-            if (!productService.isProductAvailable(item.getProductID(), newQuantity)) {
+            if (!inventoryService.isAvailable(item.getProductID(), newQuantity)) {
                 throw new ProductOperationException("Not enough quantity available");
             }
             existingItem.setQuantity(newQuantity);
@@ -78,7 +78,7 @@ public class CartService {
 
     public CartRequestDTO updateCartItem(CartItemRequestDTO item, HttpSession session) throws ProductOperationException {
         // Kiểm tra số lượng có sẵn
-        if (!productService.isProductAvailable(item.getProductID(), item.getQuantity())) {
+        if (!inventoryService.isAvailable(item.getProductID(), item.getQuantity())) {
             throw new ProductOperationException("Not enough quantity available");
         }
 

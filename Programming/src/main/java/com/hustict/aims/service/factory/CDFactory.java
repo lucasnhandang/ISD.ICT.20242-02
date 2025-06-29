@@ -2,21 +2,20 @@ package com.hustict.aims.service.factory;
 
 import com.hustict.aims.dto.product.CDDetailDTO;
 import com.hustict.aims.model.product.CD;
-import com.hustict.aims.repository.product.CDRepository;
 import com.hustict.aims.service.handler.CDHandler;
-import com.hustict.aims.service.validation.CDValidator;
-import com.hustict.aims.utils.mapper.product.CDMapper;
+import com.hustict.aims.service.validator.CDValidator;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 @Component
 public class CDFactory implements ProductFactory<CD, CDDetailDTO> {
+    private final CDHandler handler;
+    private final CDValidator validator;
     
-    private final CDRepository cdRepository;
-    private final CDMapper cdMapper;
-    
-    public CDFactory(CDRepository cdRepository, CDMapper cdMapper) {
-        this.cdRepository = cdRepository;
-        this.cdMapper = cdMapper;
+    public CDFactory(CDHandler handler, CDValidator validator) {
+        this.handler = handler;
+        this.validator = validator;
     }
     
     @Override
@@ -30,9 +29,23 @@ public class CDFactory implements ProductFactory<CD, CDDetailDTO> {
     }
     
     @Override
-    public ProductBundle<CD, CDDetailDTO> createBundle() {
-        CDHandler handler = new CDHandler(cdRepository, cdMapper);
-        CDValidator validator = new CDValidator();
-        return new ProductBundle<>(handler, validator, cdMapper, getProductType());
+    public CDDetailDTO createProduct(Map<String, Object> data) {
+        CD cd = (CD) handler.toEntity(data);
+        validator.validate(cd);
+        CD savedCD = (CD) handler.save(cd);
+        return (CDDetailDTO) handler.toDTO(savedCD);
+    }
+    
+    @Override
+    public CDDetailDTO updateProduct(CD existing, Map<String, Object> data) {
+        CD updatedCD = (CD) handler.updateEntity(existing, data);
+        validator.validate(updatedCD);
+        CD savedCD = (CD) handler.save(updatedCD);
+        return (CDDetailDTO) handler.toDTO(savedCD);
+    }
+    
+    @Override
+    public CDDetailDTO viewProduct(CD product) {
+        return (CDDetailDTO) handler.toDTO(product);
     }
 }

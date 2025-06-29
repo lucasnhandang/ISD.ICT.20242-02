@@ -2,6 +2,7 @@ package com.hustict.aims.service.placeOrder;
 import com.hustict.aims.dto.cart.CartRequestDTO;
 import com.hustict.aims.exception.CartAvailabilityException;
 
+import com.hustict.aims.service.product.InventoryService;
 import com.hustict.aims.service.product.ProductService;
 import org.springframework.stereotype.Service;
 
@@ -12,9 +13,9 @@ import java.util.Map;
 @Service
 public class ProductAvailabilityService {
     // reuseable
-    private final ProductService productService;
+    private final InventoryService productService;
 
-    public ProductAvailabilityService(ProductService productService) {
+    public ProductAvailabilityService(InventoryService productService) {
         this.productService = productService;
     }
 
@@ -26,7 +27,7 @@ public class ProductAvailabilityService {
             Long productId = entry.getKey().longValue(); 
             int quantity = entry.getValue();
             
-            boolean available = productService.isProductAvailable(productId, quantity);
+            boolean available = productService.isAvailable(productId, quantity);
             
             
             if (!available) {

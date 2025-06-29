@@ -1,8 +1,10 @@
-package com.hustict.aims.service.validation;
+package com.hustict.aims.service.validator;
 
 import com.hustict.aims.model.product.LP;
+import org.springframework.stereotype.Component;
 import java.util.List;
 
+@Component
 public class LPValidator extends ProductValidator<LP> {
     @Override
     public String getType() { return "LP"; }
