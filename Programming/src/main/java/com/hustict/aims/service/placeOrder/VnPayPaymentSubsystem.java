@@ -156,7 +156,9 @@ public class VnPayPaymentSubsystem implements PaymentSubsystem {
         paymentTransaction.setBankTransactionId(params.get("vnp_TransactionNo"));
         paymentTransaction.setContent(params.get("vnp_OrderInfo"));
         try {
-            paymentTransaction.setPaymentAmount(Integer.parseInt(params.get("vnp_Amount")));
+            int rawAmount = Integer.parseInt(params.get("vnp_Amount"));
+            int normalizedAmount = rawAmount / 100;
+            paymentTransaction.setPaymentAmount(normalizedAmount);
         } catch (Exception e) {
             paymentTransaction.setPaymentAmount(0);
         }

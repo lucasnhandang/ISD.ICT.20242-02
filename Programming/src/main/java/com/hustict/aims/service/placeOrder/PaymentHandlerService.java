@@ -32,12 +32,7 @@ public class PaymentHandlerService {
 
 
     public void handlePaymentSuccess(PaymentTransactionDTO paymentTransaction, Long orderid) {
-
-        //reservationService.confirmReservation(session);
         OrderDTO orderinfo = savePaymentTransaction.save(paymentTransaction, orderid);
-        
-        //cartCleanupService.removePurchasedItems(session);
-
         emailSenderFactory.process("orderSuccess", orderinfo);
     }
 }
