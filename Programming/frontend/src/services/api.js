@@ -331,13 +331,6 @@ export const requestToPlaceOrder = async (cart) => {
   return api.post('/place-order/request', cart);
 };
 
-// Pay individual invoice for rush order
-export const payInvoice = async (invoiceId) => {
-  return api.post('/place-rush-order/pay-invoice', null, {
-    params: { invoiceId }
-  });
-};
-
 // Create separate axios instance for payment APIs
 const paymentApi = axios.create({
   baseURL: 'http://localhost:8080/api/v1/payment',
