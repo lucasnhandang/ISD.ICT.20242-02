@@ -5,9 +5,11 @@ import com.hustict.aims.model.product.DVD;
 import com.hustict.aims.model.product.Product;
 import com.hustict.aims.repository.product.DVDRepository;
 import com.hustict.aims.utils.mapper.product.DVDMapper;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+@Component
 public class DVDHandler implements ProductHandler {
     private final DVDRepository repository;
     private final DVDMapper dvdMapper;
@@ -31,7 +33,8 @@ public class DVDHandler implements ProductHandler {
         return dvdMapper.updateFromMap((DVD) existing, data);
     }
 
-    public Product save (Product product) {
+    @Override
+    public Product save(Product product) {
         return repository.save((DVD) product);
     }
 

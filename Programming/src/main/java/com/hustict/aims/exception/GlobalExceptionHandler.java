@@ -25,6 +25,40 @@ public class GlobalExceptionHandler {
         );
     }
 
+    // === NEW PRODUCT EXCEPTION HANDLERS ===
+    
+    // Handle base product exceptions (catch-all for ProductException hierarchy)
+    @ExceptionHandler(ProductException.class)
+    public ResponseEntity<Map<String, Object>> handleProductException(ProductException e) {
+        Map<String, Object> response = createErrorResponse(e.getErrorCode(), e.getMessage(), HttpStatus.BAD_REQUEST);
+        
+        // Add specific details for certain exception types
+        if (e instanceof ProductTypeException pte) {
+            response.put("requestedType", pte.getRequestedType());
+        } else if (e instanceof ProductNotFoundException pnfe) {
+            response.put("productId", pnfe.getProductId());
+            response.put("identifier", pnfe.getIdentifier());
+        } else if (e instanceof ProductOperationException poe) {
+            response.put("operation", poe.getOperation());
+        } else if (e instanceof ProductValidationException pve) {
+            response.put("validationErrors", pve.getValidationErrors());
+        }
+        
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    // Handle specific product not found exceptions with 404 status
+    @ExceptionHandler(ProductNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleProductNotFound(ProductNotFoundException e) {
+        Map<String, Object> response = createErrorResponse(e.getErrorCode(), e.getMessage(), HttpStatus.NOT_FOUND);
+        response.put("productId", e.getProductId());
+        response.put("identifier", e.getIdentifier());
+        
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    // === EXISTING EXCEPTION HANDLERS (MAINTAINED FOR BACKWARD COMPATIBILITY) ===
+
     // Handle validation errors
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handleValidationError(IllegalArgumentException e) {
@@ -58,15 +92,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(response);
     }
 
-    // Handle custom product validation errors
-    @ExceptionHandler(ProductValidationException.class)
-    public ResponseEntity<Map<String, Object>> handleProductValidation(ProductValidationException e) {
-        Map<String, Object> response = createErrorResponse("PRODUCT_VALIDATION_ERROR", e.getMessage(), HttpStatus.BAD_REQUEST);
-        response.put("validationErrors", e.getValidationErrors());
-        
-        return ResponseEntity.badRequest().body(response);
-    }
-
     // Handle JSON parsing errors
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleJsonValidation(MethodArgumentNotValidException e) {
@@ -86,7 +111,6 @@ public class GlobalExceptionHandler {
                 HttpStatus.INTERNAL_SERVER_ERROR));
     }
 
-
     // Handle unmet item in cart
     @ExceptionHandler(CartAvailabilityException.class)
     public ResponseEntity<Map<String, Object>> handleCartAvailabilityException(CartAvailabilityException ex) {
@@ -97,7 +121,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
-    
     @ExceptionHandler(DeliveryFormValidationException.class)
     public ResponseEntity<Map<String, Object>> handleDeliveryFormValidationException(DeliveryFormValidationException ex) {
         Map<String, Object> response = new HashMap<>();

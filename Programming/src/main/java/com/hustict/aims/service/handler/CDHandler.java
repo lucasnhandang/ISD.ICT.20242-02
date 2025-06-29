@@ -5,9 +5,11 @@ import com.hustict.aims.model.product.CD;
 import com.hustict.aims.model.product.Product;
 import com.hustict.aims.repository.product.CDRepository;
 import com.hustict.aims.utils.mapper.product.CDMapper;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+@Component
 public class CDHandler implements ProductHandler {
     private final CDRepository repository;
     private final CDMapper cdMapper;

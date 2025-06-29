@@ -1,16 +1,18 @@
 package com.hustict.aims.service;
 
 import com.hustict.aims.dto.product.ProductDetailDTO;
+import com.hustict.aims.exception.ProductNotFoundException;
+import com.hustict.aims.exception.ProductOperationException;
+import com.hustict.aims.exception.ProductTypeException;
+import com.hustict.aims.exception.ProductValidationException;
 import com.hustict.aims.model.product.Book;
 import com.hustict.aims.model.product.Product;
-import com.hustict.aims.repository.ReservationItemRepository;
 import com.hustict.aims.repository.product.ProductRepository;
-import com.hustict.aims.service.product.ProductComponentService;
-import com.hustict.aims.service.handler.ProductHandler;
+import com.hustict.aims.service.factory.ProductFactory;
+import com.hustict.aims.service.factory.ProductFactoryProvider;
+import com.hustict.aims.service.product.ImageService;
 import com.hustict.aims.service.product.ProductActionService;
 import com.hustict.aims.service.product.ProductService;
-import com.hustict.aims.service.storage.ImageUploadStorage;
-import com.hustict.aims.service.validation.ProductValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,14 +31,12 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class ProductServiceTest {
 
-    @Mock private ImageUploadStorage uploadService;
-    @Mock private ProductComponentService componentService;
-    @Mock private ProductRepository productRepo;
+    @Mock private ImageService imageService;
+    @Mock private ProductFactoryProvider factoryProvider;
     @Mock private ProductActionService actionService;
-    @Mock private ReservationItemRepository reservationItemRepository;
     @Mock private MessageService messageService;
-    @Mock private ProductHandler productHandler;
-    @Mock private ProductValidator<Product> productValidator;
+    @Mock private ProductRepository productRepo;
+    @Mock private ProductFactory<Product, ProductDetailDTO> productFactory;
 
     @InjectMocks private ProductService productService;
 
@@ -44,6 +44,7 @@ public class ProductServiceTest {
     private Product validProduct;
     private ProductDetailDTO expectedDTO;
     private MockMultipartFile mockImage;
+    private MockMultipartFile emptyImage;
 
     @BeforeEach
     void setUp() {
@@ -97,61 +98,64 @@ public class ProductServiceTest {
                 "image", "test-image.jpg", "image/jpeg", "test image content".getBytes()
         );
 
+        emptyImage = new MockMultipartFile(
+                "image", "empty.jpg", "image/jpeg", new byte[0]
+        );
+
         lenient().when(messageService.getInvalidInput()).thenReturn("Invalid input provided");
         lenient().when(messageService.getValidationError()).thenReturn("Validation failed");
     }
 
     @Test
-    void createProduct_Success_WithoutImage() {
-        when(componentService.supports("Book")).thenReturn(true);
-        when(componentService.getHandler("Book")).thenReturn(productHandler);
-        when(productHandler.toEntity(validProductData)).thenReturn(validProduct);
-        when(componentService.getValidator("Book")).thenReturn(productValidator);
-        when(productValidator.validate(validProduct)).thenReturn(Collections.emptyList());
-        when(productHandler.save(validProduct)).thenReturn(validProduct);
-        when(productHandler.toDTO(validProduct)).thenReturn(expectedDTO);
-
-        ProductDetailDTO result = productService.createProduct(validProductData, null);
-
-        assertNotNull(result);
-        assertEquals(expectedDTO.getId(), result.getId());
-        assertEquals(expectedDTO.getTitle(), result.getTitle());
-        assertEquals(expectedDTO.getCategory(), result.getCategory());
-
-        verify(componentService).supports("Book");
-        verify(componentService).getHandler("Book");
-        verify(productHandler).toEntity(validProductData);
-        verify(productHandler).save(validProduct);
-        verify(productHandler).toDTO(validProduct);
-        verify(componentService).getValidator("Book");
-        verify(productValidator).validate(validProduct);
-        verify(uploadService, never()).upload(any(), any(), any());
-    }
-
-    @Test
-    void createProduct_Success_WithImage() throws Exception {
+    void createProduct_Success_WithImage() {
         String expectedImageUrl = "http://example.com/test-image.jpg";
-        when(uploadService.upload(any(), any(), any())).thenReturn(expectedImageUrl);
-        when(componentService.supports("Book")).thenReturn(true);
-        when(componentService.getHandler("Book")).thenReturn(productHandler);
-        when(productHandler.toEntity(any())).thenReturn(validProduct);
-        when(componentService.getValidator("Book")).thenReturn(productValidator);
-        when(productValidator.validate(validProduct)).thenReturn(Collections.emptyList());
-        when(productHandler.save(validProduct)).thenReturn(validProduct);
-        when(productHandler.toDTO(validProduct)).thenReturn(expectedDTO);
+        
+        when(imageService.upload(mockImage)).thenReturn(expectedImageUrl);
+        when(factoryProvider.getFactory("Book")).thenReturn(Optional.of(productFactory));
+        when(productFactory.createProduct(any())).thenReturn(expectedDTO);
 
         ProductDetailDTO result = productService.createProduct(validProductData, mockImage);
 
         assertNotNull(result);
         assertEquals(expectedDTO.getId(), result.getId());
+        assertEquals(expectedDTO.getTitle(), result.getTitle());
 
-        verify(uploadService).upload(eq("test image content".getBytes()), contains("test-image.jpg"), eq("image/jpeg"));
-        verify(productHandler).toEntity(argThat(data ->
+        verify(imageService).upload(mockImage);
+        verify(factoryProvider).getFactory("Book");
+        verify(productFactory).createProduct(argThat(data ->
                 data.containsKey("imageUrl") &&
                         data.get("imageUrl").equals(expectedImageUrl)
         ));
-        verify(productHandler).save(validProduct);
-        verify(productHandler).toDTO(validProduct);
+    }
+
+    @Test
+    void createProduct_Success_WithoutImage() {
+        when(factoryProvider.getFactory("Book")).thenReturn(Optional.of(productFactory));
+        when(productFactory.createProduct(validProductData)).thenReturn(expectedDTO);
+
+        ProductDetailDTO result = productService.createProduct(validProductData, null);
+
+        assertNotNull(result);
+        assertEquals(expectedDTO.getId(), result.getId());
+
+        verify(imageService, never()).upload(any());
+        verify(factoryProvider).getFactory("Book");
+        verify(productFactory).createProduct(validProductData);
+    }
+
+    @Test
+    void createProduct_Success_WithEmptyImage() {
+        when(factoryProvider.getFactory("Book")).thenReturn(Optional.of(productFactory));
+        when(productFactory.createProduct(validProductData)).thenReturn(expectedDTO);
+
+        ProductDetailDTO result = productService.createProduct(validProductData, emptyImage);
+
+        assertNotNull(result);
+        assertEquals(expectedDTO.getId(), result.getId());
+
+        verify(imageService, never()).upload(any());
+        verify(factoryProvider).getFactory("Book");
+        verify(productFactory).createProduct(validProductData);
     }
 
     @Test
@@ -159,91 +163,166 @@ public class ProductServiceTest {
         Map<String, Object> invalidData = new HashMap<>(validProductData);
         invalidData.remove("category");
 
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        ProductOperationException exception = assertThrows(
+                ProductOperationException.class,
                 () -> productService.createProduct(invalidData, null)
         );
 
         assertTrue(exception.getMessage().contains("Missing category field"));
-        verify(componentService, never()).supports(any());
+        verify(factoryProvider, never()).getFactory(any());
+        verify(imageService, never()).upload(any());
     }
 
     @Test
     void createProduct_UnsupportedCategory_ThrowsException() {
-        when(componentService.supports("InvalidCategory")).thenReturn(false);
-
         Map<String, Object> invalidData = new HashMap<>(validProductData);
         invalidData.put("category", "InvalidCategory");
 
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        when(factoryProvider.getFactory("InvalidCategory")).thenReturn(Optional.empty());
+
+        ProductTypeException exception = assertThrows(
+                ProductTypeException.class,
                 () -> productService.createProduct(invalidData, null)
         );
 
-        assertTrue(exception.getMessage().contains("Unsupported category: InvalidCategory"));
-        verify(componentService).supports("InvalidCategory");
-        verify(componentService, never()).getHandler(any());
+        assertTrue(exception.getMessage().contains("InvalidCategory"));
+        verify(factoryProvider).getFactory("InvalidCategory");
+        verify(productFactory, never()).createProduct(any());
     }
 
     @Test
     void createProduct_ValidationErrors_ThrowsException() {
         List<String> errors = List.of("Title is required", "Price must be positive");
+        ProductValidationException validationException = new ProductValidationException(errors);
 
-        when(componentService.supports("Book")).thenReturn(true);
-        when(componentService.getHandler("Book")).thenReturn(productHandler);
-        when(productHandler.toEntity(validProductData)).thenReturn(validProduct);
-        when(componentService.getValidator("Book")).thenReturn(productValidator);
-        when(productValidator.validate(validProduct)).thenReturn(errors);
+        when(factoryProvider.getFactory("Book")).thenReturn(Optional.of(productFactory));
+        when(productFactory.createProduct(validProductData)).thenThrow(validationException);
 
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        ProductValidationException exception = assertThrows(
+                ProductValidationException.class,
                 () -> productService.createProduct(validProductData, null)
         );
 
-        assertTrue(exception.getMessage().contains("Validation failed"));
-        assertTrue(exception.getMessage().contains("Title is required"));
-        assertTrue(exception.getMessage().contains("Price must be positive"));
-
-        verify(productHandler, never()).save(any());
-        verify(productHandler, never()).toDTO(any());
+        assertEquals(errors, exception.getValidationErrors());
+        verify(factoryProvider).getFactory("Book");
+        verify(productFactory).createProduct(validProductData);
     }
 
     @Test
-    void createProduct_ImageUploadFailure_ThrowsException() throws Exception {
-        when(uploadService.upload(any(), any(), any()))
-                .thenThrow(new RuntimeException("Upload failed"));
+    void createProduct_ImageUploadFailure_ThrowsException() {
+        when(imageService.upload(mockImage)).thenThrow(new RuntimeException("Upload failed"));
 
         RuntimeException exception = assertThrows(
                 RuntimeException.class,
                 () -> productService.createProduct(validProductData, mockImage)
         );
 
-        assertTrue(exception.getMessage().contains("Failed to upload image"));
-        verify(uploadService).upload(any(), any(), any());
-        verify(componentService, never()).supports(any());
+        assertTrue(exception.getMessage().contains("Upload failed"));
+        verify(imageService).upload(mockImage);
+        verify(factoryProvider, never()).getFactory(any());
     }
 
     @Test
-    void createProduct_EmptyImage_ProcessesWithoutImage() {
-        MockMultipartFile emptyImage = new MockMultipartFile(
-                "image", "empty.jpg", "image/jpeg", new byte[0]
-        );
+    void updateProduct_Success_WithImage() {
+        Long productId = 1L;
+        Long userId = 10L;
+        String expectedImageUrl = "http://example.com/updated-image.jpg";
+        
+        Product mockProduct = mock(Product.class);
+        when(mockProduct.getCategory()).thenReturn("Book");
+        
+        when(productRepo.findById(productId)).thenReturn(Optional.of(mockProduct));
+        when(imageService.upload(mockImage)).thenReturn(expectedImageUrl);
+        when(factoryProvider.getFactory("Book")).thenReturn(Optional.of(productFactory));
+        when(productFactory.updateProduct(eq(mockProduct), any())).thenReturn(expectedDTO);
 
-        when(componentService.supports("Book")).thenReturn(true);
-        when(componentService.getHandler("Book")).thenReturn(productHandler);
-        when(productHandler.toEntity(validProductData)).thenReturn(validProduct);
-        when(componentService.getValidator("Book")).thenReturn(productValidator);
-        when(productValidator.validate(validProduct)).thenReturn(Collections.emptyList());
-        when(productHandler.save(validProduct)).thenReturn(validProduct);
-        when(productHandler.toDTO(validProduct)).thenReturn(expectedDTO);
-
-        ProductDetailDTO result = productService.createProduct(validProductData, emptyImage);
+        ProductDetailDTO result = productService.updateProduct(productId, validProductData, mockImage, userId);
 
         assertNotNull(result);
         assertEquals(expectedDTO.getId(), result.getId());
 
-        verify(uploadService, never()).upload(any(), any(), any());
-        verify(productHandler).save(validProduct);
-        verify(productHandler).toDTO(validProduct);
+        verify(actionService).validateUpdate(userId, productId, validProductData);
+        verify(productRepo).findById(productId);
+        verify(imageService).upload(mockImage);
+        verify(factoryProvider).getFactory("Book");
+        verify(productFactory).updateProduct(eq(mockProduct), argThat(data ->
+                data.containsKey("imageUrl") &&
+                        data.get("imageUrl").equals(expectedImageUrl)
+        ));
+        verify(actionService).logProductAction(eq(userId), eq(productId), any());
+    }
+
+    @Test
+    void updateProduct_ProductNotFound_ThrowsException() {
+        Long productId = 1L;
+        Long userId = 10L;
+
+        when(productRepo.findById(productId)).thenReturn(Optional.empty());
+
+        ProductNotFoundException exception = assertThrows(
+                ProductNotFoundException.class,
+                () -> productService.updateProduct(productId, validProductData, null, userId)
+        );
+
+        assertTrue(exception.getMessage().contains(productId.toString()));
+        verify(actionService).validateUpdate(userId, productId, validProductData);
+        verify(productRepo).findById(productId);
+        verify(factoryProvider, never()).getFactory(any());
+    }
+
+    @Test
+    void viewProduct_Success() {
+        Long productId = 1L;
+
+        Product mockProduct = mock(Product.class);
+        when(mockProduct.getCategory()).thenReturn("Book");
+
+        when(productRepo.findById(productId)).thenReturn(Optional.of(mockProduct));
+        when(factoryProvider.getFactory("Book")).thenReturn(Optional.of(productFactory));
+        when(productFactory.viewProduct(mockProduct)).thenReturn(expectedDTO);
+
+        ProductDetailDTO result = productService.viewProduct(productId);
+
+        assertNotNull(result);
+        assertEquals(expectedDTO.getId(), result.getId());
+
+        verify(productRepo).findById(productId);
+        verify(factoryProvider).getFactory("Book");
+        verify(productFactory).viewProduct(mockProduct);
+    }
+
+    @Test
+    void viewProduct_ProductNotFound_ThrowsException() {
+        Long productId = 1L;
+
+        when(productRepo.findById(productId)).thenReturn(Optional.empty());
+
+        ProductNotFoundException exception = assertThrows(
+                ProductNotFoundException.class,
+                () -> productService.viewProduct(productId)
+        );
+
+        assertTrue(exception.getMessage().contains(productId.toString()));
+        verify(productRepo).findById(productId);
+        verify(factoryProvider, never()).getFactory(any());
+    }
+
+    @Test
+    void viewProduct_UnsupportedCategory_ThrowsException() {
+        Long productId = 1L;
+        Product mockProduct = mock(Product.class);
+        when(mockProduct.getCategory()).thenReturn("InvalidCategory");
+
+        when(productRepo.findById(productId)).thenReturn(Optional.of(mockProduct));
+        when(factoryProvider.getFactory("InvalidCategory")).thenReturn(Optional.empty());
+
+        ProductTypeException exception = assertThrows(
+                ProductTypeException.class,
+                () -> productService.viewProduct(productId)
+        );
+
+        assertTrue(exception.getMessage().contains("InvalidCategory"));
+        verify(productRepo).findById(productId);
+        verify(factoryProvider).getFactory("InvalidCategory");
     }
 }
