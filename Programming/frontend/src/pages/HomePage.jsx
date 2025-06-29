@@ -4,7 +4,6 @@ import Header from '../components/Header';
 import Navigation from '../components/Navigation';
 import ProductCard from '../components/ProductCard';
 import ConnectionStatus from '../components/ConnectionStatus';
-import LoginPage from './LoginPage';
 import { checkBackendConnection, getProducts, searchProducts } from '../services/api';
 import { authService } from '../services/authService';
 import {
@@ -14,6 +13,7 @@ import {
   paginationContainerStyles,
   rootStyles
 } from '../styles/HomePage.styles';
+import { useNavigate } from 'react-router-dom';
 
 const PRODUCTS_PER_PAGE = 20;
 
@@ -28,13 +28,13 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState(null);
-  const [showLogin, setShowLogin] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState({
     checked: false,
     connected: false,
     message: '',
   });
+  const navigate = useNavigate();
 
   // Check authentication status on component mount
   useEffect(() => {
@@ -124,16 +124,7 @@ const HomePage = () => {
   };
 
   const handleSignInClick = () => {
-    setShowLogin(true);
-  };
-
-  const handleLoginSuccess = (userInfo) => {
-    setCurrentUser(userInfo);
-    setShowLogin(false);
-  };
-
-  const handleBackToHome = () => {
-    setShowLogin(false);
+    navigate('/login');
   };
 
   const handleLogout = async () => {
@@ -155,15 +146,6 @@ const HomePage = () => {
     console.log('Subscribe email:', email);
     setEmail('');
   };
-
-  if (showLogin) {
-    return (
-      <LoginPage 
-        onLoginSuccess={handleLoginSuccess}
-        onBackToHome={handleBackToHome}
-      />
-    );
-  }
 
   const renderContent = () => {
     if (loading) {

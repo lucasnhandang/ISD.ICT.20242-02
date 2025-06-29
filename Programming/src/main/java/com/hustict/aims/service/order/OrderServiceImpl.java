@@ -60,6 +60,27 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
+    public void cancelOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderOperationException("Order not found with id: " + orderId));
+
+        if (order.getOrderStatus() != OrderStatus.PENDING) {
+            throw new OrderOperationException("Only PENDING orders can be cancelled. Current status: " + order.getOrderStatus());
+        }
+
+        orderRepository.cancelOrderById(orderId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public OrderInformationDTO getOrderDetails(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderOperationException("Order not found with id: " + orderId));
+        return orderMapper.toDTO(order);
+    }
+
+    @Override
     public void prepareOrderSessionForEmail(Long orderId, HttpSession session) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderOperationException("Order not found with id: " + orderId));
