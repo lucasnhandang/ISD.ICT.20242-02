@@ -7,13 +7,8 @@ import com.hustict.aims.dto.invoice.InvoiceDTO;
 import com.hustict.aims.service.placeRushOrder.RushOrderEligibilityService;
 import com.hustict.aims.service.placeRushOrder.RushOrderValidationService;
 import com.hustict.aims.service.placeRushOrder.RushOrderProcessingService;
-import com.hustict.aims.service.placeRushOrder.RushOrderSaveService;
 import com.hustict.aims.service.sessionValidator.SessionValidatorService;
-import com.hustict.aims.service.placeOrder.PaymentHandlerService;
-import com.hustict.aims.service.placeOrder.CartCleanupService;
 import com.hustict.aims.service.placeOrder.SaveTempOrder;
-import com.hustict.aims.service.email.EmailSenderFactory;
-import com.hustict.aims.service.reservation.ReservationService;
 import java.util.HashMap;
 import java.util.Map;
 import jakarta.servlet.http.HttpSession;
@@ -28,35 +23,20 @@ public class PlaceRushOrderController {
     private final RushOrderEligibilityService rushOrderEligibilityService;
     private final RushOrderValidationService rushOrderValidationService;
     private final RushOrderProcessingService rushOrderProcessingService;
-    private final RushOrderSaveService rushOrderSaveService;
     private final SessionValidatorService sessionValidatorService;
-    private final PaymentHandlerService paymentHandlerService;
-    private final CartCleanupService cartCleanupService;
     private final SaveTempOrder saveTempOrder;
-    private final EmailSenderFactory emailSenderFactory;
-    private final ReservationService reservationService;
 
     @Autowired
     public PlaceRushOrderController(RushOrderEligibilityService rushOrderEligibilityService,
                                    RushOrderValidationService rushOrderValidationService,
                                    RushOrderProcessingService rushOrderProcessingService,
-                                   RushOrderSaveService rushOrderSaveService,
                                    SessionValidatorService sessionValidatorService,
-                                   PaymentHandlerService paymentHandlerService,
-                                   CartCleanupService cartCleanupService,
-                                   SaveTempOrder saveTempOrder,
-                                   EmailSenderFactory emailSenderFactory,
-                                   ReservationService reservationService) {
+                                   SaveTempOrder saveTempOrder) {
         this.rushOrderEligibilityService = rushOrderEligibilityService;
         this.rushOrderValidationService = rushOrderValidationService;
         this.rushOrderProcessingService = rushOrderProcessingService;
-        this.rushOrderSaveService = rushOrderSaveService;
         this.sessionValidatorService = sessionValidatorService;
-        this.paymentHandlerService = paymentHandlerService;
-        this.cartCleanupService = cartCleanupService;
         this.saveTempOrder = saveTempOrder;
-        this.emailSenderFactory = emailSenderFactory;
-        this.reservationService = reservationService;
     }
 
     /**
