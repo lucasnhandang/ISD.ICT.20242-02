@@ -2,9 +2,9 @@ package com.hustict.aims.service.email;
 
 import com.hustict.aims.dto.cart.CartItemRequestDTO;
 import com.hustict.aims.dto.email.OrderSuccessEmailRequest;
+import com.hustict.aims.dto.order.OrderDTO;
 import com.hustict.aims.dto.order.OrderInformationDTO;
 
-import jakarta.servlet.http.HttpSession;
 
 import java.text.DecimalFormat;
 
@@ -15,9 +15,9 @@ import org.springframework.stereotype.Service;
 public class OrderSuccessEmailService extends SendEmailServiceImpl<OrderSuccessEmailRequest> {
 
     @Override
-    public OrderSuccessEmailRequest buildRequest(HttpSession session) {
+    public OrderSuccessEmailRequest buildRequest(OrderDTO order) {
         OrderSuccessEmailRequest req = instantiateRequest();
-        populateCommonFields(req);
+        populateCommonFields(req, order);
         req.setCancelLink("http://localhost:3000/order/cancel/" + req.getOrder().getOrderId());
         return req;
     }
@@ -28,9 +28,8 @@ public class OrderSuccessEmailService extends SendEmailServiceImpl<OrderSuccessE
     }
 
     @Override
-    protected String buildSubject(OrderSuccessEmailRequest request) {
-        OrderInformationDTO orderInfo = (OrderInformationDTO) session.getAttribute("orderInformation");
-        Long orderId = orderInfo.getOrderId();
+    protected String buildSubject(OrderSuccessEmailRequest request, Long orderId) {
+        
         return "Your Order #" + orderId + " is Pending";
     }
     @Override

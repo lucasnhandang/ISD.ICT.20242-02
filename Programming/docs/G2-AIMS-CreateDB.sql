@@ -117,7 +117,9 @@ CREATE TABLE paymenttransaction (
     paymenttime TIMESTAMP NOT NULL,
     paymentamount INTEGER NOT NULL,
     cardtype VARCHAR(50) NOT NULL,
-    currency VARCHAR(10) NOT NULL
+    currency VARCHAR(10) NOT NULL,
+    systems VARCHAR(255),
+    payment_url VARCHAR(255)
 );
 
 -- REFUND
@@ -126,7 +128,9 @@ CREATE TABLE refundtransaction (
     banktransactionid VARCHAR(100) NOT NULL,
     refundtime TIMESTAMP NOT NULL,
     orderamount INTEGER NOT NULL,
-    currency VARCHAR(10) NOT NULL
+    currency VARCHAR(10) NOT NULL,
+    systems VARCHAR(255),
+    payment_url VARCHAR(255),
 );
 
 -- INVOICE

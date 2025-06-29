@@ -1,21 +1,20 @@
 package com.hustict.aims.service.handler;
 
 import com.hustict.aims.dto.product.ProductDetailDTO;
+import com.hustict.aims.model.product.Book;
 import com.hustict.aims.model.product.LP;
 import com.hustict.aims.model.product.Product;
 import com.hustict.aims.repository.product.LPRepository;
-import com.hustict.aims.utils.mapper.LPMapper;
-import org.springframework.stereotype.Component;
+import com.hustict.aims.utils.mapper.product.LPMapper;
 
 import java.util.Map;
 
-@Component
 public class LPHandler implements ProductHandler {
-    private final LPRepository lpRepo;
+    private final LPRepository repository;
     private final LPMapper lpMapper;
 
     public LPHandler(LPRepository lpRepo, LPMapper lpMapper) {
-        this.lpRepo = lpRepo;
+        this.repository = lpRepo;
         this.lpMapper = lpMapper;
     }
 
@@ -34,8 +33,12 @@ public class LPHandler implements ProductHandler {
     }
 
     @Override
-    public ProductDetailDTO saveAndReturnDTO(Product product) {
-        LP saved = lpRepo.save((LP) product);
-        return lpMapper.toDetailDTO(saved);
+    public Product save(Product product) {
+        return repository.save((LP) product);
+    }
+
+    @Override
+    public ProductDetailDTO toDTO(Product product) {
+        return lpMapper.toDetailDTO((LP) product);
     }
 }

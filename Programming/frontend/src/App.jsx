@@ -2,6 +2,7 @@ import React from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import CssBaseline from '@mui/material/CssBaseline';
+
 import HomePage from './pages/HomePage';
 import ManagementPanel from './pages/ManagementPanel';
 import CartPage from './pages/CartPage';
@@ -9,9 +10,11 @@ import CheckoutPage from './pages/CheckoutPage';
 import OrderReviewPage from './pages/OrderReviewPage';
 import RushOrderPage from './pages/RushOrderPage';
 import InvoicePage from './pages/InvoicePage';
+import LoginPage from './pages/LoginPage';
 
 
 import VnPayReturnPage from './pages/VnPayReturnPage';
+import ApiTestComponent from './components/ApiTestComponent';
 
 const theme = createTheme({
   palette: {
@@ -32,7 +35,7 @@ const theme = createTheme({
     text: {
       primary: '#1e293b',
       secondary: '#64748b',
-    }
+    },
   },
   typography: {
     fontFamily: [
@@ -76,6 +79,7 @@ function App() {
       <CssBaseline />
       <Router>
         <Routes>
+          <Route path="/login" element={<LoginPage />} />
           <Route path="/" element={<HomePage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
@@ -84,10 +88,11 @@ function App() {
           <Route path="/rush-order" element={<RushOrderPage />} />
           <Route path="/invoice" element={<InvoicePage />} />
           <Route path="/vnpay-return" element={<VnPayReturnPage />} />
+          <Route path="/api-test" element={<ApiTestComponent />} />
         </Routes>
       </Router>
     </ThemeProvider>
   );
 }
 
-export default App; 
+export default App;

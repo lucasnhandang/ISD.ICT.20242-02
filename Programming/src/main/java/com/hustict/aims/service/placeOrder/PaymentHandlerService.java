@@ -1,42 +1,43 @@
 package com.hustict.aims.service.placeOrder;
 
+import com.hustict.aims.dto.order.OrderDTO;
 import com.hustict.aims.dto.order.OrderInformationDTO;
+import com.hustict.aims.dto.payment.PaymentTransactionDTO;
 import com.hustict.aims.service.email.EmailSenderFactory;
+import com.hustict.aims.service.payment.SavePaymentTransaction;
 import com.hustict.aims.service.reservation.ReservationService;
 
 import jakarta.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PaymentHandlerService {
 
-    private final CartCleanupService cartCleanupService;
-    private final SaveOrderService saveOrderService;
-    private final EmailSenderFactory emailSenderFactory;
-    private final ReservationService reservationService;
+    @Autowired
+    private CartCleanupService cartCleanupService;
 
-    public PaymentHandlerService(
-        CartCleanupService cartCleanupService,
-        SaveOrderService saveOrderService,
-        EmailSenderFactory emailSenderFactory,
-        ReservationService reservationService
-    ) {
-        this.cartCleanupService = cartCleanupService;
-        this.saveOrderService   = saveOrderService;
-        this.emailSenderFactory = emailSenderFactory;
-        this.reservationService = reservationService;
-    }
+    @Autowired
+    private SaveOrderService saveOrderService;
 
-    public void handlePaymentSuccess(HttpSession session) {
-        OrderInformationDTO savedOrderInfo = saveOrderService.saveAll(session);
-        
-        reservationService.confirmReservation(session);
-        
-        session.setAttribute("orderInformation", savedOrderInfo);
-        //session.setAttribute("deliveryForm", session.getAttribute("deliveryForm"));
-        
-        cartCleanupService.removePurchasedItems(session);
+    @Autowired
+    private EmailSenderFactory emailSenderFactory;
 
-        emailSenderFactory.process("orderSuccess", session);
+    @Autowired
+    private ReservationService reservationService;
+
+    @Autowired
+    private SavePaymentTransaction savePaymentTransaction;
+
+
+    public void handlePaymentSuccess(PaymentTransactionDTO paymentTransaction, Long orderid) {
+
+        //reservationService.confirmReservation(session);
+        OrderDTO orderinfo = savePaymentTransaction.save(paymentTransaction, orderid);
+        
+        //cartCleanupService.removePurchasedItems(session);
+
+        emailSenderFactory.process("orderSuccess", orderinfo);
     }
 }

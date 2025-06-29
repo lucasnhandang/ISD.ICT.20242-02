@@ -2,8 +2,8 @@ package com.hustict.aims.service.email;
 
 import com.hustict.aims.dto.email.BaseEmailRequest;
 
-import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Component;
+import com.hustict.aims.dto.order.OrderDTO;
 
 import java.util.Map;
 
@@ -18,14 +18,15 @@ public class EmailSenderFactory {
 
   
     @SuppressWarnings("unchecked")
-    public void process(String type, HttpSession session) {
+    public void process(String type, OrderDTO order) {
+
         SendEmailService<BaseEmailRequest> service =
                 (SendEmailService<BaseEmailRequest>) emailServices.get(type);
         if (service == null) {
             throw new IllegalArgumentException("Unsupported email type: " + type);
         }
 
-        BaseEmailRequest request = service.buildRequest(session);
-        service.sendEmail(request);
+        BaseEmailRequest request = service.buildRequest(order);
+        service.sendEmail(request,order);
     }
 }

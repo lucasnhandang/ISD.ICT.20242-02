@@ -4,18 +4,19 @@ import java.text.DecimalFormat;
 
 import com.hustict.aims.dto.cart.CartItemRequestDTO;
 import com.hustict.aims.dto.email.ApproveOrderEmailRequest;
+import com.hustict.aims.dto.email.OrderSuccessEmailRequest;
+import com.hustict.aims.dto.order.OrderDTO;
 import com.hustict.aims.dto.order.OrderInformationDTO;
 import org.springframework.stereotype.Service;
 
-import jakarta.servlet.http.HttpSession;
 
 @Service("approveOrder")
 public class ApproveOrderEmailService extends SendEmailServiceImpl<ApproveOrderEmailRequest> {
     
     @Override
-    public ApproveOrderEmailRequest buildRequest(HttpSession session) {
+    public ApproveOrderEmailRequest buildRequest(OrderDTO order) {
         ApproveOrderEmailRequest req = instantiateRequest();
-        populateCommonFields(req);
+        populateCommonFields(req, order);
         return req;
     }
 
@@ -25,9 +26,8 @@ public class ApproveOrderEmailService extends SendEmailServiceImpl<ApproveOrderE
     }
 
     @Override
-    protected String buildSubject(ApproveOrderEmailRequest request) {
-        OrderInformationDTO orderInfo = (OrderInformationDTO) session.getAttribute("orderInformation");
-        Long orderId = orderInfo.getOrderId();
+
+    protected String buildSubject(ApproveOrderEmailRequest request,Long orderId) {
         return "Your Order #" + orderId + " is Approved";
     }
 
