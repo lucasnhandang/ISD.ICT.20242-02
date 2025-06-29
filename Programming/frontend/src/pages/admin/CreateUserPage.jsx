@@ -85,8 +85,8 @@ const CreateUserPage = () => {
     // Password validation
     if (!formData.password) {
       newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters long';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters long';
     }
 
     // Confirm password validation
@@ -330,7 +330,7 @@ const CreateUserPage = () => {
                   value={formData.password}
                   onChange={handleInputChange('password')}
                   error={!!errors.password}
-                  helperText={errors.password || 'Minimum 6 characters'}
+                  helperText={errors.password || 'Minimum 8 characters'}
                   disabled={loading}
                 />
               </Grid>

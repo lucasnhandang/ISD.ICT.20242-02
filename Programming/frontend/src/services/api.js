@@ -30,10 +30,14 @@ api.interceptors.response.use(
       // Handle specific error cases
       switch (error.response.status) {
         case 401:
-          // Unauthorized - redirect to login
-          localStorage.removeItem('token');
-          localStorage.removeItem('userInfo');
-          window.location.href = '/login';
+          // Unauthorized - chỉ redirect nếu có token (token hết hạn)
+          // Không redirect cho login API vì login thất bại là bình thường
+          const token = localStorage.getItem('token');
+          if (token && !error.config.url.includes('/auth/login')) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userInfo');
+            window.location.href = '/login';
+          }
           break;
         case 403:
           // Forbidden - show error message
@@ -298,6 +302,24 @@ export const orderManagementAPI = {
       return response.data;
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Failed to reject order');
+    }
+  },
+
+  getOrderDetails: async (orderId) => {
+    try {
+      const response = await api.get(`/orders/${orderId}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to get order details');
+    }
+  },
+
+  cancelOrder: async (orderId) => {
+    try {
+      const response = await api.put(`/orders/${orderId}/cancel`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to cancel order');
     }
   }
 };

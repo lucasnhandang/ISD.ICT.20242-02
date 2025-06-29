@@ -12,6 +12,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+import java.security.MessageDigest;
+import java.nio.charset.StandardCharsets;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -36,7 +38,8 @@ public class CreateRefundRequestVNP {
 
         String txnRef = queryParams.get("vnp_TxnRef");  
         String transactionNo = queryParams.get("vnp_TransactionNo");  
-        int amount = Integer.parseInt(queryParams.get("vnp_Amount"));  
+        int amount = Integer.parseInt(queryParams.get("vnp_Amount")); 
+        String transactionDate = queryParams.get("vnp_PayDate"); 
 
         String orderInfo = "Hoàn tiền cho đơn hàng " + order.getId();
 
@@ -49,11 +52,26 @@ public class CreateRefundRequestVNP {
         refundRequest.setAmount(amount);  
         refundRequest.setOrderInfo(orderInfo);  
         refundRequest.setTransactionNo(transactionNo);
+        refundRequest.setTransactionDate(transactionDate);
         refundRequest.setCreateDate(java.time.LocalDateTime.now().toString());
-        refundRequest.setIpAddr(ipAddr);  // Địa chỉ IP của máy chủ
+        refundRequest.setIpAddr(ipAddr);  
         refundRequest.setCreateBy(createBy);
         String secureHash = generateSecureHash(secretKey, refundRequest);
         refundRequest.setSecureHash(secureHash);
+        
+        System.out.println("VNPay announce: Create request done!");
+
+        System.out.println("Invoice: " + invoice);
+        System.out.println("PaymentTransaction: " + paymentTransaction);
+        System.out.println("PaymentUrl: " + paymentUrl);
+        System.out.println("QueryParams: " + queryParams);
+        System.out.println("txnRef: " + queryParams.get("vnp_TxnRef"));
+        System.out.println("transactionNo: " + queryParams.get("vnp_TransactionNo"));
+        System.out.println("amount: " + queryParams.get("vnp_Amount"));
+        System.out.println("vnpTmnCode: " + vnpTmnCode);
+        System.out.println("secretKey: " + secretKey);
+        System.out.println("ipAddr: " + ipAddr);
+        System.out.println("createBy: " + createBy);
 
         return refundRequest;
     }
@@ -61,57 +79,59 @@ public class CreateRefundRequestVNP {
     private Map<String, String> extractQueryParams(String paymentUrl) {
         Map<String, String> params = new HashMap<>();
         try {
-            URL url = new URL(paymentUrl);
-            String query = url.getQuery();
-            if (query != null) {
-                String[] pairs = query.split("&");
-                for (String pair : pairs) {
-                    String[] keyValue = pair.split("=");
-                    if (keyValue.length == 2) {
-                        params.put(keyValue[0], keyValue[1]);
-                    }
+            // Nếu paymentUrl chứa dấu ?, chỉ lấy phần sau
+            String query = paymentUrl.contains("?") ? paymentUrl.split("\\?", 2)[1] : paymentUrl;
+
+            String[] pairs = query.split("&");
+            for (String pair : pairs) {
+                String[] keyValue = pair.split("=", 2); // đảm bảo không lỗi nếu có dấu '=' trong value
+                if (keyValue.length == 2) {
+                    params.put(keyValue[0], keyValue[1]);
                 }
             }
         } catch (Exception e) {
-            System.err.println("Error parsing URL or extracting parameters: " + e.getMessage());
+            System.err.println("Error extracting parameters: " + e.getMessage());
         }
         return params;
     }
 
     public static String generateSecureHash(String secretKey, RefundRequest refundRequest) {
         try {
-            // Tạo dữ liệu đầu vào (data) theo thứ tự các tham số như mô tả
             String data = refundRequest.getRequestId() + "|" + 
-                          refundRequest.getVersion() + "|" + 
-                          refundRequest.getCommand() + "|" + 
-                          refundRequest.getTmnCode() + "|" + 
-                          refundRequest.getTransactionType() + "|" + 
-                          refundRequest.getTxnRef() + "|" + 
-                          refundRequest.getAmount() + "|" + 
-                          refundRequest.getTransactionNo() + "|" + 
-                          refundRequest.getTransactionDate() + "|" + 
-                          refundRequest.getCreateBy() + "|" + 
-                          refundRequest.getCreateDate() + "|" + 
-                          refundRequest.getIpAddr() + "|" + 
-                          refundRequest.getOrderInfo();
-            
-            // Tạo đối tượng SecretKeySpec với secretKey của bạn
-            SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), "HmacSHA512");
-            
-            // Tạo đối tượng Mac và sử dụng thuật toán HmacSHA512
-            Mac mac = Mac.getInstance("HmacSHA512");
-            mac.init(secretKeySpec);
+                        refundRequest.getVersion() + "|" + 
+                        refundRequest.getCommand() + "|" + 
+                        refundRequest.getTmnCode() + "|" + 
+                        refundRequest.getTransactionType() + "|" + 
+                        refundRequest.getTxnRef() + "|" + 
+                        refundRequest.getAmount() + "|" + 
+                        refundRequest.getTransactionNo() + "|" + 
+                        refundRequest.getTransactionDate() + "|" + 
+                        refundRequest.getCreateBy() + "|" + 
+                        refundRequest.getCreateDate() + "|" + 
+                        refundRequest.getIpAddr() + "|" + 
+                        refundRequest.getOrderInfo();
 
-            // Tính toán hash
-            byte[] hashBytes = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
-            
-            // Chuyển đổi byte[] thành chuỗi hex
-            return bytesToHex(hashBytes);
-            
+            // Kết hợp secretKey + data
+            String input = secretKey + data;
+
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
+
+            // Chuyển byte thành hex string
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+
+            return hexString.toString();
+
         } catch (Exception e) {
             throw new RuntimeException("Error generating secure hash", e);
         }
     }
+
 
     // Hàm chuyển đổi byte[] thành chuỗi hex
     private static String bytesToHex(byte[] bytes) {

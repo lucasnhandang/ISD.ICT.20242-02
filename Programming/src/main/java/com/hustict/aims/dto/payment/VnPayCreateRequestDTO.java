@@ -3,12 +3,15 @@ package com.hustict.aims.dto.payment;
 public class VnPayCreateRequestDTO {
     private int amount;
     private String orderInfo;
-    private String orderType;
     private String bankCode;
+    private String orderType;
+ 
     private String language;
-    private String billingFullName;
     private String billingMobile;
     private String billingEmail;
+    
+    private String billingFullName;
+    
     private String billingAddress;
     private String billingCity;
     private String billingCountry;
