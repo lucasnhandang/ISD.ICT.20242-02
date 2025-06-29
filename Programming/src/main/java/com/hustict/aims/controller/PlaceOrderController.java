@@ -22,20 +22,27 @@ import com.hustict.aims.service.placeOrder.DeliveryFormValidator;
 import com.hustict.aims.service.placeOrder.HandleRequestService;
 import com.hustict.aims.service.placeOrder.PaymentHandlerService;
 import com.hustict.aims.service.placeOrder.NormalOrderService;
+import com.hustict.aims.service.placeOrder.ProductUpdateService;
+
 import com.hustict.aims.service.placeOrder.SaveTempOrder;
+import com.hustict.aims.service.product.ProductService;
 import com.hustict.aims.service.placeOrder.CartCleanupService;
 import com.hustict.aims.dto.order.ConfirmOrderRequestDTO;
 
 import com.hustict.aims.service.reservation.ReservationService;
 import com.hustict.aims.service.sessionValidator.SessionValidatorService;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-        
+
 @RestController
 @RequestMapping("/api/v1/place-order")
 public class PlaceOrderController {
+
+    private static final Logger logger = LoggerFactory.getLogger(SavePaymentTransaction.class);
+
 
     @Autowired
     private HandleRequestService handleRequestService;
@@ -142,20 +149,27 @@ public class PlaceOrderController {
             throw new IllegalArgumentException("PaymentTransactionDTO must not be null");
         } else if (orderId == null) {
             throw new IllegalArgumentException("orderId must not be null");
-        } else {
-            System.out.println("PaymentTransactionDTO and orderId are valid" + orderId);
-        }
+        } 
         paymentHandlerService.handlePaymentSuccess(paymentTransaction, orderId);
         return ResponseEntity.ok("Order is successfully created (Mock Test)");
     }
 
     @PostMapping("/confirm-order")
     public ResponseEntity<String> cartCleanUp(HttpSession session, @RequestBody ConfirmOrderRequestDTO confirmOrderRequestDTO) {
-        if (confirmOrderRequestDTO.isSuccess()) 
-        {cartCleanupService.removePurchasedItems(session, confirmOrderRequestDTO.getOrderId());
-            } else 
-            return ResponseEntity.ok("Cart is cleaned and reservation is removed");
         
+        logger.info("Sucess or not?:" + confirmOrderRequestDTO.isSuccess());
+        if (confirmOrderRequestDTO.isSuccess()) {
+            logger.info("Remove cart for order" + confirmOrderRequestDTO.getOrderId());
+
+            cartCleanupService.removePurchasedItems(session, confirmOrderRequestDTO.getOrderId());
+            logger.info("Confirm reservation for order" + confirmOrderRequestDTO.getOrderId());
+
+            reservationService.confirmReservation(session,confirmOrderRequestDTO.getOrderId());
+          
+        } else//  return ResponseEntity.ok("Nothing to remove!");
+
+        logger.info("Order is not sucess " + confirmOrderRequestDTO.getOrderId());
+
         return ResponseEntity.ok("Cart is cleaned and reservation is cleaned for");
     }
 }

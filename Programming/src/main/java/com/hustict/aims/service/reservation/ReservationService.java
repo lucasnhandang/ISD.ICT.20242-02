@@ -5,29 +5,38 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.hustict.aims.dto.cart.CartRequestDTO;
 import com.hustict.aims.dto.invoice.InvoiceDTO;
+import com.hustict.aims.model.order.OrderItem;
 import com.hustict.aims.model.reservation.Reservation;
 import com.hustict.aims.repository.ReservationRepository;
 import com.hustict.aims.model.reservation.Reservation.Status;
 import com.hustict.aims.model.reservation.ReservationItem;
 import com.hustict.aims.service.product.InventoryService;
+import com.hustict.aims.repository.OrderItemRepository;
+import com.hustict.aims.repository.ReservationItemRepository;
+
 
 import jakarta.servlet.http.HttpSession;
-
+import java.util.List;
 @Service
 public class ReservationService {
-    private final ReservationRepository reservationRepository;
+    @Autowired
+    private ReservationRepository reservationRepository;
 
-    private final InventoryService inventoryService;
+    @Autowired
+    private InventoryService inventoryService;
 
-    public ReservationService(ReservationRepository reservationRepository,
-                                InventoryService inventoryService) {
-        this.reservationRepository = reservationRepository;
-        this.inventoryService = inventoryService;
-    }
+    @Autowired
+    private OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private ReservationItemRepository reservationItemRepository;
 
     @Transactional
     public void createReservation(CartRequestDTO cart, String sessionId) {
@@ -96,7 +105,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void confirmReservation(HttpSession session) {
+    public void confirmReservation(HttpSession session, Long orderId) {
         String sessionId = session.getId();
 
         List<Reservation> reservations = reservationRepository
@@ -117,21 +126,30 @@ public class ReservationService {
         } else if (reservation.getStatus() == Status.RELEASED) {
             throw new IllegalStateException("Reservation đã bị hủy và không thể thay đổi.");
         }
-        
-        if (session.getAttribute("invoice") != null) {
-            InvoiceDTO invoiceDTO = (InvoiceDTO) session.getAttribute("invoice");
-            for (ReservationItem item : reservation.getItems()) {
-                inventoryService.decreaseQuantity(item.getProductId(), item.getQuantity());
-            }
-            if (invoiceDTO.getPaymentTransactionId() != null) {
-                reservation.setStatus(Status.CONFIRMED);  
-                reservationRepository.save(reservation);
+        List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderId);
+        List<ReservationItem> reservationItems = reservationItemRepository.findByReservationId(reservation.getId());
+
+        Map<Long, ReservationItem> reservationItemMap = reservationItems.stream()
+            .collect(Collectors.toMap(ReservationItem::getProductId, item -> item));
+        for (OrderItem orderItem : orderItems) {
+            Long productId = orderItem.getProduct().getId();
+            System.out.println("Đang xử lý OrderItem với productId: " + productId);
+
+            if (reservationItemMap.containsKey(productId)) {
+                ReservationItem reservationItem = reservationItemMap.get(productId);
+                System.out.println("Tìm thấy ReservationItem tương ứng với productId: " + productId);
+                System.out.println("Giảm số lượng sản phẩm (productId: " + productId + ") với quantity: " + reservationItem.getQuantity());
+
+                inventoryService.decreaseQuantity(productId, reservationItem.getQuantity());
+
+                System.out.println("Xóa ReservationItem với productId: " + productId);
+                reservationItemRepository.delete(reservationItem);
             } else {
-                throw new IllegalStateException("Cannot find payment transaction in invoice in session");
+                System.out.println("Không tìm thấy ReservationItem cho productId: " + productId);
             }
-        } else {
-            throw new IllegalStateException("Cannot find invoice in session.");
         }
+    
+
     }
 
 }

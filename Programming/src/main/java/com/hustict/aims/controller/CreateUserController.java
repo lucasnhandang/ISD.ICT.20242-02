@@ -41,7 +41,6 @@ public class CreateUserController {
             System.out.println("Request: " + request);
             System.out.println("Auth Header: " + authHeader);
             
-            // Extract and validate admin token
             String token = AuthUtils.extractTokenFromHeader(authHeader);
             if (token == null) {
                 System.out.println("ERROR: Authorization token required");
@@ -49,7 +48,6 @@ public class CreateUserController {
                         .body(new CreateUserResponseDTO(false, "Authorization token required", null));
             }
 
-            // Get admin user from token
             User adminUser = getAdminUserFromToken(token);
             if (adminUser == null) {
                 System.out.println("ERROR: Invalid or expired token");
@@ -59,7 +57,6 @@ public class CreateUserController {
 
             System.out.println("Admin User: " + adminUser.getEmail() + " with roles: " + adminUser.getRoles());
 
-            // Create user
             CreateUserResponseDTO response = userCreationService.createUser(request, adminUser);
             
             System.out.println("Service Response: " + response);
