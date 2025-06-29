@@ -44,7 +44,7 @@ const PaymentResultPage = () => {
         const responseCode = urlParams.get('vnp_ResponseCode');
         
         if (!txnRef || !responseCode) {
-          setError('Thiếu thông tin giao dịch');
+          setError('Missing transaction information');
           return;
         }
 
@@ -54,7 +54,7 @@ const PaymentResultPage = () => {
         
       } catch (err) {
         console.error('Error fetching payment result:', err);
-        setError(err.response?.data?.message || 'Có lỗi khi lấy thông tin thanh toán');
+        setError(err.response?.data?.message || 'Error retrieving payment information');
       } finally {
         setLoading(false);
       }
@@ -77,9 +77,9 @@ const PaymentResultPage = () => {
           gap: 2
         }}>
           <CircularProgress size={60} />
-          <Typography variant="h6">Đang xử lý kết quả thanh toán...</Typography>
+          <Typography variant="h6">Processing payment result...</Typography>
           <Typography variant="body2" color="text.secondary">
-            Vui lòng không đóng trang này
+            Please do not close this page
           </Typography>
         </Box>
       </Box>
@@ -95,7 +95,7 @@ const PaymentResultPage = () => {
           <Paper elevation={2} sx={{ p: 4, textAlign: 'center' }}>
             <ErrorIcon sx={{ fontSize: 80, color: 'error.main', mb: 2 }} />
             <Typography variant="h5" gutterBottom color="error">
-              Có lỗi xảy ra
+              An Error Occurred
             </Typography>
             <Typography variant="body1" sx={{ mb: 3 }}>
               {error}
@@ -106,13 +106,13 @@ const PaymentResultPage = () => {
               onClick={() => navigate('/')}
               sx={{ mr: 2 }}
             >
-              Về trang chủ
+              Back to Home
             </Button>
             <Button 
               variant="outlined"
               onClick={() => navigate(-1)}
             >
-              Quay lại
+              Go Back
             </Button>
           </Paper>
         </Box>
@@ -135,7 +135,7 @@ const PaymentResultPage = () => {
           <Box sx={{ textAlign: 'center', mb: 4 }}>
             {resultIcon}
             <Typography variant="h4" gutterBottom color={isSuccess ? 'success.main' : 'error.main'}>
-              {isSuccess ? 'Thanh toán thành công!' : 'Thanh toán không thành công'}
+              {isSuccess ? 'Payment Successful!' : 'Payment Failed'}
             </Typography>
             <Typography variant="body1" color="text.secondary">
               {paymentResult?.message || 'Không có thông tin chi tiết'}

@@ -46,14 +46,14 @@ const RushOrderPage = () => {
             try {
               const response = await getProductDetails(item.productID);
               details[item.productID] = {
-                name: response.data.title || response.data.name || `Sản phẩm ${item.productID}`,
+                name: response.data.title || response.data.name || `Product ${item.productID}`,
                 description: response.data.description || '',
                 image: response.data.imageUrl || response.data.image || null
               };
             } catch (error) {
               console.error(`Failed to fetch product ${item.productID}:`, error);
               details[item.productID] = {
-                name: `Sản phẩm ${item.productID}`,
+                name: `Product ${item.productID}`,
                 description: '',
                 image: null
               };
@@ -74,7 +74,7 @@ const RushOrderPage = () => {
 
   const handleRushOrder = async () => {
     if (!rushInfo.expectedDateTime) {
-      setError('Vui lòng chọn thời gian mong muốn nhận hàng');
+      setError('Please select your desired delivery time');
       return;
     }
 
@@ -125,12 +125,12 @@ const RushOrderPage = () => {
           },
           cart: cart,
           source: 'rush-order',
-          message: res.data.message || 'Đơn hàng đã được tách thành công!'
+          message: res.data.message || 'Order has been split successfully!'
         }
       });
       
     } catch (err) {
-      setError(err.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại.');
+      setError(err.response?.data?.message || 'An error occurred, please try again.');
     } finally {
       setLoading(false);
     }
@@ -155,14 +155,14 @@ const RushOrderPage = () => {
         <Header />
         <Box sx={{ maxWidth: 1200, mx: 'auto', pt: 4, px: 2 }}>
           <Alert severity="error" sx={{ mb: 2 }}>
-            Không tìm thấy thông tin đơn hàng. Vui lòng thử lại từ trang order review.
+            Order information not found. Please try again from the order review page.
           </Alert>
           <Button 
             variant="contained" 
             onClick={() => navigate('/order-review')}
             sx={{ mt: 2 }}
           >
-            Quay lại Order Review
+            Back to Order Review
           </Button>
         </Box>
       </Box>
@@ -177,7 +177,7 @@ const RushOrderPage = () => {
       
       <Box sx={{ maxWidth: 1200, mx: 'auto', pt: 4, px: 2 }}>
         <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, mb: 4 }}>
-          Giao hàng nhanh (Rush Order)
+          Rush Delivery
         </Typography>
 
         <Box sx={{ 
@@ -190,14 +190,14 @@ const RushOrderPage = () => {
             {/* Danh sách sản phẩm */}
             <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                Sản phẩm đã đặt ({productList.length} sản phẩm)
+                Ordered Products ({productList.length} items)
               </Typography>
               <Divider sx={{ mb: 2 }} />
 
               {loadingProducts ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
                   <CircularProgress />
-                  <Typography sx={{ ml: 2 }}>Đang tải thông tin sản phẩm...</Typography>
+                  <Typography sx={{ ml: 2 }}>Loading product information...</Typography>
                 </Box>
               ) : (
                 <Box>
@@ -250,20 +250,20 @@ const RushOrderPage = () => {
                         {/* Thông tin sản phẩm */}
                         <Box sx={{ flex: 1 }}>
                           <Typography variant="h6" sx={{ fontWeight: 500, mb: 0.5 }}>
-                            {product.name || `Sản phẩm ${item.productID}`}
+                            {product.name || `Product ${item.productID}`}
                           </Typography>
                           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                             ID: {item.productID}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
-                            Đơn giá: {formatPrice(item.price)}
+                            Unit Price: {formatPrice(item.price)}
                           </Typography>
                         </Box>
 
                         {/* Số lượng và tổng tiền */}
                         <Box sx={{ textAlign: 'right', minWidth: 120 }}>
                           <Typography variant="body1" sx={{ mb: 1 }}>
-                            Số lượng: {item.quantity}
+                            Quantity: {item.quantity}
                           </Typography>
                           <Typography variant="h6" color="primary" sx={{ fontWeight: 600 }}>
                             {formatPrice(subtotal)}
@@ -279,22 +279,22 @@ const RushOrderPage = () => {
             {/* Thông tin hóa đơn */}
             <Paper elevation={2} sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                Chi tiết thanh toán (sẽ được tính lại với phí giao hàng nhanh)
+                Payment Details (will be recalculated with rush delivery fee)
               </Typography>
               <Divider sx={{ mb: 2 }} />
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography>Tổng tiền hàng (chưa VAT):</Typography>
+                <Typography>Product Total (excl. VAT):</Typography>
                 <Typography>{formatPrice(invoice.productPriceExVAT)}</Typography>
               </Box>
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography>Tổng tiền hàng (đã VAT):</Typography>
+                <Typography>Product Total (incl. VAT):</Typography>
                 <Typography>{formatPrice(invoice.productPriceIncVAT)}</Typography>
               </Box>
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography>Phí giao hàng thường:</Typography>
+                <Typography>Standard Shipping Fee:</Typography>
                 <Typography sx={{ 
                   color: 'text.secondary',
                   textDecoration: 'line-through'
@@ -305,10 +305,10 @@ const RushOrderPage = () => {
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography sx={{ color: 'warning.main', fontWeight: 600 }}>
-                  Phí giao hàng nhanh:
+                  Rush Delivery Fee:
                 </Typography>
                 <Typography sx={{ color: 'warning.main', fontWeight: 600 }}>
-                  Sẽ được tính lại
+                  To be recalculated
                 </Typography>
               </Box>
 
@@ -316,7 +316,7 @@ const RushOrderPage = () => {
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  Tổng cộng tạm tính:
+                  Estimated Total:
                 </Typography>
                 <Typography variant="h6" color="primary" sx={{ fontWeight: 700 }}>
                   {formatPrice(invoice.totalAmount)}
@@ -324,7 +324,7 @@ const RushOrderPage = () => {
               </Box>
 
               <Typography variant="body2" color="warning.main" sx={{ mt: 1, fontStyle: 'italic' }}>
-                * Tổng tiền cuối cùng sẽ được cập nhật sau khi tính phí giao hàng nhanh
+                * Final total will be updated after rush delivery fee calculation
               </Typography>
             </Paper>
           </Box>
@@ -334,14 +334,14 @@ const RushOrderPage = () => {
             {/* Thông tin giao hàng hiện tại */}
             <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                Thông tin giao hàng
+                Delivery Information
               </Typography>
               <Divider sx={{ mb: 2 }} />
 
               <Box sx={{ '& > *': { mb: 1.5 } }}>
                 <Box>
                   <Typography variant="subtitle2" color="text.secondary">
-                    Người nhận:
+                    Recipient:
                   </Typography>
                   <Typography variant="body1" sx={{ fontWeight: 500 }}>
                     {deliveryForm.customerName}
@@ -350,7 +350,7 @@ const RushOrderPage = () => {
 
                 <Box>
                   <Typography variant="subtitle2" color="text.secondary">
-                    Số điện thoại:
+                    Phone Number:
                   </Typography>
                   <Typography variant="body1">
                     {deliveryForm.phoneNumber}
@@ -359,7 +359,7 @@ const RushOrderPage = () => {
 
                 <Box>
                   <Typography variant="subtitle2" color="text.secondary">
-                    Địa chỉ giao hàng:
+                    Delivery Address:
                   </Typography>
                   <Typography variant="body1">
                     {deliveryForm.deliveryAddress}
@@ -374,7 +374,7 @@ const RushOrderPage = () => {
             {/* Form rush order */}
             <Paper elevation={2} sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                Thông tin giao hàng nhanh
+                Rush Delivery Information
               </Typography>
               <Divider sx={{ mb: 3 }} />
 
@@ -387,7 +387,7 @@ const RushOrderPage = () => {
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                 <Box>
                   <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                    Thời gian mong muốn nhận hàng <span style={{ color: 'red' }}>*</span>
+                    Expected Delivery Time <span style={{ color: 'red' }}>*</span>
                   </Typography>
                   <TextField
                     type="datetime-local"
@@ -401,13 +401,13 @@ const RushOrderPage = () => {
                     }}
                   />
                   <Typography variant="caption" color="text.secondary">
-                    Thời gian nhận hàng phải sau ít nhất 2 giờ từ bây giờ
+                    Delivery time must be at least 2 hours from now
                   </Typography>
                 </Box>
 
                 <Box>
                   <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                    Hướng dẫn giao hàng (tùy chọn)
+                    Delivery Instructions (optional)
                   </Typography>
                   <TextField
                     multiline
@@ -416,14 +416,14 @@ const RushOrderPage = () => {
                     onChange={(e) => setRushInfo({ ...rushInfo, deliveryInstructions: e.target.value })}
                     fullWidth
                     variant="outlined"
-                    placeholder="Ví dụ: Gọi trước khi giao, để hàng tại bảo vệ, v.v..."
+                    placeholder="e.g. Call before delivery, leave at security desk, etc..."
                   />
                 </Box>
 
                 <Alert severity="info" sx={{ mt: 2 }}>
                   <Typography variant="body2">
-                    <strong>Lưu ý:</strong> Giao hàng nhanh có thể tách thành nhiều đơn hàng riêng biệt 
-                    và phí giao hàng sẽ được tính lại theo mức phí giao hàng nhanh.
+                    <strong>Note:</strong> Rush delivery may split into multiple separate orders 
+                    and shipping fees will be recalculated according to rush delivery rates.
                   </Typography>
                 </Alert>
 
@@ -434,7 +434,7 @@ const RushOrderPage = () => {
                     disabled={loading}
                     fullWidth
                   >
-                    Quay lại
+                    Go Back
                   </Button>
 
                   <Button
@@ -453,10 +453,10 @@ const RushOrderPage = () => {
                     {loading ? (
                       <>
                         <CircularProgress size={20} sx={{ mr: 1 }} />
-                        Đang xử lý...
+                        Processing...
                       </>
                     ) : (
-                      'Xác nhận giao hàng nhanh'
+                      'Confirm Rush Delivery'
                     )}
                   </Button>
                 </Box>

@@ -74,14 +74,14 @@ const OrderReviewPage = () => {
         <Header />
         <Box sx={{ maxWidth: 1200, mx: 'auto', pt: 4, px: 2 }}>
           <Alert severity="error" sx={{ mb: 2 }}>
-            Không tìm thấy thông tin đơn hàng. Vui lòng thử lại từ trang checkout.
+            Order information not found. Please try again from the checkout page.
           </Alert>
           <Button 
             variant="contained" 
             onClick={() => navigate('/checkout')}
             sx={{ mt: 2 }}
           >
-            Quay lại Checkout
+            Back to Checkout
           </Button>
         </Box>
       </Box>
@@ -101,12 +101,12 @@ const OrderReviewPage = () => {
           state: { cart, invoice, deliveryForm, orderId } 
         });
       } else {
-        setRushError(response.data.message || 'Địa chỉ không đủ điều kiện giao hàng nhanh.');
+        setRushError(response.data.message || 'Address is not eligible for rush delivery.');
       }
     } catch (error) {
       setRushError(
         error.response?.data?.message || 
-        'Có lỗi xảy ra khi kiểm tra điều kiện giao hàng nhanh.'
+        'An error occurred while checking rush delivery eligibility.'
       );
     } finally {
       setLoadingRush(false);
@@ -140,7 +140,7 @@ const OrderReviewPage = () => {
       
       <Box sx={{ maxWidth: 1200, mx: 'auto', pt: 4, px: 2 }}>
         <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, mb: 4 }}>
-          Xác nhận đơn hàng
+          Order Confirmation
         </Typography>
 
         <Box sx={{ 
@@ -153,14 +153,14 @@ const OrderReviewPage = () => {
             {/* Danh sách sản phẩm */}
             <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                Sản phẩm đã đặt ({productList.length} sản phẩm)
+                Ordered Products ({productList.length} items)
               </Typography>
               <Divider sx={{ mb: 2 }} />
 
               {loadingProducts ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
                   <CircularProgress />
-                  <Typography sx={{ ml: 2 }}>Đang tải thông tin sản phẩm...</Typography>
+                  <Typography sx={{ ml: 2 }}>Loading product information...</Typography>
                 </Box>
               ) : (
                 <Box>
@@ -213,20 +213,17 @@ const OrderReviewPage = () => {
                         {/* Thông tin sản phẩm */}
                         <Box sx={{ flex: 1 }}>
                           <Typography variant="h6" sx={{ fontWeight: 500, mb: 0.5 }}>
-                            {product.name || `Sản phẩm ${item.productID}`}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                            ID: {item.productID}
+                            {product.name || `Product ${item.productID}`}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
-                            Đơn giá: {formatPrice(item.price)}
+                            Unit Price: {formatPrice(item.price)}
                           </Typography>
                         </Box>
 
                         {/* Số lượng và tổng tiền */}
                         <Box sx={{ textAlign: 'right', minWidth: 120 }}>
                           <Typography variant="body1" sx={{ mb: 1 }}>
-                            Số lượng: {item.quantity}
+                            Quantity: {item.quantity}
                           </Typography>
                           <Typography variant="h6" color="primary" sx={{ fontWeight: 600 }}>
                             {formatPrice(subtotal)}
@@ -242,22 +239,22 @@ const OrderReviewPage = () => {
             {/* Thông tin hóa đơn */}
             <Paper elevation={2} sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                Chi tiết thanh toán
+                Payment Details
               </Typography>
               <Divider sx={{ mb: 2 }} />
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography>Tổng tiền hàng (chưa VAT):</Typography>
+                <Typography>Product Total (excl. VAT):</Typography>
                 <Typography>{formatPrice(invoice.productPriceExVAT)}</Typography>
               </Box>
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography>Tổng tiền hàng (đã VAT):</Typography>
+                <Typography>Product Total (incl. VAT):</Typography>
                 <Typography>{formatPrice(invoice.productPriceIncVAT)}</Typography>
               </Box>
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography>Phí giao hàng:</Typography>
+                <Typography>Shipping Fee:</Typography>
                 <Typography sx={{ 
                   color: invoice.shippingFee > 0 ? 'orange' : 'inherit',
                   fontWeight: invoice.shippingFee > 0 ? 600 : 400
@@ -270,7 +267,7 @@ const OrderReviewPage = () => {
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  Tổng cộng:
+                  Total Amount:
                 </Typography>
                 <Typography variant="h6" color="primary" sx={{ fontWeight: 700 }}>
                   {formatPrice(invoice.totalAmount)}
@@ -278,7 +275,7 @@ const OrderReviewPage = () => {
               </Box>
 
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Đơn vị tiền tệ: {cart.currency || 'VND'}
+                Currency: {cart.currency || 'VND'}
               </Typography>
             </Paper>
           </Box>
@@ -288,14 +285,14 @@ const OrderReviewPage = () => {
             {/* Thông tin giao hàng */}
             <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                Thông tin giao hàng
+                Delivery Information
               </Typography>
               <Divider sx={{ mb: 2 }} />
 
               <Box sx={{ '& > *': { mb: 1.5 } }}>
                 <Box>
                   <Typography variant="subtitle2" color="text.secondary">
-                    Người nhận:
+                    Recipient:
                   </Typography>
                   <Typography variant="body1" sx={{ fontWeight: 500 }}>
                     {deliveryForm.customerName}
@@ -304,7 +301,7 @@ const OrderReviewPage = () => {
 
                 <Box>
                   <Typography variant="subtitle2" color="text.secondary">
-                    Số điện thoại:
+                    Phone Number:
                   </Typography>
                   <Typography variant="body1">
                     {deliveryForm.phoneNumber}
@@ -322,7 +319,7 @@ const OrderReviewPage = () => {
 
                 <Box>
                   <Typography variant="subtitle2" color="text.secondary">
-                    Địa chỉ giao hàng:
+                    Delivery Address:
                   </Typography>
                   <Typography variant="body1">
                     {deliveryForm.deliveryAddress}
@@ -335,7 +332,7 @@ const OrderReviewPage = () => {
                 {deliveryForm.deliveryInstructions && (
                   <Box>
                     <Typography variant="subtitle2" color="text.secondary">
-                      Ghi chú:
+                      Notes:
                     </Typography>
                     <Typography variant="body1">
                       {deliveryForm.deliveryInstructions}
@@ -345,13 +342,13 @@ const OrderReviewPage = () => {
 
                 <Box>
                   <Typography variant="subtitle2" color="text.secondary">
-                    Giao hàng nhanh:
+                    Rush Delivery:
                   </Typography>
                   <Typography variant="body1" sx={{ 
                     color: deliveryForm.rushOrder ? 'success.main' : 'text.primary',
                     fontWeight: deliveryForm.rushOrder ? 600 : 400
                   }}>
-                    {deliveryForm.rushOrder ? 'Có' : 'Không'}
+                    {deliveryForm.rushOrder ? 'Yes' : 'No'}
                   </Typography>
                 </Box>
               </Box>
@@ -360,7 +357,7 @@ const OrderReviewPage = () => {
             {/* Hành động */}
             <Paper elevation={2} sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                Hành động
+                Actions
               </Typography>
               <Divider sx={{ mb: 2 }} />
 
@@ -373,10 +370,12 @@ const OrderReviewPage = () => {
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Button
                   variant="outlined"
-                  onClick={() => navigate('/checkout')}
+                  onClick={() => navigate('/checkout', { 
+                    state: { preservedDeliveryForm: deliveryForm } 
+                  })}
                   fullWidth
                 >
-                  Quay lại Checkout
+                  Back to Checkout
                 </Button>
 
                 <Button
@@ -389,10 +388,10 @@ const OrderReviewPage = () => {
                   {loadingRush ? (
                     <>
                       <CircularProgress size={20} sx={{ mr: 1 }} />
-                      Đang kiểm tra...
+                      Checking...
                     </>
                   ) : (
-                    'Chọn giao hàng nhanh'
+                    'Choose Rush Delivery'
                   )}
                 </Button>
 
@@ -408,7 +407,7 @@ const OrderReviewPage = () => {
                     fontSize: '1rem'
                   }}
                 >
-                  Tiến hành thanh toán
+                  Proceed to Payment
                 </Button>
               </Box>
             </Paper>
