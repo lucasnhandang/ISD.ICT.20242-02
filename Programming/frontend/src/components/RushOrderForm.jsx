@@ -59,7 +59,7 @@ const RushOrderForm = ({ open, onClose, onSuccess }) => {
             InputLabelProps={{ shrink: true }}
           />
           <TextField
-            label="Delivery Instructions (Optional)"
+            label="Delivery Instructions"
             name="deliveryInstructions"
             value={form.deliveryInstructions}
             onChange={handleChange}

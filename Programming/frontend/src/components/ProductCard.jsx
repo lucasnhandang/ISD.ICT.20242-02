@@ -386,6 +386,15 @@ const ProductCard = ({ product, onCartUpdate }) => {
                 <Typography variant="body1" gutterBottom>
                   <strong>In Stock:</strong> {(productDetails || product).quantity} products
                 </Typography>
+                <Typography variant="body1" gutterBottom>
+                  <strong>Rush Delivery:</strong> 
+                  <Chip 
+                    label={(productDetails || product).rushOrderSupported ? "Supported" : "Not Supported"}
+                    color={(productDetails || product).rushOrderSupported ? "success" : "default"}
+                    size="small"
+                    sx={{ ml: 1 }}
+                  />
+                </Typography>
                 
                 {/* Product-specific details */}
                 {productDetails && renderProductSpecificDetails(productDetails)}

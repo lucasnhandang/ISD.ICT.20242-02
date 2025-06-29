@@ -407,7 +407,7 @@ const RushOrderPage = () => {
 
                 <Box>
                   <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                    Delivery Instructions (optional)
+                    Delivery Instruction
                   </Typography>
                   <TextField
                     multiline

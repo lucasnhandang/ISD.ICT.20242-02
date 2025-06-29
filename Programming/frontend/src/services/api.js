@@ -348,11 +348,9 @@ export const processRushOrder = async () => {
 export const saveRushOrders = async () => {
   return api.post('/place-rush-order/save-rush-orders');
 };
-
 export const requestToPlaceOrder = async (cart) => {
   return api.post('/place-order/request', cart);
 };
-
 // Create separate axios instance for payment APIs
 const paymentApi = axios.create({
   baseURL: 'http://localhost:8080/api/v1/payment',

@@ -97,12 +97,23 @@ const CheckoutPage = () => {
     fetchProductDetails();
   }, [cart]);
 
-  // Handle normal order submission
+  // Handle normal order submission (with delivery form from state)
   const handleNormalOrderSubmit = async () => {
     try {
       setProcessingOrder(true);
       setError('');
       
+      if (!preservedDeliveryForm) {
+        throw new Error('No delivery information found. Please fill delivery form first.');
+      }
+      
+      // First, request to place order to create session
+      await requestToPlaceOrder(cart);
+      
+      // Then submit delivery form
+      await submitDeliveryForm(preservedDeliveryForm);
+      
+      // Finally handle normal order
       const response = await handleNormalOrder(cart);
       
       if (!response.data) {
@@ -141,10 +152,13 @@ const CheckoutPage = () => {
         throw new Error('Cart information not found');
       }
 
-      // Submit delivery form and process order
-      await submitDeliveryForm(deliveryForm);
+      // First, request to place order to create session
       await requestToPlaceOrder(cart);
       
+      // Then submit delivery form
+      await submitDeliveryForm(deliveryForm);
+      
+      // Finally handle normal order
       const invoiceResponse = await handleNormalOrder(cart);
       
       if (!invoiceResponse.data) {
