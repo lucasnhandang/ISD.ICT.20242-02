@@ -2,6 +2,7 @@ package com.hustict.aims.service.placeOrder;
 
 import com.hustict.aims.dto.payment.PaymentTransactionDTO;
 import com.hustict.aims.dto.payment.VnPayCreateRequestDTO;
+import com.hustict.aims.dto.payment.PlaceOrderRequestDTO;
 import com.hustict.aims.model.order.Order;
 import com.hustict.aims.model.payment.PaymentTransaction;
 import com.hustict.aims.repository.OrderRepository;
@@ -10,12 +11,16 @@ import com.hustict.aims.utils.VnPayConfig;
 import com.hustict.aims.utils.VnPayUtils;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.io.IOException;
 
 @Service("vnPayPaymentSubsystem")
 public class VnPayPaymentSubsystem implements PaymentSubsystem {
@@ -25,6 +30,8 @@ public class VnPayPaymentSubsystem implements PaymentSubsystem {
     private OrderRepository orderRepository;
     @Autowired
     private PaymentTransactionRepository paymentTransactionRepository;
+    @Autowired
+    private RestTemplate restTemplate;
 
     @Override
     public String createPaymentUrl(VnPayCreateRequestDTO req, String clientIp, String returnUrl, String txnRef) {
@@ -117,6 +124,77 @@ public class VnPayPaymentSubsystem implements PaymentSubsystem {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public String handleReturnAndBuildRedirect(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        Map<String, String> params = new HashMap<>();
+        request.getParameterMap().forEach((k, v) -> params.put(k, v[0]));
+
+        // Xử lý logic như trong PaymentController
+        String vnpTxnRef = params.getOrDefault("vnp_TxnRef", "");
+        String vnpResponseCode = params.getOrDefault("vnp_ResponseCode", "");
+        String vnpTransactionNo = params.getOrDefault("vnp_TransactionNo", "");
+        String vnpAmount = params.getOrDefault("vnp_Amount", "");
+        String vnpPayDate = params.getOrDefault("vnp_PayDate", "");
+        String vnpCardType = params.getOrDefault("vnp_CardType", "");
+        String vnpOrderInfo = params.getOrDefault("vnp_OrderInfo", "");
+        String vnpBankCode = params.getOrDefault("vnp_BankCode", "");
+        String vnpTransactionStatus = params.getOrDefault("vnp_TransactionStatus", "");
+
+        String paymentUrl = "vnp_TxnRef=" + vnpTxnRef
+                + "&vnp_ResponseCode=" + vnpResponseCode
+                + "&vnp_TransactionNo=" + vnpTransactionNo
+                + "&vnp_Amount=" + vnpAmount
+                + "&vnp_PayDate=" + vnpPayDate
+                + "&vnp_CardType=" + vnpCardType
+                + "&vnp_OrderInfo=" + vnpOrderInfo
+                + "&vnp_BankCode=" + vnpBankCode
+                + "&vnp_TransactionStatus=" + vnpTransactionStatus;
+
+        PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO();
+        paymentTransaction.setBankTransactionId(params.get("vnp_TransactionNo"));
+        paymentTransaction.setContent(params.get("vnp_OrderInfo"));
+        try {
+            paymentTransaction.setPaymentAmount(Integer.parseInt(params.get("vnp_Amount")));
+        } catch (Exception e) {
+            paymentTransaction.setPaymentAmount(0);
+        }
+        paymentTransaction.setPaymentTime(java.time.LocalDateTime.now());
+        paymentTransaction.setCardType(params.get("vnp_CardType"));
+        paymentTransaction.setCurrency("VND");
+        paymentTransaction.setSystem("VNPay");
+        paymentTransaction.setPaymentUrl(paymentUrl);
+        paymentTransaction.setContent(params.get("vnp_OrderInfo"));
+
+        String content = params.get("vnp_OrderInfo");
+        int lastSpaceIndex = content.lastIndexOf(" ");
+        String idStr = (lastSpaceIndex != -1) ? content.substring(lastSpaceIndex + 1).trim() : null;
+        Long orderid = null;
+        try {
+            if (idStr != null) {
+                orderid = Long.parseLong(idStr);
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("ID không hợp lệ: " + idStr);
+        }
+
+        PlaceOrderRequestDTO placeOrderRequestDTO = new PlaceOrderRequestDTO();
+        placeOrderRequestDTO.setPaymentTransaction(paymentTransaction);
+        placeOrderRequestDTO.setOrderId(orderid);
+
+        String placeOrderUrl = "http://localhost:8080/api/v1/place-order/handle-payment";
+        restTemplate.postForEntity(placeOrderUrl, placeOrderRequestDTO, String.class);
+        // Ở đây chỉ trả về URL frontend để controller redirect
+        String frontendUrl = "http://localhost:3000/vnpay-return" +
+                "?vnp_TxnRef=" + vnpTxnRef +
+                "&vnp_ResponseCode=" + vnpResponseCode +
+                "&vnp_TransactionNo=" + vnpTransactionNo +
+                "&vnp_Amount=" + vnpAmount +
+                "&vnp_PayDate=" + vnpPayDate +
+                "&vnp_OrderInfo=" + vnpOrderInfo +
+                "&orderId=" + orderid;
+        return frontendUrl;
     }
 }
 
