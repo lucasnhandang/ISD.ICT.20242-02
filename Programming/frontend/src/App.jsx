@@ -14,6 +14,7 @@ import LoginPage from './pages/LoginPage';
 
 
 import VnPayReturnPage from './pages/VnPayReturnPage';
+import ApiTestComponent from './components/ApiTestComponent';
 
 const theme = createTheme({
   palette: {
@@ -87,6 +88,7 @@ function App() {
           <Route path="/rush-order" element={<RushOrderPage />} />
           <Route path="/invoice" element={<InvoicePage />} />
           <Route path="/vnpay-return" element={<VnPayReturnPage />} />
+          <Route path="/api-test" element={<ApiTestComponent />} />
         </Routes>
       </Router>
     </ThemeProvider>
