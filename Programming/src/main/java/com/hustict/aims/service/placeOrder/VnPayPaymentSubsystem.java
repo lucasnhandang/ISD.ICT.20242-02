@@ -196,7 +196,7 @@ public class VnPayPaymentSubsystem implements PaymentSubsystem {
                 "&vnp_Amount=" + vnpAmount +
                 "&vnp_PayDate=" + vnpPayDate +
                 "&vnp_OrderInfo=" + vnpOrderInfo +
-                "&orderId=" + orderid + "paymentSuccess" + isSuccess;
+                "&orderId=" + orderid + "&paymentSuccess=" + isSuccess;
         return frontendUrl;
     }
 }

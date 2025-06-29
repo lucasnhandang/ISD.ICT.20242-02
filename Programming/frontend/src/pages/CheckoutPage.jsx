@@ -17,7 +17,6 @@ import Header from '../components/Header';
 import DeliveryForm from '../components/DeliveryForm';
 import { 
   getCart, 
-  requestToPlaceOrder, 
   submitDeliveryForm, 
   handleNormalOrder,
   getProductDetails 
@@ -107,10 +106,7 @@ const CheckoutPage = () => {
         throw new Error('No delivery information found. Please fill delivery form first.');
       }
       
-      // First, request to place order to create session
-      await requestToPlaceOrder(cart);
-      
-      // Then submit delivery form
+      // Submit delivery form
       await submitDeliveryForm(preservedDeliveryForm);
       
       // Finally handle normal order
@@ -152,10 +148,7 @@ const CheckoutPage = () => {
         throw new Error('Cart information not found');
       }
 
-      // First, request to place order to create session
-      await requestToPlaceOrder(cart);
-      
-      // Then submit delivery form
+      // Submit delivery form
       await submitDeliveryForm(deliveryForm);
       
       // Finally handle normal order

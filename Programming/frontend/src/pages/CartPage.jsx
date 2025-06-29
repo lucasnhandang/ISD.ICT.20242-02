@@ -63,7 +63,6 @@ const CartPage = () => {
       setLoading(true);
       const response = await getCart();
       setCart(response.data);
-      await requestToPlaceOrder(response.data);
     } catch (err) {
       setError('Failed to load cart. Please try again later.');
       console.error('Error loading cart:', err);
@@ -149,8 +148,22 @@ const CartPage = () => {
     }
   };
 
-  const handleProceedToCheckout = () => {
-    navigate('/checkout');
+  const handleProceedToCheckout = async () => {
+    try {
+      setLoading(true);
+      // Gọi API để request place order trước khi chuyển sang checkout
+      await requestToPlaceOrder(cart);
+      navigate('/checkout');
+    } catch (err) {
+      setSnackbar({
+        open: true,
+        message: err.message || 'Failed to proceed to checkout. Please try again.',
+        severity: 'error'
+      });
+      console.error('Error proceeding to checkout:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) {
@@ -264,9 +277,11 @@ const CartPage = () => {
                 fullWidth
                 size="large"
                 onClick={handleProceedToCheckout}
+                disabled={loading}
                 sx={{ mt: 2 }}
+                startIcon={loading ? <CircularProgress size={20} /> : null}
               >
-                Proceed to Checkout
+                {loading ? 'Processing...' : 'Proceed to Checkout'}
               </Button>
             </Box>
           </>
