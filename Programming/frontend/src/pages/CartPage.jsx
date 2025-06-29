@@ -25,7 +25,7 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import Header from '../components/Header';
-import { getCart, removeFromCart, updateCartItem, requestToPlaceOrder } from '../services/api';
+import { getCart, removeFromCart, updateCartItem } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 
 const formatPrice = (price) => {
@@ -63,7 +63,6 @@ const CartPage = () => {
       setLoading(true);
       const response = await getCart();
       setCart(response.data);
-      await requestToPlaceOrder(response.data);
     } catch (err) {
       setError('Failed to load cart. Please try again later.');
       console.error('Error loading cart:', err);

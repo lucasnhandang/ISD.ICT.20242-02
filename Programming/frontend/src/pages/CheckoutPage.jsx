@@ -143,7 +143,6 @@ const CheckoutPage = () => {
 
       // Submit delivery form and process order
       await submitDeliveryForm(deliveryForm);
-      await requestToPlaceOrder(cart);
       
       const invoiceResponse = await handleNormalOrder(cart);
       
