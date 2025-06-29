@@ -50,10 +50,24 @@ public class CreateRefundRequestVNP {
         refundRequest.setOrderInfo(orderInfo);  
         refundRequest.setTransactionNo(transactionNo);
         refundRequest.setCreateDate(java.time.LocalDateTime.now().toString());
-        refundRequest.setIpAddr(ipAddr);  // Địa chỉ IP của máy chủ
+        refundRequest.setIpAddr(ipAddr);  
         refundRequest.setCreateBy(createBy);
         String secureHash = generateSecureHash(secretKey, refundRequest);
         refundRequest.setSecureHash(secureHash);
+        
+        System.out.println("VNPay announce: Create request done!");
+
+        System.out.println("Invoice: " + invoice);
+        System.out.println("PaymentTransaction: " + paymentTransaction);
+        System.out.println("PaymentUrl: " + paymentUrl);
+        System.out.println("QueryParams: " + queryParams);
+        System.out.println("txnRef: " + queryParams.get("vnp_TxnRef"));
+        System.out.println("transactionNo: " + queryParams.get("vnp_TransactionNo"));
+        System.out.println("amount: " + queryParams.get("vnp_Amount"));
+        System.out.println("vnpTmnCode: " + vnpTmnCode);
+        System.out.println("secretKey: " + secretKey);
+        System.out.println("ipAddr: " + ipAddr);
+        System.out.println("createBy: " + createBy);
 
         return refundRequest;
     }
@@ -61,19 +75,18 @@ public class CreateRefundRequestVNP {
     private Map<String, String> extractQueryParams(String paymentUrl) {
         Map<String, String> params = new HashMap<>();
         try {
-            URL url = new URL(paymentUrl);
-            String query = url.getQuery();
-            if (query != null) {
-                String[] pairs = query.split("&");
-                for (String pair : pairs) {
-                    String[] keyValue = pair.split("=");
-                    if (keyValue.length == 2) {
-                        params.put(keyValue[0], keyValue[1]);
-                    }
+            // Nếu paymentUrl chứa dấu ?, chỉ lấy phần sau
+            String query = paymentUrl.contains("?") ? paymentUrl.split("\\?", 2)[1] : paymentUrl;
+
+            String[] pairs = query.split("&");
+            for (String pair : pairs) {
+                String[] keyValue = pair.split("=", 2); // đảm bảo không lỗi nếu có dấu '=' trong value
+                if (keyValue.length == 2) {
+                    params.put(keyValue[0], keyValue[1]);
                 }
             }
         } catch (Exception e) {
-            System.err.println("Error parsing URL or extracting parameters: " + e.getMessage());
+            System.err.println("Error extracting parameters: " + e.getMessage());
         }
         return params;
     }

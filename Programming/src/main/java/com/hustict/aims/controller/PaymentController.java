@@ -135,6 +135,7 @@ public class PaymentController {
         ResponseEntity<String> response = restTemplate.postForEntity(placeOrderUrl, placeOrderRequestDTO, String.class);
 
         //response.sendRedirect(redirectUrl.toString( ));
+        
         return ResponseEntity.ok(paymentResult);
     }
 

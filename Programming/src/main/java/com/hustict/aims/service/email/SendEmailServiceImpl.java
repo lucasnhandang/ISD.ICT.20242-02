@@ -115,6 +115,10 @@ public abstract class SendEmailServiceImpl<T extends BaseEmailRequest> implement
         InvoiceDTO invoiceDTO = invoiceMapper.toDTO(invoice);
         PaymentTransactionDTO paymentTransactionDTO = paymentTransactionMapper.toDTO(paymentTransaction);
 
+        if (orderInformationDTO.getProductList() == null ){
+            
+        }
+
         req.setOrder(orderInformationDTO);
         req.setDeliveryInfor(deliveryFormDTO);
         req.setInvoice(invoiceDTO);

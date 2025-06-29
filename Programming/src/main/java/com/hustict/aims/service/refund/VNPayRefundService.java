@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 
-@Service("VNPayRefundService")
+@Service("VNPay")
 public class VNPayRefundService implements RefundService {
     
     private final RestTemplate restTemplate;
@@ -36,6 +36,8 @@ public class VNPayRefundService implements RefundService {
 
     @Override
     public void processRefund(Long orderId) {
+        System.out.println("VNPay announce: Start refund for order: " + orderId );
+        
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderOperationException("Order not found with id: " + orderId));
         String createBy = "system";
