@@ -105,7 +105,7 @@ const CheckoutPage = () => {
         throw new Error('Không nhận được phản hồi từ server');
       }
       
-      const { cart: apiCart, invoice, deliveryForm } = response.data;
+      const { cart: apiCart, invoice, deliveryForm, orderid } = response.data;
       
       console.log('Normal order response:', response.data);
       
@@ -114,7 +114,8 @@ const CheckoutPage = () => {
         state: {
           cart: apiCart || cart,
           invoice: invoice,
-          deliveryForm: deliveryForm
+          deliveryForm: deliveryForm,
+          orderId: orderid 
         }
       });
       
@@ -151,7 +152,8 @@ const CheckoutPage = () => {
         state: { 
           cart: invoiceResponse.data.cart || cart,
           invoice: invoiceResponse.data.invoice, 
-          deliveryForm: deliveryForm
+          deliveryForm: deliveryForm,
+          orderId: invoiceResponse.data.orderid
         } 
       });
       

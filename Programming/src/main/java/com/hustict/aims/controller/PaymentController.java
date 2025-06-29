@@ -57,8 +57,7 @@ public class PaymentController {
     }
 
     @GetMapping("/vnpay-return")
-    //public void vnPayReturn(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    public ResponseEntity<PaymentResultDTO> vnPayReturn(HttpServletRequest request) {
+    public void vnPayReturn(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Map<String, String> params = new HashMap<>();
         request.getParameterMap().forEach((k, v) -> params.put(k, v[0]));
         
@@ -132,10 +131,19 @@ public class PaymentController {
         String placeOrderUrl = "http://localhost:8080/api/v1/place-order/handle-payment"; 
         
         
-        ResponseEntity<String> response = restTemplate.postForEntity(placeOrderUrl, placeOrderRequestDTO, String.class);
+        ResponseEntity<String> restResponse = restTemplate.postForEntity(placeOrderUrl, placeOrderRequestDTO, String.class);
 
-        //response.sendRedirect(redirectUrl.toString( ));
-        return ResponseEntity.ok(paymentResult);
+        // Redirect đến frontend với các query params
+        String frontendUrl = "http://localhost:3000/vnpay-return" +
+                           "?vnp_TxnRef=" + vnpTxnRef +
+                           "&vnp_ResponseCode=" + vnpResponseCode +
+                           "&vnp_TransactionNo=" + vnpTransactionNo +
+                           "&vnp_Amount=" + vnpAmount +
+                           "&vnp_PayDate=" + vnpPayDate +
+                           "&vnp_OrderInfo=" + vnpOrderInfo +
+                           "&orderId=" + orderid;
+        
+        response.sendRedirect(frontendUrl);
     }
 
     @GetMapping("/payment-result")
