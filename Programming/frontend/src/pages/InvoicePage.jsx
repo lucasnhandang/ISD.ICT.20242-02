@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Box, Typography, Divider, Paper, Button, CircularProgress, Alert } from '@mui/material';
+import { Box, Typography, Divider, Paper, Button, Alert, CircularProgress } from '@mui/material';
 import Header from '../components/Header';
 import { createVnPayUrl } from '../services/api';
 
@@ -16,66 +16,60 @@ const InvoicePage = () => {
   const navigate = useNavigate();
   const { invoice, invoiceList, deliveryForm, isRushOrder } = location.state || {};
   
-  // State để quản lý từng invoice riêng biệt
-  const [loadingStates, setLoadingStates] = useState({});
-  const [errorStates, setErrorStates] = useState({});
-  const [paidStates, setPaidStates] = useState({});
+  // State để quản lý trạng thái thanh toán
+  const [paymentLoading, setPaymentLoading] = useState({});
+  const [paymentError, setPaymentError] = useState({});
 
   const invoices = invoiceList || (invoice ? [invoice] : []);
 
   const handlePay = async (inv, index) => {
     const invoiceKey = inv.id || index;
     
-    // Set loading state cho invoice này
-    setLoadingStates(prev => ({ ...prev, [invoiceKey]: true }));
-    setErrorStates(prev => ({ ...prev, [invoiceKey]: '' }));
+    // Set loading state
+    setPaymentLoading(prev => ({ ...prev, [invoiceKey]: true }));
+    setPaymentError(prev => ({ ...prev, [invoiceKey]: '' }));
     
     try {
-      if (isRushOrder) {
-        // Tạm thời bỏ call API cho rush order - chỉ hiển thị thông báo
-        alert('Tính năng thanh toán rush order đang được phát triển. Vui lòng thử lại sau!');
-        return;
-      } else {
-        // Thanh toán qua VnPay cho normal order
-        const vnPayData = {
-          amount: inv.totalAmount,
-          orderInfo: `Thanh toan don hang - Invoice ${inv.id || 'N/A'}`,
-          orderType: "other",
-          language: "vn",
-          billingEmail: deliveryForm?.email,
-          billingMobile: deliveryForm?.phoneNumber,
-          billingFullName: deliveryForm?.customerName,
-          billingAddress: deliveryForm?.deliveryAddress,
-          billingCity: deliveryForm?.deliveryProvince
-        };
+      // Tạo VnPay payment data
+      const vnPayData = {
+        amount: inv.totalAmount,
+        orderInfo: `Thanh toan hoa don #${inv.id || (index + 1)}`,
+        orderType: "other",
+        language: "vn",
+        billingEmail: deliveryForm?.email,
+        billingMobile: deliveryForm?.phoneNumber,
+        billingFullName: deliveryForm?.customerName,
+        billingAddress: deliveryForm?.deliveryAddress,
+        billingCity: deliveryForm?.deliveryProvince
+      };
+      
+      // Gọi API tạo VnPay URL
+      const response = await createVnPayUrl(vnPayData);
+      
+      if (response.data.paymentUrl) {
+        // Mở tab mới với VnPay URL thay vì redirect trang hiện tại
+        const paymentWindow = window.open(response.data.paymentUrl, '_blank');
         
-        const response = await createVnPayUrl(vnPayData);
-        
-        if (response.data.paymentUrl) {
-          // Lưu thông tin vào sessionStorage để sử dụng sau khi return từ VnPay
-          sessionStorage.setItem('pendingPaymentInfo', JSON.stringify({
-            orderInformation: location.state?.orderInformation,
-            invoice: inv,
-            deliveryForm: deliveryForm,
-            isRushOrder: isRushOrder,
-            txnRef: response.data.txnRef
-          }));
-          
-          // Redirect đến VnPay
-          window.location.href = response.data.paymentUrl;
-        } else {
-          throw new Error('Không thể tạo URL thanh toán');
+        // Kiểm tra xem có mở được tab mới không
+        if (!paymentWindow) {
+          throw new Error('Trình duyệt đã chặn popup. Vui lòng cho phép popup và thử lại.');
         }
+        
+        // Hiển thị thông báo cho user
+        alert(`Đã mở trang thanh toán VnPay trong tab mới. Tổng tiền: ${formatPrice(inv.totalAmount)}`);
+        
+      } else {
+        throw new Error('Không thể tạo URL thanh toán');
       }
       
-    } catch (err) {
-      console.error('Payment error:', err);
-      setErrorStates(prev => ({ 
+    } catch (error) {
+      console.error('Payment error:', error);
+      setPaymentError(prev => ({ 
         ...prev, 
-        [invoiceKey]: err.response?.data?.message || err.message || 'Có lỗi khi thanh toán invoice này.' 
+        [invoiceKey]: error.response?.data?.message || error.message || 'Có lỗi khi tạo liên kết thanh toán' 
       }));
     } finally {
-      setLoadingStates(prev => ({ ...prev, [invoiceKey]: false }));
+      setPaymentLoading(prev => ({ ...prev, [invoiceKey]: false }));
     }
   };
 
@@ -107,39 +101,23 @@ const InvoicePage = () => {
           Thanh toán hóa đơn
         </Typography>
         
-        {isRushOrder && (
-          <Alert severity="warning" sx={{ mb: 3 }}>
-            <Typography variant="body2">
-              <strong>Giao hàng nhanh:</strong> Tính năng thanh toán cho đơn hàng giao nhanh đang được phát triển. 
-              Vui lòng liên hệ với chúng tôi để được hỗ trợ thanh toán.
-            </Typography>
-          </Alert>
-        )}
+        <Alert severity="info" sx={{ mb: 3 }}>
+          <Typography variant="body2">
+            <strong>Hướng dẫn thanh toán:</strong> Nhấn nút "Thanh toán VnPay" để mở trang thanh toán trong tab mới. 
+            Sau khi thanh toán xong, hệ thống sẽ tự động cập nhật trạng thái đơn hàng.
+          </Typography>
+        </Alert>
 
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           {invoices.map((inv, idx) => {
             const invoiceKey = inv.id || idx;
-            const isLoading = loadingStates[invoiceKey] || false;
-            const error = errorStates[invoiceKey] || '';
-            const isPaid = paidStates[invoiceKey] || false;
+            const isLoading = paymentLoading[invoiceKey] || false;
+            const error = paymentError[invoiceKey] || '';
             
             return (
               <Paper key={invoiceKey} elevation={2} sx={{ p: 3 }}>
                 <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
                   Hóa đơn #{inv.id || (idx + 1)}
-                  {isPaid && (
-                    <Typography 
-                      component="span" 
-                      sx={{ 
-                        ml: 2, 
-                        color: 'success.main', 
-                        fontWeight: 500,
-                        fontSize: '0.9rem'
-                      }}
-                    >
-                      ✓ Đã thanh toán
-                    </Typography>
-                  )}
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
 
@@ -236,58 +214,33 @@ const InvoicePage = () => {
                   </Alert>
                 )}
 
-                {/* Success message */}
-                {isPaid && (
-                  <Alert 
-                    severity="success" 
-                    sx={{ mt: 2 }}
-                    action={
-                      <Button 
-                        color="inherit" 
-                        size="small" 
-                        onClick={() => navigate('/')}
-                        sx={{ fontWeight: 600 }}
-                      >
-                        Về trang chủ
-                      </Button>
-                    }
-                  >
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      Hóa đơn này đã được thanh toán thành công! 
-                      {!isRushOrder && " Đơn hàng đã được tạo và bạn sẽ nhận được email xác nhận."}
-                    </Typography>
-                  </Alert>
-                )}
-
                 {/* Action buttons */}
-                {!isPaid && (
-                  <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
-                    <Button 
-                      variant="outlined" 
-                      color="secondary" 
-                      onClick={() => navigate(-1)} 
-                      disabled={isLoading}
-                    >
-                      Quay lại
-                    </Button>
-                    <Button 
-                      variant="contained" 
-                      color={isRushOrder ? "warning" : "primary"}
-                      onClick={() => handlePay(inv, idx)} 
-                      disabled={isLoading}
-                      sx={{ minWidth: 120 }}
-                    >
-                      {isLoading ? (
-                        <>
-                          <CircularProgress size={20} sx={{ mr: 1 }} />
-                          Đang xử lý...
-                        </>
-                      ) : (
-                        isRushOrder ? 'Liên hệ thanh toán' : 'Thanh toán'
-                      )}
-                    </Button>
-                  </Box>
-                )}
+                <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
+                  <Button 
+                    variant="outlined" 
+                    color="secondary" 
+                    onClick={() => navigate(-1)}
+                    disabled={isLoading}
+                  >
+                    Quay lại
+                  </Button>
+                  <Button 
+                    variant="contained" 
+                    color="primary"
+                    onClick={() => handlePay(inv, idx)} 
+                    disabled={isLoading}
+                    sx={{ minWidth: 150 }}
+                  >
+                    {isLoading ? (
+                      <>
+                        <CircularProgress size={20} sx={{ mr: 1 }} />
+                        Đang tạo liên kết...
+                      </>
+                    ) : (
+                      'Thanh toán VnPay'
+                    )}
+                  </Button>
+                </Box>
               </Paper>
             );
           })}

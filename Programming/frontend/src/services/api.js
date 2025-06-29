@@ -327,8 +327,6 @@ export const requestToPlaceOrder = async (cart) => {
   return api.post('/place-order/request', cart);
 };
 
-
-
 // Pay individual invoice for rush order
 export const payInvoice = async (invoiceId) => {
   return api.post('/place-rush-order/pay-invoice', null, {
@@ -336,12 +334,12 @@ export const payInvoice = async (invoiceId) => {
   });
 };
 
-// Create separate axios instance for payment APIs (different base path)
+// Create separate axios instance for payment APIs
 const paymentApi = axios.create({
-  baseURL: 'http://localhost:8080/api/v1/payment',  // ✅ Fixed: Added v1 to match backend
+  baseURL: 'http://localhost:8080/api/v1/payment',
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
-  // withCredentials: true  // Tạm thời comment để test CORS issue
+  withCredentials: true
 });
 
 // Add token interceptor for payment API as well
