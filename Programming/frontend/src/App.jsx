@@ -87,7 +87,7 @@ function App() {
           <Route path="/management/*" element={<ManagementPanel />} />
           <Route path="/order-review" element={<OrderReviewPage />} />
           <Route path="/rush-order" element={<RushOrderPage />} />
-          <Route path="/invoice/:id" element={<InvoicePage />} />
+          <Route path="/invoice" element={<InvoicePage />} />
           <Route path="/payment-result" element={<PaymentResultPage />} />
           <Route path="/vnpay-return" element={<VnPayReturnPage />} />
           <Route path="/api-test" element={<ApiTestComponent />} />
