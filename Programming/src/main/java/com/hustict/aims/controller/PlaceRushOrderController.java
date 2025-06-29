@@ -7,7 +7,6 @@ import com.hustict.aims.dto.invoice.InvoiceDTO;
 import com.hustict.aims.service.placeRushOrder.RushOrderEligibilityService;
 import com.hustict.aims.service.placeRushOrder.RushOrderValidationService;
 import com.hustict.aims.service.placeRushOrder.RushOrderProcessingService;
-import com.hustict.aims.service.placeRushOrder.RushOrderSaveService;
 import com.hustict.aims.service.sessionValidator.SessionValidatorService;
 import com.hustict.aims.service.placeOrder.PaymentHandlerService;
 import com.hustict.aims.service.placeOrder.CartCleanupService;
@@ -28,7 +27,6 @@ public class PlaceRushOrderController {
     private final RushOrderEligibilityService rushOrderEligibilityService;
     private final RushOrderValidationService rushOrderValidationService;
     private final RushOrderProcessingService rushOrderProcessingService;
-    private final RushOrderSaveService rushOrderSaveService;
     private final SessionValidatorService sessionValidatorService;
     private final PaymentHandlerService paymentHandlerService;
     private final CartCleanupService cartCleanupService;
@@ -40,7 +38,6 @@ public class PlaceRushOrderController {
     public PlaceRushOrderController(RushOrderEligibilityService rushOrderEligibilityService,
                                    RushOrderValidationService rushOrderValidationService,
                                    RushOrderProcessingService rushOrderProcessingService,
-                                   RushOrderSaveService rushOrderSaveService,
                                    SessionValidatorService sessionValidatorService,
                                    PaymentHandlerService paymentHandlerService,
                                    CartCleanupService cartCleanupService,
@@ -50,7 +47,6 @@ public class PlaceRushOrderController {
         this.rushOrderEligibilityService = rushOrderEligibilityService;
         this.rushOrderValidationService = rushOrderValidationService;
         this.rushOrderProcessingService = rushOrderProcessingService;
-        this.rushOrderSaveService = rushOrderSaveService;
         this.sessionValidatorService = sessionValidatorService;
         this.paymentHandlerService = paymentHandlerService;
         this.cartCleanupService = cartCleanupService;
