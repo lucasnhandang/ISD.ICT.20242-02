@@ -17,6 +17,7 @@ import {
 } from '@mui/icons-material';
 import axios from 'axios';
 import Header from '../components/Header';
+import { clearCart } from '../services/api';
 
 const VnPayReturnPage = () => {
   const [result, setResult] = useState(null);
@@ -54,6 +55,24 @@ const VnPayReturnPage = () => {
     setResult(paymentResult);
     setLoading(false);
   }, []);
+
+  // Clear cart khi payment success
+  useEffect(() => {
+    const clearCartOnSuccess = async () => {
+      if (result && result.responseCode === '00') {
+        try {
+          console.log("Payment successful, clearing cart...");
+          await clearCart();
+          console.log("Cart cleared successfully!");
+        } catch (error) {
+          console.error("Failed to clear cart:", error);
+          // Không hiển thị lỗi cho user vì việc clear cart là background operation
+        }
+      }
+    };
+
+    clearCartOnSuccess();
+  }, [result]);
 
   const formatAmount = (amount) => {
     if (!amount) return "0";

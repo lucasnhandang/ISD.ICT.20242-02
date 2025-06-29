@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, Typography, Divider, Paper, Button, Alert, CircularProgress, Chip } from '@mui/material';
 import Header from '../components/Header';
-import { createVnPayUrl } from '../services/api';
+import { createVnPayUrl, clearCart } from '../services/api';
 import { AccessTime } from '@mui/icons-material';
 
 const formatPrice = (price) => {
@@ -34,6 +34,25 @@ const InvoicePage = () => {
     setCurrentInvoices(prev => prev.filter(inv => (inv.id || inv.orderId) !== invoiceKey));
   };
 
+  // Helper function để xử lý khi payment thành công
+  const handlePaymentSuccess = async (invoiceKey) => {
+    try {
+      // Xóa invoice khỏi danh sách
+      removeInvoiceFromList(invoiceKey);
+      
+      // Clear cart khi payment thành công
+      console.log("Payment successful, clearing cart...");
+      await clearCart();
+      console.log("Cart cleared successfully!");
+      
+      alert('Order has been paid successfully and removed from the list!');
+    } catch (error) {
+      console.error("Failed to clear cart:", error);
+      // Vẫn thông báo thành công cho user vì invoice đã được xóa
+      alert('Order has been paid successfully and removed from the list!');
+    }
+  };
+
   // Kiểm tra payment status thủ công
   const checkPaymentStatusManually = async (inv) => {
     const invoiceKey = inv.id || inv.orderId;
@@ -50,8 +69,7 @@ const InvoicePage = () => {
       const isRandomlyPaid = Math.random() > 0.95; // 10% cơ hội "đã thanh toán"
       
       if (isRandomlyPaid) {
-        removeInvoiceFromList(invoiceKey);
-        alert('Order has been paid successfully and removed from the list!');
+        await handlePaymentSuccess(invoiceKey);
       } else {
         alert('Order has not been paid yet. Please try again later.');
       }
@@ -106,9 +124,8 @@ const InvoicePage = () => {
               const isRandomlyPaid = Math.random() > 0.9; // 10% cơ hội "đã thanh toán" mỗi lần check
               
               if (isRandomlyPaid) {
-                // Xóa invoice khỏi danh sách nếu đã thanh toán
-                removeInvoiceFromList(invoiceKey);
-                alert('Order has been paid successfully and removed from the list!');
+                // Xử lý payment success (xóa invoice và clear cart)
+                await handlePaymentSuccess(invoiceKey);
                 return true; // Stop polling
               }
               return false; // Continue polling
