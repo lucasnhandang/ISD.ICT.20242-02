@@ -9,7 +9,7 @@ import com.hustict.aims.dto.order.OrderDTO;
 
 import com.hustict.aims.service.PaymentResultService;
 import com.hustict.aims.service.payment.SavePaymentTransaction;
-import com.hustict.aims.service.placeOrder.VnPayService;
+import com.hustict.aims.service.placeOrder.PaymentSubsystem;
 import com.hustict.aims.utils.VnPayConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +21,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 
 @RestController
@@ -28,7 +29,8 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class PaymentController {
     @Autowired
-    private VnPayService vnPayService;
+    @Qualifier("vnPayPaymentSubsystem")
+    private PaymentSubsystem paymentSubsystem;
     @Autowired
     private VnPayConfig vnPayConfig;
     @Autowired
@@ -49,7 +51,7 @@ public class PaymentController {
         String clientIp = request.getRemoteAddr();
         // Tạo mã đơn hàng (txnRef) ở đây, ví dụ lấy từ DB hoặc random
         String txnRef = String.valueOf(System.currentTimeMillis());
-        String url = vnPayService.createPaymentUrl(req, clientIp, vnPayConfig.getReturnUrl(), txnRef);
+        String url = paymentSubsystem.createPaymentUrl(req, clientIp, vnPayConfig.getReturnUrl(), txnRef);
         Map<String, String> resp = new HashMap<>();
         resp.put("paymentUrl", url);
         resp.put("txnRef", txnRef);
@@ -171,7 +173,7 @@ public class PaymentController {
     public ResponseEntity<VnPayIpnResponseDTO> vnPayIpn(HttpServletRequest request) {
         Map<String, String> params = new HashMap<>();
         request.getParameterMap().forEach((k, v) -> params.put(k, v[0]));
-        boolean success = vnPayService.handleVnPayReturn(params);
+        boolean success = paymentSubsystem.handlePaymentReturn(params);
         if (success) {
             return ResponseEntity.ok(new VnPayIpnResponseDTO("00", "Confirm Success"));
         } else {

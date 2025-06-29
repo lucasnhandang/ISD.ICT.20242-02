@@ -1,9 +1,10 @@
 package com.hustict.aims.service;
 
 import com.hustict.aims.dto.payment.PaymentResultDTO;
-import com.hustict.aims.service.placeOrder.VnPayService;
+import com.hustict.aims.service.placeOrder.PaymentSubsystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -13,15 +14,15 @@ import jakarta.servlet.http.HttpSession;
 @Service
 public class PaymentResultService {
     
-    private final VnPayService vnPayService;
+    private final PaymentSubsystem paymentSubsystem;
     
     @Autowired
-    public PaymentResultService(VnPayService vnPayService) {
-        this.vnPayService = vnPayService;
+    public PaymentResultService(@Qualifier("vnPayPaymentSubsystem") PaymentSubsystem paymentSubsystem) {
+        this.paymentSubsystem = paymentSubsystem;
     }
     
     public PaymentResultDTO processPaymentReturn(Map<String, String> params) {
-        boolean success = vnPayService.handleVnPayReturn(params);
+        boolean success = paymentSubsystem.handlePaymentReturn(params);
         
         PaymentResultDTO result = new PaymentResultDTO();
         result.setTxnRef(params.get("vnp_TxnRef"));
