@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, Typography, Divider, Paper, Button, CircularProgress, Alert, TextField } from '@mui/material';
 import Header from '../components/Header';
-import { checkRushOrderEligibility, submitRushOrderInfo, processRushOrder, getProductDetails } from '../services/api';
+import RushOrderResults from '../components/RushOrderResults';
+import { checkRushOrderEligibility, submitRushOrderInfo, saveRushOrders, getProductDetails } from '../services/api';
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('vi-VN', {
@@ -25,7 +26,8 @@ const RushOrderPage = () => {
     expectedDateTime: '', 
     deliveryInstructions: '' 
   });
-  const [invoiceList, setInvoiceList] = useState(null);
+  const [orderData, setOrderData] = useState(null);
+  const [showResults, setShowResults] = useState(false);
   const [productDetails, setProductDetails] = useState({});
   const [loadingProducts, setLoadingProducts] = useState(true);
 
@@ -85,22 +87,27 @@ const RushOrderPage = () => {
       await checkRushOrderEligibility();
       // 2. Submit rush info
       await submitRushOrderInfo(rushInfo);
-      // 3. Process rush order
-      const res = await processRushOrder();
-      setInvoiceList(res.data.invoiceList);
-      navigate('/invoice', { 
-        state: { 
-          invoiceList: res.data.invoiceList, 
-          cartList: res.data.cartList,
-          deliveryForm,
-          isRushOrder: true
-        } 
-      });
+      // 3. Save rush orders and get order IDs
+      const res = await saveRushOrders();
+      setOrderData(res.data);
+      setShowResults(true);
     } catch (err) {
       setError(err.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePayment = (orderId, orderType, invoice) => {
+    // Navigate to existing invoice page for payment
+    navigate('/invoice', { 
+      state: { 
+        invoice: invoice,
+        orderId: orderId,
+        isRushOrder: orderType === 'rush',
+        source: 'rush-order'
+      }
+    });
   };
 
   // Kiểm tra dữ liệu đầu vào
@@ -125,6 +132,22 @@ const RushOrderPage = () => {
   }
 
   const productList = cart.productList || [];
+
+  // Hiển thị kết quả rush order nếu đã xử lý xong
+  if (showResults && orderData) {
+    return (
+      <Box sx={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
+        <Header />
+        <Box sx={{ pt: 4, px: 2 }}>
+          <RushOrderResults 
+            orderData={orderData}
+            onPayment={handlePayment}
+            expectedDateTime={rushInfo.expectedDateTime}
+          />
+        </Box>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
