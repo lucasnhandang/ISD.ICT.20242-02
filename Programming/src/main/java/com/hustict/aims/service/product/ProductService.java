@@ -7,15 +7,12 @@ import com.hustict.aims.repository.ReservationItemRepository;
 import com.hustict.aims.repository.product.ProductRepository;
 import com.hustict.aims.service.MessageService;
 import com.hustict.aims.service.handler.ProductHandler;
-import com.hustict.aims.service.handler.ProductHandlerRegistry;
 import com.hustict.aims.service.validation.ProductValidator;
-import com.hustict.aims.service.validation.ProductValidatorRegistry;
 import com.hustict.aims.service.storage.ImageUploadStorage;
 
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.Map;
@@ -24,23 +21,19 @@ import java.util.NoSuchElementException;
 @Service
 public class ProductService {
         private final ImageUploadStorage uploadService;
-        private final ProductHandlerRegistry handlerReg;
-        private final ProductValidatorRegistry validatorReg;
+        private final ProductComponentService componentService;
         private final ProductRepository productRepo;
         private final ProductActionService actionService;
         private final ReservationItemRepository reservationItemRepository;
         private final MessageService messageService;
 
-        @Autowired
-        public ProductService(ProductHandlerRegistry handlerReg,
-                                ProductValidatorRegistry validatorReg,
+        public ProductService(ProductComponentService componentService,
                                 ProductRepository productRepo,
                                 ProductActionService actionService,
                                 ImageUploadStorage uploadService,
                                 ReservationItemRepository reservationItemRepository,
                                 MessageService messageService) {
-                this.handlerReg = handlerReg;
-                this.validatorReg = validatorReg;
+                this.componentService = componentService;
                 this.productRepo = productRepo;
                 this.actionService = actionService;
                 this.uploadService = uploadService;
@@ -48,11 +41,7 @@ public class ProductService {
                 this.messageService = messageService;
         }
 
-        public ProductDetailDTO createProduct(Map<String, Object> data, MultipartFile image) {
-                String type = (String) data.get("category");
-                if (type == null) throw new IllegalArgumentException(messageService.getInvalidInput() + ": Missing category field");
-
-                // Upload image if provided
+        private void uploadImage(MultipartFile image, Map<String, Object> data) {
                 if (image != null && !image.isEmpty()) {
                         try {
                                 String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
@@ -62,19 +51,35 @@ public class ProductService {
                                 throw new RuntimeException("Failed to upload image: " + e.getMessage());
                         }
                 }
+        }
 
-                ProductHandler handler = handlerReg.getHandler(type)
-                        .orElseThrow(() -> new IllegalArgumentException(messageService.getInvalidInput() + ": Unsupported category: " + type));
+        private void validateProduct(Product product, String type) {
+                ProductValidator<Product> validator = componentService.getValidator(type);
+                List<String> errors = validator.validate(product);
+                if (!errors.isEmpty()) {
+                        String errorMessages = String.join(", ", errors);
+                        throw new IllegalArgumentException(messageService.getValidationError() + ": " + errorMessages);
+                }
+        }
 
+        public ProductDetailDTO createProduct(Map<String, Object> data, MultipartFile image) {
+                String type = (String) data.get("category");
+                if (type == null) throw new IllegalArgumentException(messageService.getInvalidInput() + ": Missing category field");
+
+                uploadImage(image, data);
+
+                if (!componentService.supports(type)) {
+                        throw new IllegalArgumentException(messageService.getInvalidInput() + ": Unsupported category: " + type);
+                }
+
+                ProductHandler handler = componentService.getHandler(type);
                 Product product = handler.toEntity(data);
 
-                ProductValidator<?> validator = validatorReg.getValidator(type)
-                        .orElseThrow(() -> new IllegalArgumentException(messageService.getInvalidInput() + ": No validator for: " + type));
+                validateProduct(product, type);
 
-                List<String> errors = validator.validate(product);
-                if (!errors.isEmpty()) throw new IllegalArgumentException(messageService.getValidationError() + ": " + errors.toString());
+                Product saved = handler.save(product);
 
-                return handler.saveAndReturnDTO(product);
+                return handler.toDTO(saved);
         }
 
         public ProductDetailDTO updateProduct(Long id, Map<String, Object> data, MultipartFile image, Long userId) {
@@ -84,31 +89,17 @@ public class ProductService {
                 Product existing = productRepo.findById(id)
                         .orElseThrow(() -> new NoSuchElementException(messageService.getProductNotFound() + " with ID: " + id));
 
-                // Upload new image if provided
-                if (image != null && !image.isEmpty()) {
-                        try {
-                                String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
-                                String imageUrl = uploadService.upload(image.getBytes(), fileName, image.getContentType());
-                                data.put("imageUrl", imageUrl);
-                        } catch (Exception e) {
-                                throw new RuntimeException("Failed to upload image: " + e.getMessage());
-                        }
-                }
+                uploadImage(image, data);
 
                 String type = existing.getCategory();
 
-                ProductHandler handler = handlerReg.getHandler(type)
-                        .orElseThrow(() -> new IllegalArgumentException(messageService.getInvalidInput() + ": Unsupported category: " + type));
-
+                ProductHandler handler = componentService.getHandler(type);
                 Product updated = handler.updateEntity(existing, data);
 
-                ProductValidator<?> validator = validatorReg.getValidator(type)
-                        .orElseThrow(() -> new IllegalArgumentException(messageService.getInvalidInput() + ": No validator for: " + type));
+                validateProduct(updated, type);
 
-                List<String> errors = validator.validate(updated);
-                if (!errors.isEmpty()) throw new IllegalArgumentException(messageService.getValidationError() + ": " + errors.toString());
-
-                ProductDetailDTO result = handler.saveAndReturnDTO(updated);
+                Product saved = handler.save(updated);
+                ProductDetailDTO result = handler.toDTO(saved);
 
                 // Log the action after successful update
                 ActionType actionType = data.containsKey("currentPrice") ? ActionType.UPDATE_PRICE : ActionType.UPDATE;
@@ -121,10 +112,9 @@ public class ProductService {
                 Product p = productRepo.findById(id)
                         .orElseThrow(() -> new NoSuchElementException(messageService.getProductNotFound() + " with ID: " + id));
 
-                ProductHandler handler = handlerReg.getHandler(p.getCategory())
-                        .orElseThrow(() -> new IllegalArgumentException(messageService.getInvalidInput() + ": No handler for category: " + p.getCategory()));
+                ProductHandler handler = componentService.getHandler(p.getCategory());
 
-                return handler.saveAndReturnDTO(p);
+                return handler.toDTO(p);
         }
 
         @Transactional

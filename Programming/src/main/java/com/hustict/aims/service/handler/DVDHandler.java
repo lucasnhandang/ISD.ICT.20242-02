@@ -4,18 +4,16 @@ import com.hustict.aims.dto.product.ProductDetailDTO;
 import com.hustict.aims.model.product.DVD;
 import com.hustict.aims.model.product.Product;
 import com.hustict.aims.repository.product.DVDRepository;
-import com.hustict.aims.utils.mapper.DVDMapper;
-import org.springframework.stereotype.Component;
+import com.hustict.aims.utils.mapper.product.DVDMapper;
 
 import java.util.Map;
 
-@Component
 public class DVDHandler implements ProductHandler {
-    private final DVDRepository dvdRepo;
+    private final DVDRepository repository;
     private final DVDMapper dvdMapper;
 
     public DVDHandler(DVDRepository dvdRepo, DVDMapper dvdMapper) {
-        this.dvdRepo = dvdRepo;
+        this.repository = dvdRepo;
         this.dvdMapper = dvdMapper;
     }
 
@@ -33,9 +31,12 @@ public class DVDHandler implements ProductHandler {
         return dvdMapper.updateFromMap((DVD) existing, data);
     }
 
+    public Product save (Product product) {
+        return repository.save((DVD) product);
+    }
+
     @Override
-    public ProductDetailDTO saveAndReturnDTO(Product product) {
-        DVD saved = dvdRepo.save((DVD) product);
-        return dvdMapper.toDetailDTO(saved);
+    public ProductDetailDTO toDTO(Product product) {
+        return dvdMapper.toDetailDTO((DVD) product);
     }
 }
