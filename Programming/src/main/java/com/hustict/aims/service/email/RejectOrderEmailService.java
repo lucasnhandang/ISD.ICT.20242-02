@@ -2,9 +2,9 @@ package com.hustict.aims.service.email;
 
 import com.hustict.aims.dto.cart.CartItemRequestDTO;
 import com.hustict.aims.dto.email.RejectOrderRequest;
+import com.hustict.aims.dto.order.OrderDTO;
 import com.hustict.aims.dto.order.OrderInformationDTO;
 
-import jakarta.servlet.http.HttpSession;
 
 import java.text.DecimalFormat;
 
@@ -15,9 +15,9 @@ import org.springframework.stereotype.Service;
 public class RejectOrderEmailService extends SendEmailServiceImpl<RejectOrderRequest> {
 
     @Override
-    public RejectOrderRequest buildRequest(HttpSession session) {
+    public RejectOrderRequest buildRequest(OrderDTO order) {
         RejectOrderRequest req = instantiateRequest();
-        populateCommonFields(req);
+        populateCommonFields(req, order);
         return req;
     }
 
@@ -27,9 +27,8 @@ public class RejectOrderEmailService extends SendEmailServiceImpl<RejectOrderReq
     }
 
     @Override
-    protected String buildSubject(RejectOrderRequest request) {
-        OrderInformationDTO orderInfo = (OrderInformationDTO) session.getAttribute("orderInformation");
-        Long orderId = orderInfo.getOrderId();
+    protected String buildSubject(RejectOrderRequest request, Long orderId) {
+       
         return "Your Order #" + orderId + " is Rejected";
     }
 

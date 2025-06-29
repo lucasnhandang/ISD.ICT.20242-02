@@ -20,8 +20,8 @@ public class PaymentResultService {
         this.vnPayService = vnPayService;
     }
     
-    public PaymentResultDTO processPaymentReturn(Map<String, String> params, HttpSession session) {
-        boolean success = vnPayService.handleVnPayReturn(params,session);
+    public PaymentResultDTO processPaymentReturn(Map<String, String> params) {
+        boolean success = vnPayService.handleVnPayReturn(params);
         
         PaymentResultDTO result = new PaymentResultDTO();
         result.setTxnRef(params.get("vnp_TxnRef"));

@@ -241,4 +241,107 @@ export const validateToken = async () => {
   }
 };
 
+// Order Management APIs
+export const orderManagementAPI = {
+  getPendingOrders: async () => {
+    try {
+      const response = await api.get('/product-manager/orders/pending');
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to fetch pending orders');
+    }
+  },
+
+  approveOrder: async (orderId) => {
+    try {
+      const response = await api.put(`/product-manager/orders/${orderId}/approve`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to approve order');
+    }
+  },
+
+  rejectOrder: async (orderId) => {
+    try {
+      const response = await api.put(`/product-manager/orders/${orderId}/reject`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to reject order');
+    }
+  }
+};
+
+// Place Order APIs
+export const submitDeliveryForm = async (data) => {
+  return api.post('/place-order/submit-form', data);
+};
+
+export const checkRushOrderEligibility = async () => {
+  return api.post('/place-rush-order/check-eligibility');
+};
+
+export const handleNormalOrder = async () => {
+  return api.post('/place-order/normal-order');
+};
+
+export const submitRushOrderInfo = async (data) => {
+  return api.post('/place-rush-order/submit-rush-info', data);
+};
+
+export const processRushOrder = async () => {
+  return api.post('/place-rush-order/process-rush-order');
+};
+
+export const requestToPlaceOrder = async (cart) => {
+  return api.post('/place-order/request', cart);
+};
+
+
+
+// Pay individual invoice for rush order
+export const payInvoice = async (invoiceId) => {
+  return api.post('/place-rush-order/pay-invoice', null, {
+    params: { invoiceId }
+  });
+};
+
+// Create separate axios instance for payment APIs (different base path)
+const paymentApi = axios.create({
+  baseURL: 'http://localhost:8080/api/payment',
+  timeout: 10000,
+  headers: { 'Content-Type': 'application/json' },
+  withCredentials: true
+});
+
+// Add token interceptor for payment API as well
+paymentApi.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// VnPay Payment APIs
+export const createVnPayUrl = async (paymentData) => {
+  return paymentApi.post('/vnpay-create', paymentData);
+};
+
+export const getPaymentResult = async (txnRef, responseCode) => {
+  return paymentApi.get('/payment-result', {
+    params: { txnRef, responseCode }
+  });
+};
+
+export const getPaymentStatus = async (txnRef) => {
+  return paymentApi.get('/payment-status', {
+    params: { txnRef }
+  });
+};
+
 export default api;

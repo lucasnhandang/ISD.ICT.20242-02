@@ -26,7 +26,7 @@ public class VnPayService {
     @Autowired
     private PaymentTransactionRepository paymentTransactionRepository;
 
-    public String createPaymentUrl(VnPayCreateRequestDTO req, String clientIp, String returnUrl, String txnRef, HttpSession session) {
+    public String createPaymentUrl(VnPayCreateRequestDTO req, String clientIp, String returnUrl, String txnRef) {
         Map<String, String> vnp_Params = new HashMap<>();
         vnp_Params.put("vnp_Version", "2.1.0");
         vnp_Params.put("vnp_Command", "pay");
@@ -75,7 +75,7 @@ public class VnPayService {
         return vnPayConfig.getPayUrl() + "?" + queryUrl;
     }
 
-    public boolean handleVnPayReturn(Map<String, String> params, HttpSession session) {
+    public boolean handleVnPayReturn(Map<String, String> params) {
         // Validate checksum
         String vnp_SecureHash = params.get("vnp_SecureHash");
         params.remove("vnp_SecureHash");

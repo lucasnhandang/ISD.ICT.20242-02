@@ -1,9 +1,10 @@
 package com.hustict.aims.service.email;
 
 import com.hustict.aims.dto.email.BaseEmailRequest;
-import jakarta.servlet.http.HttpSession;
+import com.hustict.aims.dto.order.OrderDTO;
+
 
 public interface SendEmailService<T extends BaseEmailRequest> {
-    T buildRequest(HttpSession session);
-    void sendEmail(T request);
+    T buildRequest(OrderDTO order);
+    void sendEmail(T request,OrderDTO order);
 }
