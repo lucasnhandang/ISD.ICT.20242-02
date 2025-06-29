@@ -49,7 +49,17 @@ const CreateUserPage = () => {
   };
 
   const handleRoleChange = (event) => {
-    setFormData(prev => ({ ...prev, roles: event.target.value }));
+    // Đảm bảo giá trị luôn là array
+    const value = event.target.value;
+    const rolesArray = Array.isArray(value) ? value : [value].filter(Boolean);
+    
+    console.log('🔧 Role change debug:', {
+      originalValue: value,
+      isArray: Array.isArray(value),
+      processedArray: rolesArray
+    });
+    
+    setFormData(prev => ({ ...prev, roles: rolesArray }));
     if (errors.roles) {
       setErrors(prev => ({ ...prev, roles: '' }));
     }
@@ -93,8 +103,9 @@ const CreateUserPage = () => {
       newErrors.phoneNumber = 'Please enter a valid 10-digit phone number';
     }
 
-    // Roles validation
-    if (formData.roles.length === 0) {
+    // Roles validation - đảm bảo roles là array
+    const rolesArray = Array.isArray(formData.roles) ? formData.roles : [];
+    if (rolesArray.length === 0) {
       newErrors.roles = 'At least one role must be selected';
     }
 
@@ -277,19 +288,24 @@ const CreateUserPage = () => {
                     multiple
                     value={formData.roles}
                     onChange={handleRoleChange}
-                    renderValue={(selected) => (
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {selected.map((value) => (
-                          <Chip 
-                            key={value} 
-                            label={availableRoles.find(role => role.value === value)?.label || value}
-                            size="small"
-                            color="primary"
-                            variant="outlined"
-                          />
-                        ))}
-                      </Box>
-                    )}
+                    renderValue={(selected) => {
+                      // Đảm bảo selected luôn là array để tránh lỗi
+                      const selectedArray = Array.isArray(selected) ? selected : [];
+                      
+                      return (
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                          {selectedArray.map((value) => (
+                            <Chip 
+                              key={value} 
+                              label={availableRoles.find(role => role.value === value)?.label || value}
+                              size="small"
+                              color="primary"
+                              variant="outlined"
+                            />
+                          ))}
+                        </Box>
+                      );
+                    }}
                   >
                     {availableRoles.map((role) => (
                       <MenuItem key={role.value} value={role.value}>

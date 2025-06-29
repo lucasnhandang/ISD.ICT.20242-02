@@ -20,14 +20,19 @@ import {
   Snackbar,
   Alert,
   TablePagination,
+  CircularProgress,
+  Card,
+  CardContent,
 } from '@mui/material';
 import {
   CheckCircle as CheckCircleIcon,
   Cancel as CancelIcon,
   KeyboardArrowDown as KeyboardArrowDownIcon,
   KeyboardArrowUp as KeyboardArrowUpIcon,
+  Refresh as RefreshIcon,
+  Warning as WarningIcon,
 } from '@mui/icons-material';
-import { orderManagementAPI } from '../../services/api';
+import { orderManagementAPI, checkBackendConnection } from '../../services/api';
 
 const Row = ({ order, onApprove, onReject }) => {
   const [open, setOpen] = useState(false);
@@ -123,15 +128,52 @@ const OrderManagementPage = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage] = useState(30);
 
-  const fetchPendingOrders = async () => {
+  const fetchPendingOrders = async (retryCount = 0) => {
     try {
       setLoading(true);
+      setError(null);
+      
+      console.log('🔄 Đang kiểm tra kết nối backend...');
+      
+      // Kiểm tra kết nối backend trước
+      const connectionStatus = await checkBackendConnection();
+      if (!connectionStatus.connected) {
+        throw new Error(`Không thể kết nối backend: ${connectionStatus.message}`);
+      }
+      
+      console.log('✅ Backend connection OK, đang tải pending orders...');
       const data = await orderManagementAPI.getPendingOrders();
       setPendingOrders(data);
       setError(null);
+      
+      console.log(`✅ Đã tải thành công ${data.length} pending orders`);
+      
     } catch (err) {
-      setError('Failed to fetch pending orders. Please try again later.');
-      console.error('Error fetching pending orders:', err);
+      console.error(`❌ Lỗi lần thử ${retryCount + 1}:`, err);
+      
+      // Retry logic - thử lại tối đa 2 lần
+      if (retryCount < 2) {
+        console.log(`🔄 Đang thử lại lần ${retryCount + 2}...`);
+        setTimeout(() => {
+          fetchPendingOrders(retryCount + 1);
+        }, 2000); // Đợi 2 giây trước khi retry
+        return;
+      }
+      
+      // Thông báo lỗi chi tiết hơn
+      let errorMessage = 'Không thể tải danh sách đơn hàng. ';
+      
+      if (err.message.includes('Network Error') || err.message.includes('ERR_NETWORK')) {
+        errorMessage += 'Vui lòng kiểm tra:\n• Kết nối mạng\n• Backend server đang chạy\n• Firewall/Antivirus blocking';
+      } else if (err.message.includes('timeout')) {
+        errorMessage += 'Kết nối quá chậm. Vui lòng thử lại.';
+      } else if (err.message.includes('404')) {
+        errorMessage += 'API endpoint không tồn tại.';
+      } else {
+        errorMessage += err.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -200,8 +242,12 @@ const OrderManagementPage = () => {
 
   if (loading) {
     return (
-      <Box sx={{ p: 3 }}>
-        <Typography>Loading orders...</Typography>
+      <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <CircularProgress size={40} sx={{ mb: 2 }} />
+        <Typography variant="h6" gutterBottom>Đang tải đơn hàng...</Typography>
+        <Typography variant="body2" color="text.secondary">
+          Vui lòng đợi trong giây lát
+        </Typography>
       </Box>
     );
   }
@@ -214,14 +260,59 @@ const OrderManagementPage = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Order Management
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h4">
+          Quản lý đơn hàng
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button
+            variant="outlined"
+            startIcon={<RefreshIcon />}
+            onClick={() => fetchPendingOrders()}
+            disabled={loading}
+          >
+            Làm mới
+          </Button>
+          {/* <Button
+            variant="text"
+            size="small"
+            onClick={() => window.open('/api-test', '_blank')}
+          >
+            🔧 Test API
+          </Button> */}
+        </Box>
+      </Box>
       
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
+        <Card sx={{ mb: 2 }}>
+          <CardContent>
+            <Alert severity="error" sx={{ mb: 2 }}>
+              <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
+                <WarningIcon sx={{ mr: 1 }} />
+                Lỗi kết nối
+              </Typography>
+            </Alert>
+            <Typography variant="body2" sx={{ whiteSpace: 'pre-line', mb: 2 }}>
+              {error}
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Button 
+                variant="contained" 
+                onClick={() => fetchPendingOrders()}
+                disabled={loading}
+                startIcon={<RefreshIcon />}
+              >
+                Thử lại
+              </Button>
+              <Button 
+                variant="outlined" 
+                onClick={() => window.open('http://localhost:8080/api/v1/product-manager/orders/pending', '_blank')}
+              >
+                Test API trực tiếp
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
       )}
 
       <Paper sx={{ width: '100%', mb: 2 }}>

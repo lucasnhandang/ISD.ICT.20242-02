@@ -19,4 +19,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("SELECT p FROM Product p WHERE p.id = :id AND p.isDeleted = false")
     Optional<Product> findByIdNotDeleted(@Param("id") Long id);
+
+    @Query("SELECT p.currentPrice FROM Product p WHERE p.id = :productId")
+    Integer getCurrentPrice(@Param("productId") Long productId);
 }
