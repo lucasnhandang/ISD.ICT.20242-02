@@ -10,7 +10,7 @@ import {
   Paper,
   Divider
 } from '@mui/material';
-import { submitDeliveryForm, checkRushOrderEligibility, handleNormalOrder } from '../services/api';
+import { submitDeliveryForm, checkRushOrderEligibility } from '../services/api';
 
 // Danh sách tỉnh/thành mới nhất (cập nhật theo sáp nhập 2024)
 const provinces = [
