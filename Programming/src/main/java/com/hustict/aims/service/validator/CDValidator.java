@@ -1,8 +1,10 @@
-package com.hustict.aims.service.validation;
+package com.hustict.aims.service.validator;
 
 import com.hustict.aims.model.product.CD;
+import org.springframework.stereotype.Component;
 import java.util.List;
 
+@Component
 public class CDValidator extends ProductValidator<CD> {
     @Override
     public String getType() { return "CD"; }

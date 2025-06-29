@@ -1,6 +1,7 @@
-package com.hustict.aims.service.validation;
+package com.hustict.aims.service.validator;
 
 import com.hustict.aims.model.product.Product;
+import com.hustict.aims.exception.ProductValidationException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +15,27 @@ public abstract class ProductValidator<T extends Product> {
     }
 
     @SuppressWarnings("unchecked")
-    public final List<String> validate(Product product) {
+    public final void validate(Product product) {
+        List<String> errors = new ArrayList<>();
+        if (canValidate(product)) {
+            T typedProduct = (T) product;
+            validateCommon(typedProduct, errors);
+            validateSpecific(typedProduct, errors);
+        } else {
+            throw new ProductValidationException("Validator type mismatch for product: " + product.getTitle());
+        }
+        
+        if (!errors.isEmpty()) {
+            throw new ProductValidationException(errors);
+        }
+    }
+    
+    /**
+     * Legacy method that returns errors list for backward compatibility.
+     * @deprecated Use validate(Product) method which throws exceptions instead.
+     */
+    @Deprecated
+    public final List<String> validateAndReturnErrors(Product product) {
         List<String> errors = new ArrayList<>();
         if (canValidate(product)) {
             T typedProduct = (T) product;
@@ -50,6 +71,7 @@ public abstract class ProductValidator<T extends Product> {
         rejectIfBlank(p.getTitle(), "Product title", 255, errs);
         rejectIfNegative(p.getValue(), "Product value", errs);
         rejectIfNegative(p.getCurrentPrice(), "Product current price", errs);
+
         if (p.getValue() > 0) {
             double min = p.getValue() * 0.3;
             double max = p.getValue() * 1.5;
@@ -57,6 +79,7 @@ public abstract class ProductValidator<T extends Product> {
                 errs.add(String.format("Current price must be between 30%% and 150%% of value (%.0f – %.0f)!", min, max));
             }
         }
+
         rejectIfBlank(p.getBarcode(), "Barcode", 100, errs);
         rejectIfBlank(p.getDescription(), "Product description", 255, errs);
         rejectIfNegative(p.getQuantity(), "Product quantity", errs);

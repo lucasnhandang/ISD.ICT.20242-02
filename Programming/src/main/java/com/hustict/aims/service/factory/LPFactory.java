@@ -2,21 +2,20 @@ package com.hustict.aims.service.factory;
 
 import com.hustict.aims.dto.product.LPDetailDTO;
 import com.hustict.aims.model.product.LP;
-import com.hustict.aims.repository.product.LPRepository;
 import com.hustict.aims.service.handler.LPHandler;
-import com.hustict.aims.service.validation.LPValidator;
-import com.hustict.aims.utils.mapper.product.LPMapper;
+import com.hustict.aims.service.validator.LPValidator;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 @Component
 public class LPFactory implements ProductFactory<LP, LPDetailDTO> {
+    private final LPHandler handler;
+    private final LPValidator validator;
     
-    private final LPRepository lpRepository;
-    private final LPMapper lpMapper;
-    
-    public LPFactory(LPRepository lpRepository, LPMapper lpMapper) {
-        this.lpRepository = lpRepository;
-        this.lpMapper = lpMapper;
+    public LPFactory(LPHandler handler, LPValidator validator) {
+        this.handler = handler;
+        this.validator = validator;
     }
     
     @Override
@@ -30,9 +29,23 @@ public class LPFactory implements ProductFactory<LP, LPDetailDTO> {
     }
     
     @Override
-    public ProductBundle<LP, LPDetailDTO> createBundle() {
-        LPHandler handler = new LPHandler(lpRepository, lpMapper);
-        LPValidator validator = new LPValidator();
-        return new ProductBundle<>(handler, validator, lpMapper, getProductType());
+    public LPDetailDTO createProduct(Map<String, Object> data) {
+        LP lp = (LP) handler.toEntity(data);
+        validator.validate(lp);
+        LP savedLP = (LP) handler.save(lp);
+        return (LPDetailDTO) handler.toDTO(savedLP);
+    }
+    
+    @Override
+    public LPDetailDTO updateProduct(LP existing, Map<String, Object> data) {
+        LP updatedLP = (LP) handler.updateEntity(existing, data);
+        validator.validate(updatedLP);
+        LP savedLP = (LP) handler.save(updatedLP);
+        return (LPDetailDTO) handler.toDTO(savedLP);
+    }
+    
+    @Override
+    public LPDetailDTO viewProduct(LP product) {
+        return (LPDetailDTO) handler.toDTO(product);
     }
 } 

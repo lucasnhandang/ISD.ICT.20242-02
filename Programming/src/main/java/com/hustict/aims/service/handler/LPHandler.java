@@ -1,14 +1,15 @@
 package com.hustict.aims.service.handler;
 
 import com.hustict.aims.dto.product.ProductDetailDTO;
-import com.hustict.aims.model.product.Book;
 import com.hustict.aims.model.product.LP;
 import com.hustict.aims.model.product.Product;
 import com.hustict.aims.repository.product.LPRepository;
 import com.hustict.aims.utils.mapper.product.LPMapper;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+@Component
 public class LPHandler implements ProductHandler {
     private final LPRepository repository;
     private final LPMapper lpMapper;
