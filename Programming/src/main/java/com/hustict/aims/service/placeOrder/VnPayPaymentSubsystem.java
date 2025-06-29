@@ -17,8 +17,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.*;
 
-@Service
-public class VnPayService {
+@Service("vnPayPaymentSubsystem")
+public class VnPayPaymentSubsystem implements PaymentSubsystem {
     @Autowired
     private VnPayConfig vnPayConfig;
     @Autowired
@@ -26,6 +26,7 @@ public class VnPayService {
     @Autowired
     private PaymentTransactionRepository paymentTransactionRepository;
 
+    @Override
     public String createPaymentUrl(VnPayCreateRequestDTO req, String clientIp, String returnUrl, String txnRef) {
         Map<String, String> vnp_Params = new HashMap<>();
         vnp_Params.put("vnp_Version", "2.1.0");
@@ -75,7 +76,8 @@ public class VnPayService {
         return vnPayConfig.getPayUrl() + "?" + queryUrl;
     }
 
-    public boolean handleVnPayReturn(Map<String, String> params) {
+    @Override
+    public boolean handlePaymentReturn(Map<String, String> params) {
         // Validate checksum
         String vnp_SecureHash = params.get("vnp_SecureHash");
         params.remove("vnp_SecureHash");
@@ -112,7 +114,6 @@ public class VnPayService {
                 .reduce("", (a, b) -> a + (a.isEmpty() ? "" : "&") + b);
             txnDTO.setPaymentUrl(returnUrl);
 
-            
             return true;
         }
         return false;
