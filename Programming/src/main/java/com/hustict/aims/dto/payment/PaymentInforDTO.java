@@ -1,14 +1,8 @@
 package com.hustict.aims.dto.payment;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class PaymentTransactionDTO {
+public class PaymentInforDTO {
     private String bankTransactionId;
     private String content;
     private LocalDateTime paymentTime;
