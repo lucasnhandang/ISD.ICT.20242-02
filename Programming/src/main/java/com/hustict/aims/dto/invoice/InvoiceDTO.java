@@ -16,4 +16,5 @@ public class InvoiceDTO {
     private int shippingFee;
     private Long paymentTransactionId;
     private int totalAmount;
+    private boolean rushOrder;
 }

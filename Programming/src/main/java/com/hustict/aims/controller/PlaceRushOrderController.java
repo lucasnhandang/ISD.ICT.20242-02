@@ -166,9 +166,9 @@ public class PlaceRushOrderController {
         Map<String, Long> orderIds = saveMultipleOrders(
             processResult.getCartList(), 
             deliveryInfo, 
-            processResult.getInvoiceList()
+            processResult.getInvoiceList(),session
         );
-
+        
         // Chuẩn bị response
         Map<String, Object> response = new HashMap<>();
         
@@ -199,7 +199,7 @@ public class PlaceRushOrderController {
      */
     private Map<String, Long> saveMultipleOrders(java.util.List<com.hustict.aims.dto.cart.CartRequestDTO> cartList, 
                                                  DeliveryFormDTO deliveryInfo, 
-                                                 java.util.List<InvoiceDTO> invoiceList) {
+                                                 java.util.List<InvoiceDTO> invoiceList,HttpSession session) {
         Map<String, Long> orderIds = new HashMap<>();
         
         for (int i = 0; i < cartList.size(); i++) {
@@ -207,7 +207,7 @@ public class PlaceRushOrderController {
             InvoiceDTO currentInvoice = invoiceList.get(i);
             
             // Save temp order
-            Long orderId = saveTempOrder.save(currentCart, deliveryInfo, currentInvoice);
+            Long orderId = saveTempOrder.save(currentCart, deliveryInfo, currentInvoice,session);
             
             // Phân loại order theo rush flag
             if (currentCart.isRushOrder()) {

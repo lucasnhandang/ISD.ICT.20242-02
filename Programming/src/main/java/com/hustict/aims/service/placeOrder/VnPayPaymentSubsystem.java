@@ -141,7 +141,7 @@ public class VnPayPaymentSubsystem implements PaymentSubsystem {
         String vnpOrderInfo = params.getOrDefault("vnp_OrderInfo", "");
         String vnpBankCode = params.getOrDefault("vnp_BankCode", "");
         String vnpTransactionStatus = params.getOrDefault("vnp_TransactionStatus", "");
-
+        boolean isSuccess = "00".equals(vnpTransactionStatus);
         String paymentUrl = "vnp_TxnRef=" + vnpTxnRef
                 + "&vnp_ResponseCode=" + vnpResponseCode
                 + "&vnp_TransactionNo=" + vnpTransactionNo
@@ -183,6 +183,7 @@ public class VnPayPaymentSubsystem implements PaymentSubsystem {
         placeOrderRequestDTO.setPaymentTransaction(paymentTransaction);
         placeOrderRequestDTO.setOrderId(orderid);
 
+        
         String placeOrderUrl = "http://localhost:8080/api/v1/place-order/handle-payment";
         restTemplate.postForEntity(placeOrderUrl, placeOrderRequestDTO, String.class);
         // Ở đây chỉ trả về URL frontend để controller redirect
@@ -193,7 +194,7 @@ public class VnPayPaymentSubsystem implements PaymentSubsystem {
                 "&vnp_Amount=" + vnpAmount +
                 "&vnp_PayDate=" + vnpPayDate +
                 "&vnp_OrderInfo=" + vnpOrderInfo +
-                "&orderId=" + orderid;
+                "&orderId=" + orderid + "paymentSuccess" + isSuccess;
         return frontendUrl;
     }
 }
