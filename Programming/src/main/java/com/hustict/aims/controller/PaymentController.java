@@ -60,7 +60,9 @@ public class PaymentController {
 
     @GetMapping("/vnpay-return")
     public void vnPayReturn(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
         String frontendUrl = paymentSubsystem.handleReturnAndBuildRedirect(request, response);
+
         response.sendRedirect(frontendUrl);
     }
 

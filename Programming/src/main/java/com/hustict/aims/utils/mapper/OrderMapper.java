@@ -6,14 +6,17 @@ import com.hustict.aims.dto.cart.CartItemRequestDTO;
 
 import com.hustict.aims.model.order.Order;
 import com.hustict.aims.model.order.OrderItem;
+import com.hustict.aims.model.product.Product;
 import com.hustict.aims.model.shipping.DeliveryInfo;
 import com.hustict.aims.model.invoice.Invoice;
 
 import com.hustict.aims.repository.DeliveryInfoRepository;
 import com.hustict.aims.repository.InvoiceRepository;
+import com.hustict.aims.repository.product.ProductRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,13 +24,13 @@ import java.util.stream.Collectors;
 public class OrderMapper {
 
     @Autowired
-    private OrderItemMapper orderItemMapper;
-
-    @Autowired
     private DeliveryInfoRepository deliveryInfoRepository;
 
     @Autowired
     private InvoiceRepository invoiceRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
 
     public Order toEntity(OrderInformationDTO dto) {
         if (dto == null) {
@@ -50,16 +53,24 @@ public class OrderMapper {
             ));
         order.setDeliveryInfo(deliveryInfo);
 
+        // Load Invoice từ repository
         Invoice invoice = invoiceRepository.findById(dto.getInvoiceId())
             .orElseThrow(() -> new IllegalArgumentException(
-                "Không tìm thấy Invoice với id = " + dto.getDeliveryInfoId()
+                "Không tìm thấy Invoice với id = " + dto.getInvoiceId()
             ));
         order.setInvoice(invoice);
 
         // Ánh xạ danh sách sản phẩm
         List<OrderItem> orderItems = dto.getProductList().stream()
-            .map(orderItemMapper::toEntity)
+            .map(itemDto -> {
+                Product product = productRepository.findById(itemDto.getProductID())
+                    .orElseThrow(() -> new IllegalArgumentException(
+                        "Không tìm thấy Product với id = " + itemDto.getProductID()
+                    ));
+                return OrderItemMapper.toEntity(itemDto, order, product);
+            })
             .collect(Collectors.toList());
+
         orderItems.forEach(order::addOrderItem);
 
         return order;
@@ -69,7 +80,7 @@ public class OrderMapper {
         if (entity == null) return null;
 
         List<CartItemRequestDTO> items = entity.getOrderItems().stream()
-            .map(orderItemMapper::toDTO)
+            .map(OrderItemMapper::toDTO)
             .collect(Collectors.toList());
 
         OrderInformationDTO dto = new OrderInformationDTO();

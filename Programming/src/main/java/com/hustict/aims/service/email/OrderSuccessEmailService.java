@@ -29,7 +29,6 @@ public class OrderSuccessEmailService extends SendEmailServiceImpl<OrderSuccessE
 
     @Override
     protected String buildSubject(OrderSuccessEmailRequest request, Long orderId) {
-        
         return "Your Order #" + orderId + " is Pending";
     }
     @Override
