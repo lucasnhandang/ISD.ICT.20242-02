@@ -303,6 +303,24 @@ export const orderManagementAPI = {
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Failed to reject order');
     }
+  },
+
+  getOrderDetails: async (orderId) => {
+    try {
+      const response = await api.get(`/orders/${orderId}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to get order details');
+    }
+  },
+
+  cancelOrder: async (orderId) => {
+    try {
+      const response = await api.put(`/orders/${orderId}/cancel`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to cancel order');
+    }
   }
 };
 
