@@ -2,9 +2,9 @@ package com.hustict.aims.service.email;
 
 import com.hustict.aims.dto.cart.CartItemRequestDTO;
 import com.hustict.aims.dto.email.RefundEmailRequest;
+import com.hustict.aims.dto.order.OrderDTO;
 import com.hustict.aims.dto.order.OrderInformationDTO;
 
-import jakarta.servlet.http.HttpSession;
 
 import java.text.DecimalFormat;
 
@@ -15,9 +15,9 @@ import org.springframework.stereotype.Service;
 public class RefundEmailService extends SendEmailServiceImpl<RefundEmailRequest> {
 
     @Override
-    public RefundEmailRequest buildRequest(HttpSession session) {
+    public RefundEmailRequest buildRequest(OrderDTO order) {
         RefundEmailRequest req = instantiateRequest();
-        populateCommonFields(req);
+        populateCommonFields(req, order);
         return req;
     }
 
@@ -27,9 +27,8 @@ public class RefundEmailService extends SendEmailServiceImpl<RefundEmailRequest>
     }
 
     @Override
-    protected String buildSubject(RefundEmailRequest request) {
-        OrderInformationDTO orderInfo = (OrderInformationDTO) session.getAttribute("orderInformation");
-        Long orderId = orderInfo.getOrderId();
+    protected String buildSubject(RefundEmailRequest request, Long orderId) {
+      
         return "Your Order #" + orderId + " is Refunded Successfully";
     }
     

@@ -229,7 +229,7 @@ const Header = ({ onSearch, onSignInClick, currentUser, onLogout, showLoginButto
                 sx={signInButtonStyles}
                 onClick={onSignInClick}
               >
-                Admin/PM Login
+                Log in
               </Button>
             )
           )}

@@ -12,6 +12,7 @@ public class CartRequestDTO {
      private int totalItem;
      private String currency;
      private int discount;
+     private boolean rushOrder;
 
      
     // Lấy product list cho ProductAvailabilityService

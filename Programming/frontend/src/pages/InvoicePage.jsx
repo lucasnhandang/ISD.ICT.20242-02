@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, Typography, Divider, Paper, Button, CircularProgress, Alert } from '@mui/material';
 import Header from '../components/Header';
-import { handlePayment, payInvoice } from '../services/api';
+import { createVnPayUrl } from '../services/api';
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('vi-VN', {
@@ -31,21 +31,48 @@ const InvoicePage = () => {
     setErrorStates(prev => ({ ...prev, [invoiceKey]: '' }));
     
     try {
-      if (isRushOrder && inv.id) {
-        // Thanh toán riêng lẻ cho rush order
-        await payInvoice(inv.id);
+      if (isRushOrder) {
+        // Tạm thời bỏ call API cho rush order - chỉ hiển thị thông báo
+        alert('Tính năng thanh toán rush order đang được phát triển. Vui lòng thử lại sau!');
+        return;
       } else {
-        // Thanh toán chung cho normal order
-        await handlePayment();
+        // Thanh toán qua VnPay cho normal order
+        const vnPayData = {
+          amount: inv.totalAmount,
+          orderInfo: `Thanh toan don hang - Invoice ${inv.id || 'N/A'}`,
+          orderType: "other",
+          language: "vn",
+          billingEmail: deliveryForm?.email,
+          billingMobile: deliveryForm?.phoneNumber,
+          billingFullName: deliveryForm?.customerName,
+          billingAddress: deliveryForm?.deliveryAddress,
+          billingCity: deliveryForm?.deliveryProvince
+        };
+        
+        const response = await createVnPayUrl(vnPayData);
+        
+        if (response.data.paymentUrl) {
+          // Lưu thông tin vào sessionStorage để sử dụng sau khi return từ VnPay
+          sessionStorage.setItem('pendingPaymentInfo', JSON.stringify({
+            orderInformation: location.state?.orderInformation,
+            invoice: inv,
+            deliveryForm: deliveryForm,
+            isRushOrder: isRushOrder,
+            txnRef: response.data.txnRef
+          }));
+          
+          // Redirect đến VnPay
+          window.location.href = response.data.paymentUrl;
+        } else {
+          throw new Error('Không thể tạo URL thanh toán');
+        }
       }
       
-      // Đánh dấu invoice này đã thanh toán
-      setPaidStates(prev => ({ ...prev, [invoiceKey]: true }));
-      
     } catch (err) {
+      console.error('Payment error:', err);
       setErrorStates(prev => ({ 
         ...prev, 
-        [invoiceKey]: err.response?.data?.message || 'Có lỗi khi thanh toán invoice này.' 
+        [invoiceKey]: err.response?.data?.message || err.message || 'Có lỗi khi thanh toán invoice này.' 
       }));
     } finally {
       setLoadingStates(prev => ({ ...prev, [invoiceKey]: false }));
@@ -81,10 +108,10 @@ const InvoicePage = () => {
         </Typography>
         
         {isRushOrder && (
-          <Alert severity="info" sx={{ mb: 3 }}>
+          <Alert severity="warning" sx={{ mb: 3 }}>
             <Typography variant="body2">
-              <strong>Giao hàng nhanh:</strong> Đơn hàng đã được tách thành nhiều invoice riêng biệt. 
-              Bạn có thể thanh toán từng invoice một cách độc lập.
+              <strong>Giao hàng nhanh:</strong> Tính năng thanh toán cho đơn hàng giao nhanh đang được phát triển. 
+              Vui lòng liên hệ với chúng tôi để được hỗ trợ thanh toán.
             </Typography>
           </Alert>
         )}
@@ -122,9 +149,9 @@ const InvoicePage = () => {
                 </Typography>
                 {inv.productList && inv.productList.length > 0 ? (
                   <Box sx={{ mb: 2 }}>
-                    {inv.productList.map((item) => (
+                    {inv.productList.map((item, itemIdx) => (
                       <Box 
-                        key={item.productID} 
+                        key={item.productID || itemIdx} 
                         sx={{ 
                           display: 'flex', 
                           justifyContent: 'space-between', 
@@ -135,10 +162,13 @@ const InvoicePage = () => {
                       >
                         <Box sx={{ flex: 1 }}>
                           <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                            {item.productName || `Sản phẩm ${item.productID}`}
+                            {item.productName || item.name || `Sản phẩm ${item.productID}`}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
                             ID: {item.productID}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Đơn giá: {formatPrice(item.price)}
                           </Typography>
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -146,7 +176,7 @@ const InvoicePage = () => {
                             x {item.quantity}
                           </Typography>
                           <Typography variant="body1" sx={{ fontWeight: 500, minWidth: 100, textAlign: 'right' }}>
-                            {formatPrice(item.price)}
+                            {formatPrice(item.price * item.quantity)}
                           </Typography>
                         </Box>
                       </Box>
@@ -160,8 +190,15 @@ const InvoicePage = () => {
 
                 {/* Chi tiết thanh toán */}
                 <Box sx={{ mt: 3, p: 2, backgroundColor: '#f9f9f9', borderRadius: 1 }}>
+                  {!isRushOrder && inv.productPriceExVAT && (
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography>Tổng tiền hàng (chưa VAT):</Typography>
+                      <Typography>{formatPrice(inv.productPriceExVAT)}</Typography>
+                    </Box>
+                  )}
+                  
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography>Tổng tiền hàng:</Typography>
+                    <Typography>Tổng tiền hàng{!isRushOrder ? ' (đã VAT)' : ''}:</Typography>
                     <Typography>{formatPrice(inv.productPriceIncVAT || inv.subtotal || 0)}</Typography>
                   </Box>
                   
@@ -171,7 +208,7 @@ const InvoicePage = () => {
                       color: isRushOrder ? 'warning.main' : 'inherit',
                       fontWeight: isRushOrder ? 600 : 400
                     }}>
-                      {formatPrice(inv.shippingFee)}
+                      {formatPrice(inv.shippingFee || 0)}
                       {isRushOrder && (
                         <Typography component="span" sx={{ fontSize: '0.8rem', ml: 1 }}>
                           (Nhanh)
@@ -201,8 +238,24 @@ const InvoicePage = () => {
 
                 {/* Success message */}
                 {isPaid && (
-                  <Alert severity="success" sx={{ mt: 2 }}>
-                    Hóa đơn này đã được thanh toán thành công!
+                  <Alert 
+                    severity="success" 
+                    sx={{ mt: 2 }}
+                    action={
+                      <Button 
+                        color="inherit" 
+                        size="small" 
+                        onClick={() => navigate('/')}
+                        sx={{ fontWeight: 600 }}
+                      >
+                        Về trang chủ
+                      </Button>
+                    }
+                  >
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      Hóa đơn này đã được thanh toán thành công! 
+                      {!isRushOrder && " Đơn hàng đã được tạo và bạn sẽ nhận được email xác nhận."}
+                    </Typography>
                   </Alert>
                 )}
 
@@ -219,7 +272,7 @@ const InvoicePage = () => {
                     </Button>
                     <Button 
                       variant="contained" 
-                      color="primary" 
+                      color={isRushOrder ? "warning" : "primary"}
                       onClick={() => handlePay(inv, idx)} 
                       disabled={isLoading}
                       sx={{ minWidth: 120 }}
@@ -230,7 +283,7 @@ const InvoicePage = () => {
                           Đang xử lý...
                         </>
                       ) : (
-                        'Thanh toán'
+                        isRushOrder ? 'Liên hệ thanh toán' : 'Thanh toán'
                       )}
                     </Button>
                   </Box>
@@ -308,4 +361,4 @@ const InvoicePage = () => {
   );
 };
 
-export default InvoicePage; 
+export default InvoicePage;

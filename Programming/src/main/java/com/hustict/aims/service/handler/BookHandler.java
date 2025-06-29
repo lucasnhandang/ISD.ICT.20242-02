@@ -4,12 +4,10 @@ import com.hustict.aims.dto.product.ProductDetailDTO;
 import com.hustict.aims.model.product.Book;
 import com.hustict.aims.model.product.Product;
 import com.hustict.aims.repository.product.BookRepository;
-import com.hustict.aims.utils.mapper.BookMapper;
-import org.springframework.stereotype.Component;
+import com.hustict.aims.utils.mapper.product.BookMapper;
 
 import java.util.Map;
 
-@Component
 public class BookHandler implements ProductHandler {
     private final BookRepository repository;
     private final BookMapper mapper;
@@ -34,8 +32,12 @@ public class BookHandler implements ProductHandler {
     }
 
     @Override
-    public ProductDetailDTO saveAndReturnDTO(Product product) {
-        Book saved = repository.save((Book) product);
-        return mapper.toDetailDTO(saved);
+    public Product save(Product product) {
+        return repository.save((Book) product);
+    }
+
+    @Override
+    public ProductDetailDTO toDTO(Product product) {
+        return mapper.toDetailDTO((Book) product);
     }
 }

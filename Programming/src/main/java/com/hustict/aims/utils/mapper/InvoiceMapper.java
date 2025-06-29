@@ -25,13 +25,13 @@ public class InvoiceMapper {
         entity.setShippingFee(dto.getShippingFee());
         entity.setTotalAmount(dto.getTotalAmount());
         if (dto.getPaymentTransactionId() != null) {
-        PaymentTransaction transaction = transactionRepository
-            .findById(dto.getPaymentTransactionId())
-            .orElseThrow(() -> new IllegalArgumentException(
-                "Không tìm thấy PaymentTransaction với id=" + dto.getPaymentTransactionId()
-            ));
-        entity.setPaymentTransaction(transaction);
-    }
+            PaymentTransaction transaction = transactionRepository
+                .findById(dto.getPaymentTransactionId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                    "Không tìm thấy PaymentTransaction với id=" + dto.getPaymentTransactionId()
+                ));
+            entity.setPaymentTransaction(transaction);
+        }
         return entity;
     }
 

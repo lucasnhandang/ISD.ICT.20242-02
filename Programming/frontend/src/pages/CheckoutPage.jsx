@@ -99,7 +99,7 @@ const CheckoutPage = () => {
       setProcessingOrder(true);
       setError('');
       
-      const response = await handleNormalOrder();
+      const response = await handleNormalOrder(cart);
       
       if (!response.data) {
         throw new Error('Không nhận được phản hồi từ server');
@@ -140,7 +140,7 @@ const CheckoutPage = () => {
       await submitDeliveryForm(deliveryForm);
       await requestToPlaceOrder(cart);
       
-      const invoiceResponse = await handleNormalOrder();
+      const invoiceResponse = await handleNormalOrder(cart);
       
       if (!invoiceResponse.data) {
         throw new Error('Không nhận được thông tin hóa đơn');

@@ -8,5 +8,5 @@ public interface OrderService {
     void approveOrder(Long orderId);
     void rejectOrder(Long orderId);
     List<OrderInformationDTO> getPendingOrders();
-    void prepareOrderSessionForEmail(Long orderId, HttpSession session);
+    void prepareOrderSessionForEmail(Long orderId, HttpSession session); 
 } 

@@ -1,5 +1,6 @@
 package com.hustict.aims.service.placeOrder;
 
+import com.hustict.aims.dto.payment.PaymentTransactionDTO;
 import com.hustict.aims.dto.payment.VnPayCreateRequestDTO;
 import com.hustict.aims.model.order.Order;
 import com.hustict.aims.model.payment.PaymentTransaction;
@@ -7,6 +8,9 @@ import com.hustict.aims.repository.OrderRepository;
 import com.hustict.aims.repository.PaymentTransactionRepository;
 import com.hustict.aims.utils.VnPayConfig;
 import com.hustict.aims.utils.VnPayUtils;
+
+import jakarta.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -83,6 +87,7 @@ public class VnPayService {
         System.out.println("[VNPAY] vnp_SecureHash: " + vnp_SecureHash);
         boolean valid = calculatedHash.equalsIgnoreCase(vnp_SecureHash);
         if (!valid) return false;
+
         // Kiểm tra mã giao dịch, số tiền, trạng thái...
         String txnRef = params.get("vnp_TxnRef");
         String responseCode = params.get("vnp_ResponseCode");
@@ -90,27 +95,27 @@ public class VnPayService {
         String bankTxnId = params.get("vnp_TransactionNo");
         String payDate = params.get("vnp_PayDate");
         String cardType = params.get("vnp_CardType");
+
         if ("00".equals(responseCode)) {
-            // Giao dịch thành công, cập nhật DB
-            Optional<Order> orderOpt = orderRepository.findById(Long.valueOf(txnRef));
-            if (orderOpt.isPresent()) {
-                Order order = orderOpt.get();
-                // Cập nhật trạng thái đơn hàng nếu cần
-                // ...
-                // Lưu thông tin giao dịch
-                PaymentTransaction txn = new PaymentTransaction();
-                txn.setBankTransactionId(bankTxnId);
-                txn.setContent("VNPAY Payment for order " + txnRef);
-                txn.setPaymentTime(LocalDateTime.now());
-                txn.setPaymentAmount(Integer.parseInt(amountStr) / 100);
-                txn.setCardType(cardType);
-                paymentTransactionRepository.save(txn);
-                // Gắn transaction vào order nếu cần
-                // ...
-                orderRepository.save(order);
-            }
+            // Tạo PaymentTransactionDTO và lưu vào session
+            PaymentTransactionDTO txnDTO = new PaymentTransactionDTO();
+            txnDTO.setBankTransactionId(bankTxnId);
+            txnDTO.setContent("VNPAY Payment for order " + txnRef);
+            txnDTO.setPaymentTime(LocalDateTime.now());
+            txnDTO.setPaymentAmount(Integer.parseInt(amountStr) / 100); // Lưu ý chia cho 100 để chuyển sang tiền thực
+            txnDTO.setCardType(cardType);
+            txnDTO.setCurrency("VND");
+
+            // Lưu Payment URL nếu có
+            String returnUrl = vnPayConfig.getReturnUrl() + "?" + params.entrySet().stream()
+                .map(e -> e.getKey() + "=" + e.getValue())
+                .reduce("", (a, b) -> a + (a.isEmpty() ? "" : "&") + b);
+            txnDTO.setPaymentUrl(returnUrl);
+
+            
             return true;
         }
         return false;
     }
-} 
+}
+

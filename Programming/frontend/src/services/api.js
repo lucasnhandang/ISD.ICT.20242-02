@@ -3,9 +3,9 @@ import axios from 'axios';
 // Axios instance for API calls
 const api = axios.create({
   baseURL: 'http://localhost:8080/api/v1',
-  timeout: 10000,
+  timeout: 30000,
   headers: { 'Content-Type': 'application/json' },
-  withCredentials: true // Enable sending cookies with requests
+  withCredentials: true // Tạm thời comment để test CORS issue
 });
 
 // Add token to requests if available
@@ -245,10 +245,41 @@ export const validateToken = async () => {
 export const orderManagementAPI = {
   getPendingOrders: async () => {
     try {
+      console.log('🔄 Đang gọi API getPendingOrders...');
+      console.log('📍 URL:', `${api.defaults.baseURL}/product-manager/orders/pending`);
+      
       const response = await api.get('/product-manager/orders/pending');
+      console.log('✅ Thành công getPendingOrders:', response.data);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Failed to fetch pending orders');
+      console.error('❌ Lỗi getPendingOrders:', error);
+      console.error('📝 Chi tiết lỗi:', {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        config: {
+          url: error.config?.url,
+          method: error.config?.method,
+          headers: error.config?.headers,
+          baseURL: error.config?.baseURL
+        }
+      });
+      
+      // Thêm thông tin lỗi chi tiết hơn
+      if (error.code === 'ERR_NETWORK') {
+        throw new Error('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.');
+      } else if (error.response?.status === 401) {
+        throw new Error('Bạn cần đăng nhập để xem thông tin này.');
+      } else if (error.response?.status === 403) {
+        throw new Error('Bạn không có quyền truy cập chức năng này.');
+      } else if (error.response?.status === 404) {
+        throw new Error('Không tìm thấy API endpoint.');
+      } else if (error.response?.status >= 500) {
+        throw new Error('Lỗi server. Vui lòng thử lại sau.');
+      }
+      
+      throw new Error(error.response?.data?.message || 'Không thể tải danh sách đơn hàng chờ duyệt');
     }
   },
 
@@ -269,7 +300,8 @@ export const orderManagementAPI = {
       throw new Error(error.response?.data?.message || 'Failed to reject order');
     }
   }
-  
+};
+
 // Place Order APIs
 export const submitDeliveryForm = async (data) => {
   return api.post('/place-order/submit-form', data);
@@ -279,8 +311,8 @@ export const checkRushOrderEligibility = async () => {
   return api.post('/place-rush-order/check-eligibility');
 };
 
-export const handleNormalOrder = async () => {
-  return api.post('/place-order/normal-order');
+export const handleNormalOrder = async (cart) => {
+  return api.post('/place-order/normal-order', cart);
 };
 
 export const submitRushOrderInfo = async (data) => {
@@ -295,14 +327,51 @@ export const requestToPlaceOrder = async (cart) => {
   return api.post('/place-order/request', cart);
 };
 
-export const handlePayment = async () => {
-  return api.post('/place-order/handle-payment');
-};
+
 
 // Pay individual invoice for rush order
 export const payInvoice = async (invoiceId) => {
   return api.post('/place-rush-order/pay-invoice', null, {
     params: { invoiceId }
+  });
+};
+
+// Create separate axios instance for payment APIs (different base path)
+const paymentApi = axios.create({
+  baseURL: 'http://localhost:8080/api/v1/payment',  // ✅ Fixed: Added v1 to match backend
+  timeout: 10000,
+  headers: { 'Content-Type': 'application/json' },
+  // withCredentials: true  // Tạm thời comment để test CORS issue
+});
+
+// Add token interceptor for payment API as well
+paymentApi.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// VnPay Payment APIs
+export const createVnPayUrl = async (paymentData) => {
+  return paymentApi.post('/vnpay-create', paymentData);
+};
+
+export const getPaymentResult = async (txnRef, responseCode) => {
+  return paymentApi.get('/payment-result', {
+    params: { txnRef, responseCode }
+  });
+};
+
+export const getPaymentStatus = async (txnRef) => {
+  return paymentApi.get('/payment-status', {
+    params: { txnRef }
   });
 };
 
