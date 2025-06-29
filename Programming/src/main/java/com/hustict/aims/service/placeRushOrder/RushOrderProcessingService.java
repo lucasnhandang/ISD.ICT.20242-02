@@ -74,6 +74,7 @@ public class RushOrderProcessingService {
         rushCart.setCurrency(originalCart.getCurrency());
         rushCart.setDiscount(originalCart.getDiscount());
         rushCart.setTotalPrice(rushItems.stream().mapToInt(CartItemRequestDTO::getPrice).sum());
+        rushCart.setRushOrder(true); // Đánh dấu đây là rush order
         return rushCart;
     }
 
@@ -84,6 +85,7 @@ public class RushOrderProcessingService {
         normalCart.setCurrency(originalCart.getCurrency());
         normalCart.setDiscount(originalCart.getDiscount());
         normalCart.setTotalPrice(normalItems.stream().mapToInt(CartItemRequestDTO::getPrice).sum());
+        normalCart.setRushOrder(false); // Đánh dấu đây là normal order
         return normalCart;
     }
 } 

@@ -327,6 +327,10 @@ export const processRushOrder = async () => {
   return api.post('/place-rush-order/process-rush-order');
 };
 
+export const saveRushOrders = async () => {
+  return api.post('/place-rush-order/save-rush-orders');
+};
+
 export const requestToPlaceOrder = async (cart) => {
   return api.post('/place-order/request', cart);
 };
