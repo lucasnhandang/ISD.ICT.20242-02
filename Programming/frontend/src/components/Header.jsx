@@ -6,6 +6,7 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import InvoiceList from './InvoiceList';
 import api from '../services/api';
 import {
@@ -106,6 +107,15 @@ const Header = ({ onSearch, onSignInClick, currentUser, onLogout, showLoginButto
     }
   };
 
+  const handleManagementPanel = () => {
+    handleUserMenuClose();
+    navigate('/management');
+  };
+
+  // Check if user has admin or product manager role
+  const canAccessManagement = currentUser && currentUser.roles && 
+    (currentUser.roles.includes('ADMIN') || currentUser.roles.includes('PRODUCT_MANAGER'));
+
   return (
     <AppBar position="static" color="default" elevation={1}>
       <Toolbar>
@@ -204,6 +214,23 @@ const Header = ({ onSearch, onSignInClick, currentUser, onLogout, showLoginButto
                   }
                 }}
               >
+                {canAccessManagement && (
+                  <MenuItem 
+                    onClick={handleManagementPanel}
+                    sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 1,
+                      color: 'primary.main',
+                      '&:hover': {
+                        backgroundColor: 'primary.light + 20',
+                      }
+                    }}
+                  >
+                    <AdminPanelSettingsIcon fontSize="small" />
+                    Management Panel
+                  </MenuItem>
+                )}
                 <MenuItem 
                   onClick={handleLogout}
                   sx={{ 

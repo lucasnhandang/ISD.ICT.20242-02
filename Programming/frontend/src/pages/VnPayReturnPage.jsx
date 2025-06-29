@@ -219,7 +219,7 @@ const VnPayReturnPage = () => {
               Về trang chủ
             </Button>
             
-            {result?.responseCode === '00' && (
+            {/* {result?.responseCode === '00' && (
               <Button 
                 variant="outlined" 
                 color="primary"
@@ -227,7 +227,7 @@ const VnPayReturnPage = () => {
               >
                 Xem đơn hàng
               </Button>
-            )}
+            )} */}
           </Box>
         </Paper>
       </Box>
