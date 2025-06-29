@@ -25,7 +25,7 @@ const formatPrice = (price) => {
 };
 
 const formatDateTime = (dateTimeString) => {
-  if (!dateTimeString) return 'Chưa xác định';
+  if (!dateTimeString) return 'Not specified';
   return new Date(dateTimeString).toLocaleString('vi-VN', {
     year: 'numeric',
     month: '2-digit',
@@ -70,7 +70,7 @@ const InvoiceCard = ({
           {title}
         </Typography>
         <Chip 
-          label={chipColor === 'warning' ? 'Giao Nhanh' : 'Giao Thường'} 
+          label={chipColor === 'warning' ? 'Rush Delivery' : 'Standard Delivery'} 
           color={chipColor}
           size="small"
           sx={{ fontWeight: 600 }}
@@ -89,7 +89,7 @@ const InvoiceCard = ({
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <AccessTime sx={{ mr: 1, color: 'text.secondary' }} />
           <Typography variant="body2">
-            <strong>Dự kiến giao hàng:</strong> {formatDateTime(deliveryTime)}
+            <strong>Expected Delivery:</strong> {formatDateTime(deliveryTime)}
           </Typography>
         </Box>
       )}
@@ -100,7 +100,7 @@ const InvoiceCard = ({
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid item xs={6}>
           <Typography variant="body2" color="text.secondary">
-            Tiền hàng (có VAT):
+            Product Price (incl. VAT):
           </Typography>
           <Typography variant="body1" sx={{ fontWeight: 500 }}>
             {formatPrice(invoice.productPriceIncVAT)}
@@ -108,7 +108,7 @@ const InvoiceCard = ({
         </Grid>
         <Grid item xs={6}>
           <Typography variant="body2" color="text.secondary">
-            Phí giao hàng:
+            Shipping Fee:
           </Typography>
           <Typography variant="body1" sx={{ fontWeight: 500 }}>
             {formatPrice(invoice.shippingFee)}
@@ -124,7 +124,7 @@ const InvoiceCard = ({
         </Grid>
         <Grid item xs={6}>
           <Typography variant="body2" color="text.secondary">
-            Mã đơn hàng:
+            Order ID:
           </Typography>
           <Typography variant="body1" sx={{ fontWeight: 500 }}>
             #{orderId}
@@ -137,7 +137,7 @@ const InvoiceCard = ({
       {/* Total Amount */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h6" sx={{ fontWeight: 600 }}>
-          Tổng cộng:
+          Total:
         </Typography>
         <Typography variant="h5" color="primary" sx={{ fontWeight: 700 }}>
           {formatPrice(invoice.totalAmount)}
@@ -159,7 +159,7 @@ const InvoiceCard = ({
           borderRadius: 2
         }}
       >
-        Thanh toán đơn hàng này
+        Pay for this Order
       </Button>
     </Paper>
   );
@@ -171,7 +171,7 @@ const RushOrderResults = ({ orderData, onPayment, expectedDateTime }) => {
   if (!orderData) {
     return (
       <Alert severity="error">
-        Không có dữ liệu đơn hàng. Vui lòng thử lại.
+        No order data available. Please try again.
       </Alert>
     );
   }
@@ -185,7 +185,7 @@ const RushOrderResults = ({ orderData, onPayment, expectedDateTime }) => {
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <CheckCircle sx={{ mr: 1 }} />
           <Typography sx={{ fontWeight: 500 }}>
-            {message || 'Đơn hàng đã được tách thành công!'}
+            {message || 'Order has been split successfully!'}
           </Typography>
         </Box>
       </Alert>
@@ -193,45 +193,45 @@ const RushOrderResults = ({ orderData, onPayment, expectedDateTime }) => {
       {/* Header */}
       <Box sx={{ textAlign: 'center', mb: 4 }}>
         <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
-          Đơn hàng của bạn đã được tách
+          Your Order Has Been Split
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Bạn có thể thanh toán từng đơn hàng riêng biệt theo nhu cầu
+          You can pay for each order separately as needed
         </Typography>
       </Box>
 
       {/* Rush Order Invoice */}
       {rushOrderId && rushInvoice && (
         <InvoiceCard
-          title="🚀 Đơn giao hàng nhanh"
+          title="🚀 Rush Delivery Order"
           icon={<LocalShipping sx={{ color: 'warning.main' }} />}
           invoice={rushInvoice}
           orderId={rushOrderId}
           deliveryTime={expectedDateTime}
           chipColor="warning"
-          description="Các sản phẩm hỗ trợ giao hàng nhanh trong cùng ngày"
-                     onPay={() => onPayment(rushOrderId, 'rush', rushInvoice)}
+          description="Products eligible for same-day rush delivery"
+          onPay={() => onPayment(rushOrderId, 'rush', rushInvoice)}
         />
       )}
 
       {/* Normal Order Invoice */}
       {normalOrderId && normalInvoice && (
         <InvoiceCard
-          title="📦 Đơn giao hàng thường"
+          title="📦 Standard Delivery Order"
           icon={<LocalShipping sx={{ color: 'primary.main' }} />}
           invoice={normalInvoice}
           orderId={normalOrderId}
           chipColor="primary"
-          description="Các sản phẩm giao hàng theo lịch thường (3-5 ngày)"
-                     onPay={() => onPayment(normalOrderId, 'normal', normalInvoice)}
+          description="Products delivered according to standard schedule (3-5 days)"
+          onPay={() => onPayment(normalOrderId, 'normal', normalInvoice)}
         />
       )}
 
       {/* Info Alert */}
       <Alert severity="info" sx={{ mt: 3 }}>
         <Typography variant="body2">
-          <strong>Lưu ý:</strong> Bạn có thể thanh toán từng đơn hàng độc lập. 
-          Đơn hàng nào được thanh toán trước sẽ được xử lý và giao trước.
+          <strong>Note:</strong> You can pay for each order independently. 
+          Orders paid earlier will be processed and delivered first.
         </Typography>
       </Alert>
 
@@ -242,14 +242,14 @@ const RushOrderResults = ({ orderData, onPayment, expectedDateTime }) => {
           onClick={() => navigate('/')}
           sx={{ flex: 1 }}
         >
-          Về trang chủ
+          Go to Homepage
         </Button>
         <Button
           variant="outlined"
           onClick={() => navigate('/cart')}
           sx={{ flex: 1 }}
         >
-          Xem giỏ hàng
+          View Cart
         </Button>
       </Box>
     </Box>

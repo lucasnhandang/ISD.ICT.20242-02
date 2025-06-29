@@ -303,6 +303,24 @@ export const orderManagementAPI = {
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Failed to reject order');
     }
+  },
+
+  getOrderDetails: async (orderId) => {
+    try {
+      const response = await api.get(`/orders/${orderId}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to get order details');
+    }
+  },
+
+  cancelOrder: async (orderId) => {
+    try {
+      const response = await api.put(`/orders/${orderId}/cancel`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to cancel order');
+    }
   }
 };
 
@@ -330,18 +348,9 @@ export const processRushOrder = async () => {
 export const saveRushOrders = async () => {
   return api.post('/place-rush-order/save-rush-orders');
 };
-
 export const requestToPlaceOrder = async (cart) => {
   return api.post('/place-order/request', cart);
 };
-
-// Pay individual invoice for rush order
-export const payInvoice = async (invoiceId) => {
-  return api.post('/place-rush-order/pay-invoice', null, {
-    params: { invoiceId }
-  });
-};
-
 // Create separate axios instance for payment APIs
 const paymentApi = axios.create({
   baseURL: 'http://localhost:8080/api/v1/payment',

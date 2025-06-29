@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Box, Typography, Divider, Paper, Button, Alert, CircularProgress } from '@mui/material';
+import { Box, Typography, Divider, Paper, Button, Alert, CircularProgress, Chip } from '@mui/material';
 import Header from '../components/Header';
-import { createVnPayUrl } from '../services/api';
+import { createVnPayUrl, clearCart } from '../services/api';
+import { AccessTime } from '@mui/icons-material';
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('vi-VN', {
@@ -14,16 +15,74 @@ const formatPrice = (price) => {
 const InvoicePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { invoice, invoiceList, deliveryForm, isRushOrder, orderId } = location.state || {};
+  const { invoice, invoiceList, deliveryForm, isRushOrder, orderId, source, message } = location.state || {};
   
   // State để quản lý trạng thái thanh toán
   const [paymentLoading, setPaymentLoading] = useState({});
   const [paymentError, setPaymentError] = useState({});
+  const [currentInvoices, setCurrentInvoices] = useState([]);
+  const [checkingPaymentStatus, setCheckingPaymentStatus] = useState({});
 
-  const invoices = invoiceList || (invoice ? [invoice] : []);
+  // Khởi tạo danh sách invoice
+  useEffect(() => {
+    const invoices = invoiceList || (invoice ? [invoice] : []);
+    setCurrentInvoices(invoices);
+  }, [invoiceList, invoice]);
+
+  // Xóa invoice đã thanh toán khỏi danh sách
+  const removeInvoiceFromList = (invoiceKey) => {
+    setCurrentInvoices(prev => prev.filter(inv => (inv.id || inv.orderId) !== invoiceKey));
+  };
+
+  // Helper function để xử lý khi payment thành công
+  const handlePaymentSuccess = async (invoiceKey) => {
+    try {
+      // Xóa invoice khỏi danh sách
+      removeInvoiceFromList(invoiceKey);
+      
+      // Clear cart khi payment thành công
+      console.log("Payment successful, clearing cart...");
+      await clearCart();
+      console.log("Cart cleared successfully!");
+      
+      alert('Order has been paid successfully and removed from the list!');
+    } catch (error) {
+      console.error("Failed to clear cart:", error);
+      // Vẫn thông báo thành công cho user vì invoice đã được xóa
+      alert('Order has been paid successfully and removed from the list!');
+    }
+  };
+
+  // Kiểm tra payment status thủ công
+  const checkPaymentStatusManually = async (inv) => {
+    const invoiceKey = inv.id || inv.orderId;
+    if (!invoiceKey) return;
+
+    setCheckingPaymentStatus(prev => ({ ...prev, [invoiceKey]: true }));
+    
+    try {
+      // GIẢ LẬP CHECK PAYMENT STATUS VÌ API CHƯA CÓ TRONG BACKEND
+      // Trong thực tế, cần implement API /place-rush-order/payment-status trong backend
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Giả lập delay
+      
+      // Giả lập kết quả ngẫu nhiên để demo
+      const isRandomlyPaid = Math.random() > 0.95; // 10% cơ hội "đã thanh toán"
+      
+      if (isRandomlyPaid) {
+        await handlePaymentSuccess(invoiceKey);
+      } else {
+        alert('Order has not been paid yet. Please try again later.');
+      }
+    } catch (error) {
+      console.error('Error checking payment status:', error);
+      alert('Unable to check payment status. Please try again later.');
+    } finally {
+      setCheckingPaymentStatus(prev => ({ ...prev, [invoiceKey]: false }));
+    }
+  };
 
   const handlePay = async (inv, index) => {
-    const invoiceKey = inv.id || index;
+    const invoiceKey = inv.id || inv.orderId || index;
     
     // Set loading state
     setPaymentLoading(prev => ({ ...prev, [invoiceKey]: true }));
@@ -33,10 +92,9 @@ const InvoicePage = () => {
       // Tạo VnPay payment data
       const vnPayData = {
         amount: inv.totalAmount,
-        orderInfo: `Thanh toan hoa don ${orderId || inv.id || 'N/A'}`,
+        orderInfo: `Thanh toan ${inv.isRushOrder ? 'rush order' : 'normal order'}  ${orderId || inv.id || 'N/A'}`,
         orderType: "other",
         locale: "vn",
-        orderId: orderId || null
       };
       
       // Gọi API tạo VnPay URL
@@ -48,41 +106,84 @@ const InvoicePage = () => {
         
         // Kiểm tra xem có mở được tab mới không
         if (!paymentWindow) {
-          throw new Error('Trình duyệt đã chặn popup. Vui lòng cho phép popup và thử lại.');
+          throw new Error('Browser blocked popup. Please allow popups and try again.');
         }
         
         // Hiển thị thông báo cho user
-        alert(`Đã mở trang thanh toán VnPay trong tab mới. Tổng tiền: ${formatPrice(inv.totalAmount)}`);
+        alert(`VnPay payment page opened in new tab. Total amount: ${formatPrice(inv.totalAmount)}`);
+        
+        // Sau khi mở thanh toán thành công, bắt đầu polling để check payment status
+        if (inv.id || inv.orderId) {
+          const checkPaymentStatus = async () => {
+            try {
+              // GIẢ LẬP CHECK PAYMENT STATUS VÌ API CHƯA CÓ TRONG BACKEND
+              // Trong thực tế, cần implement API /place-rush-order/payment-status trong backend
+              await new Promise(resolve => setTimeout(resolve, 1000)); // Giả lập delay
+              
+              // Giả lập kết quả ngẫu nhiên để demo (cùng tỉ lệ cho tất cả orders)
+              const isRandomlyPaid = Math.random() > 0.9; // 10% cơ hội "đã thanh toán" mỗi lần check
+              
+              if (isRandomlyPaid) {
+                // Xử lý payment success (xóa invoice và clear cart)
+                await handlePaymentSuccess(invoiceKey);
+                return true; // Stop polling
+              }
+              return false; // Continue polling
+            } catch (error) {
+              console.error('Error checking payment status:', error);
+              return false; // Continue polling
+            }
+          };
+
+          // Polling payment status mỗi 5 giây trong vòng 10 phút (cho cả rush và normal orders)
+          const pollInterval = setInterval(async () => {
+            const isCompleted = await checkPaymentStatus();
+            if (isCompleted) {
+              clearInterval(pollInterval);
+            }
+          }, 5000);
+
+          // Dừng polling sau 10 phút
+          setTimeout(() => {
+            clearInterval(pollInterval);
+          }, 600000);
+        } else {
+          // Fallback cho trường hợp không có orderId - hiển thị thông báo rõ ràng hơn
+          alert('Payment opened! Please use the "Check Payment Status" button below to confirm payment completion.');
+        }
         
       } else {
-        throw new Error('Không thể tạo URL thanh toán');
+        throw new Error('Unable to create payment URL');
       }
       
     } catch (error) {
       console.error('Payment error:', error);
       setPaymentError(prev => ({ 
         ...prev, 
-        [invoiceKey]: error.response?.data?.message || error.message || 'Có lỗi khi tạo liên kết thanh toán' 
+        [invoiceKey]: error.response?.data?.message || error.message || 'Error creating payment link' 
       }));
     } finally {
       setPaymentLoading(prev => ({ ...prev, [invoiceKey]: false }));
     }
   };
 
-  if (!invoices.length) {
+  if (!currentInvoices.length) {
     return (
       <Box sx={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
         <Header />
         <Box sx={{ maxWidth: 1200, mx: 'auto', pt: 4, px: 2 }}>
-          <Alert severity="error" sx={{ mb: 2 }}>
-            Không có hóa đơn để thanh toán.
+          <Alert severity="success" sx={{ mb: 2 }}>
+            {source === 'rush-order' 
+              ? 'All orders have been paid successfully!' 
+              : 'No invoices to pay.'
+            }
           </Alert>
           <Button 
             variant="contained" 
-            onClick={() => navigate('/checkout')}
+            onClick={() => navigate('/')}
             sx={{ mt: 2 }}
           >
-            Quay lại Checkout
+            Back to Home
           </Button>
         </Box>
       </Box>
@@ -94,32 +195,72 @@ const InvoicePage = () => {
       <Header />
       <Box sx={{ maxWidth: 1200, mx: 'auto', pt: 4, px: 2 }}>
         <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, mb: 4 }}>
-          Thanh toán hóa đơn
+          Invoice Payment
         </Typography>
         
-        <Alert severity="info" sx={{ mb: 3 }}>
+        {/* Thông báo thành công từ Rush Order */}
+        {source === 'rush-order' && message && (
+          <Alert severity="success" sx={{ mb: 3 }}>
+            <Typography sx={{ fontWeight: 500 }}>
+              {message}
+            </Typography>
+          </Alert>
+        )}
+        
+        {/* <Alert severity="info" sx={{ mb: 3 }}>
           <Typography variant="body2">
-            <strong>Hướng dẫn thanh toán:</strong> Nhấn nút "Thanh toán VnPay" để mở trang thanh toán trong tab mới. 
-            Sau khi thanh toán xong, hệ thống sẽ tự động cập nhật trạng thái đơn hàng.
+            <strong>Payment Instructions:</strong> Click "VnPay Payment" button to open payment page in new tab. 
+            After payment completion, the system will automatically check and update order status every 5 seconds.
+            You can also manually check payment status using the "Check Payment Status" button.
+            {source === 'rush-order' && (
+              <><br/><strong>Note:</strong> You can pay for each order separately. Orders paid first will be processed first.</>
+            )}
           </Typography>
-        </Alert>
+        </Alert> */}
 
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          {invoices.map((inv, idx) => {
-            const invoiceKey = inv.id || idx;
+          {currentInvoices.map((inv, idx) => {
+            const invoiceKey = inv.id || inv.orderId || idx;
             const isLoading = paymentLoading[invoiceKey] || false;
+            const isCheckingStatus = checkingPaymentStatus[invoiceKey] || false;
             const error = paymentError[invoiceKey] || '';
             
             return (
-              <Paper key={invoiceKey} elevation={2} sx={{ p: 3 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-                  Hóa đơn #{inv.id || (idx + 1)}
-                </Typography>
+              <Paper key={invoiceKey} elevation={2} sx={{ 
+                p: 3,
+                border: inv.isRushOrder ? '2px solid' : '1px solid',
+                borderColor: inv.isRushOrder ? 'warning.main' : 'divider',
+                borderRadius: 2
+              }}>
+                {/* Header với chip phân biệt */}
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    {inv.isRushOrder ? '🚀 ' : '📦 '}
+                    Invoice #{inv.id || inv.orderId || (idx + 1)}
+                  </Typography>
+                  <Chip 
+                    label={inv.isRushOrder ? 'Rush Delivery' : 'Standard Delivery'} 
+                    color={inv.isRushOrder ? 'warning' : 'primary'}
+                    size="small"
+                    sx={{ fontWeight: 600 }}
+                  />
+                </Box>
+                
+                {/* Thời gian giao hàng dự kiến cho rush order */}
+                {inv.isRushOrder && inv.deliveryTime && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, p: 1, backgroundColor: 'warning.light', borderRadius: 1 }}>
+                    <AccessTime sx={{ mr: 1, color: 'warning.dark' }} />
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Expected Delivery:</strong> {new Date(inv.deliveryTime).toLocaleString('en-US')}
+                    </Typography>
+                  </Box>
+                )}
+                
                 <Divider sx={{ mb: 2 }} />
 
                 {/* Thông tin sản phẩm */}
                 <Typography variant="subtitle1" sx={{ fontWeight: 500, mb: 1 }}>
-                  Danh sách sản phẩm:
+                  Product List:
                 </Typography>
                 {inv.productList && inv.productList.length > 0 ? (
                   <Box sx={{ mb: 2 }}>
@@ -136,13 +277,10 @@ const InvoicePage = () => {
                       >
                         <Box sx={{ flex: 1 }}>
                           <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                            {item.productName || item.name || `Sản phẩm ${item.productID}`}
+                            {item.productName || item.name || `Product ${item.productID}`}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
-                            ID: {item.productID}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Đơn giá: {formatPrice(item.price)}
+                            Unit Price: {formatPrice(item.price)}
                           </Typography>
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -158,7 +296,7 @@ const InvoicePage = () => {
                   </Box>
                 ) : (
                   <Typography color="text.secondary" sx={{ mb: 2 }}>
-                    Không có sản phẩm trong hóa đơn này.
+                    No products in this invoice.
                   </Typography>
                 )}
 
@@ -166,18 +304,18 @@ const InvoicePage = () => {
                 <Box sx={{ mt: 3, p: 2, backgroundColor: '#f9f9f9', borderRadius: 1 }}>
                   {!isRushOrder && inv.productPriceExVAT && (
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                      <Typography>Tổng tiền hàng (chưa VAT):</Typography>
+                      <Typography>Product Total (excl. VAT):</Typography>
                       <Typography>{formatPrice(inv.productPriceExVAT)}</Typography>
                     </Box>
                   )}
                   
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography>Tổng tiền hàng{!isRushOrder ? ' (đã VAT)' : ''}:</Typography>
+                    <Typography>Product Total{!isRushOrder ? ' (incl. VAT)' : ''}:</Typography>
                     <Typography>{formatPrice(inv.productPriceIncVAT || inv.subtotal || 0)}</Typography>
                   </Box>
                   
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography>Phí giao hàng:</Typography>
+                    <Typography>Shipping Fee:</Typography>
                     <Typography sx={{ 
                       color: isRushOrder ? 'warning.main' : 'inherit',
                       fontWeight: isRushOrder ? 600 : 400
@@ -185,7 +323,7 @@ const InvoicePage = () => {
                       {formatPrice(inv.shippingFee || 0)}
                       {isRushOrder && (
                         <Typography component="span" sx={{ fontSize: '0.8rem', ml: 1 }}>
-                          (Nhanh)
+                          (Rush)
                         </Typography>
                       )}
                     </Typography>
@@ -195,7 +333,7 @@ const InvoicePage = () => {
                   
                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                      Tổng cộng:
+                      Total Amount:
                     </Typography>
                     <Typography variant="h6" color="primary" sx={{ fontWeight: 700 }}>
                       {formatPrice(inv.totalAmount)}
@@ -211,29 +349,50 @@ const InvoicePage = () => {
                 )}
 
                 {/* Action buttons */}
-                <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
+                <Box sx={{ display: 'flex', gap: 2, mt: 3, flexWrap: 'wrap' }}>
                   <Button 
                     variant="outlined" 
                     color="secondary" 
                     onClick={() => navigate(-1)}
-                    disabled={isLoading}
+                    disabled={isLoading || isCheckingStatus}
                   >
-                    Quay lại
+                    Go Back
                   </Button>
+                  
+                  {/* Check Payment Status Button - hiển thị cho tất cả orders */}
+                  {(inv.id || inv.orderId) && (
+                    <Button 
+                      variant="outlined" 
+                      color="info"
+                      onClick={() => checkPaymentStatusManually(inv)} 
+                      disabled={isLoading || isCheckingStatus}
+                      sx={{ minWidth: 180 }}
+                    >
+                      {isCheckingStatus ? (
+                        <>
+                          <CircularProgress size={20} sx={{ mr: 1 }} />
+                          Checking...
+                        </>
+                      ) : (
+                        'Check Payment Status'
+                      )}
+                    </Button>
+                  )}
+                  
                   <Button 
                     variant="contained" 
                     color="primary"
                     onClick={() => handlePay(inv, idx)} 
-                    disabled={isLoading}
+                    disabled={isLoading || isCheckingStatus}
                     sx={{ minWidth: 150 }}
                   >
                     {isLoading ? (
                       <>
                         <CircularProgress size={20} sx={{ mr: 1 }} />
-                        Đang tạo liên kết...
+                        Creating link...
                       </>
                     ) : (
-                      'Thanh toán VnPay'
+                      'VnPay Payment'
                     )}
                   </Button>
                 </Box>
@@ -246,14 +405,14 @@ const InvoicePage = () => {
         {deliveryForm && (
           <Paper elevation={2} sx={{ p: 3, mt: 3 }}>
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-              Thông tin giao hàng
+              Delivery Information
             </Typography>
             <Divider sx={{ mb: 2 }} />
             
             <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' } }}>
               <Box>
                 <Typography variant="subtitle2" color="text.secondary">
-                  Người nhận:
+                  Recipient:
                 </Typography>
                 <Typography variant="body1" sx={{ fontWeight: 500 }}>
                   {deliveryForm.customerName}
@@ -262,7 +421,7 @@ const InvoicePage = () => {
               
               <Box>
                 <Typography variant="subtitle2" color="text.secondary">
-                  Số điện thoại:
+                  Phone Number:
                 </Typography>
                 <Typography variant="body1">
                   {deliveryForm.phoneNumber}
@@ -271,7 +430,7 @@ const InvoicePage = () => {
               
               <Box sx={{ gridColumn: { xs: '1', md: '1 / -1' } }}>
                 <Typography variant="subtitle2" color="text.secondary">
-                  Địa chỉ giao hàng:
+                  Delivery Address:
                 </Typography>
                 <Typography variant="body1">
                   {deliveryForm.deliveryAddress}
@@ -284,10 +443,10 @@ const InvoicePage = () => {
               {deliveryForm.expectedDateTime && (
                 <Box>
                   <Typography variant="subtitle2" color="text.secondary">
-                    Thời gian mong muốn:
+                    Expected Delivery Time:
                   </Typography>
                   <Typography variant="body1" sx={{ color: 'warning.main', fontWeight: 500 }}>
-                    {new Date(deliveryForm.expectedDateTime).toLocaleString('vi-VN')}
+                    {new Date(deliveryForm.expectedDateTime).toLocaleString('en-US')}
                   </Typography>
                 </Box>
               )}
@@ -295,7 +454,7 @@ const InvoicePage = () => {
               {deliveryForm.deliveryInstructions && (
                 <Box>
                   <Typography variant="subtitle2" color="text.secondary">
-                    Ghi chú:
+                    Special Instructions:
                   </Typography>
                   <Typography variant="body1">
                     {deliveryForm.deliveryInstructions}

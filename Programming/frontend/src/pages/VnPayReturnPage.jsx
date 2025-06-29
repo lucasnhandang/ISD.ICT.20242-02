@@ -17,6 +17,7 @@ import {
 } from '@mui/icons-material';
 import axios from 'axios';
 import Header from '../components/Header';
+import { clearCart } from '../services/api';
 
 const VnPayReturnPage = () => {
   const [result, setResult] = useState(null);
@@ -55,6 +56,24 @@ const VnPayReturnPage = () => {
     setLoading(false);
   }, []);
 
+  // Clear cart khi payment success
+  useEffect(() => {
+    const clearCartOnSuccess = async () => {
+      if (result && result.responseCode === '00') {
+        try {
+          console.log("Payment successful, clearing cart...");
+          await clearCart();
+          console.log("Cart cleared successfully!");
+        } catch (error) {
+          console.error("Failed to clear cart:", error);
+          // Không hiển thị lỗi cho user vì việc clear cart là background operation
+        }
+      }
+    };
+
+    clearCartOnSuccess();
+  }, [result]);
+
   const formatAmount = (amount) => {
     if (!amount) return "0";
     return new Intl.NumberFormat('vi-VN', {
@@ -87,10 +106,10 @@ const VnPayReturnPage = () => {
   };
 
   const getStatusText = () => {
-    if (loading) return "Đang xử lý thanh toán...";
-    if (error) return "Lỗi xử lý thanh toán";
-    if (result?.responseCode === '00') return "Thanh toán thành công";
-    return "Thanh toán thất bại";
+    if (loading) return "Processing payment...";
+    if (error) return "Payment processing error";
+    if (result?.responseCode === '00') return "Payment successful";
+    return "Payment failed";
   };
 
   const getStatusColor = () => {
@@ -113,7 +132,7 @@ const VnPayReturnPage = () => {
         >
           <CircularProgress size={60} />
           <Typography variant="h6" sx={{ mt: 2 }}>
-            Đang xử lý thanh toán...
+            Processing payment...
           </Typography>
         </Box>
       </Box>
@@ -134,8 +153,8 @@ const VnPayReturnPage = () => {
             <Alert severity={getStatusColor()} sx={{ mt: 2 }}>
               {error ? error : (
                 result?.responseCode === '00' 
-                  ? "Giao dịch đã được xử lý thành công!" 
-                  : `Giao dịch thất bại. Mã lỗi: ${result?.responseCode}`
+                  ? "Transaction processed successfully!" 
+                  : `Transaction failed. Error code: ${result?.responseCode}`
               )}
             </Alert>
           </Box>
@@ -144,31 +163,31 @@ const VnPayReturnPage = () => {
             <>
               <Divider sx={{ my: 3 }} />
               <Typography variant="h6" gutterBottom>
-                Chi tiết giao dịch
+                Transaction Details
               </Typography>
               
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
                   <Typography variant="body2" color="textSecondary">
-                    Mã giao dịch VnPay
+                    VnPay Transaction ID
                   </Typography>
                   <Typography variant="body1" fontWeight="bold">
                     {result.transactionNo || "N/A"}
                   </Typography>
                 </Grid>
                 
-                <Grid item xs={12} sm={6}>
+                {/* <Grid item xs={12} sm={6}>
                   <Typography variant="body2" color="textSecondary">
-                    Mã đơn hàng
+                    Order ID
                   </Typography>
                   <Typography variant="body1" fontWeight="bold">
                     {result.txnRef || "N/A"}
                   </Typography>
-                </Grid>
+                </Grid> */}
                 
                 <Grid item xs={12} sm={6}>
                   <Typography variant="body2" color="textSecondary">
-                    Số tiền thanh toán
+                    Payment Amount
                   </Typography>
                   <Typography variant="body1" fontWeight="bold" color="primary">
                     {formatAmount(result.amount)}
@@ -177,7 +196,7 @@ const VnPayReturnPage = () => {
                 
                 <Grid item xs={12} sm={6}>
                   <Typography variant="body2" color="textSecondary">
-                    Thời gian thanh toán
+                    Payment Time
                   </Typography>
                   <Typography variant="body1" fontWeight="bold">
                     {formatDate(result.payDate)}
@@ -186,7 +205,7 @@ const VnPayReturnPage = () => {
                 
                 <Grid item xs={12}>
                   <Typography variant="body2" color="textSecondary">
-                    Thông tin đơn hàng
+                    Order Information
                   </Typography>
                   <Typography variant="body1">
                     {result.orderInfo || "N/A"}
@@ -196,7 +215,7 @@ const VnPayReturnPage = () => {
                 {result.cardType && (
                   <Grid item xs={12} sm={6}>
                     <Typography variant="body2" color="textSecondary">
-                      Loại thẻ
+                      Card Type
                     </Typography>
                     <Typography variant="body1">
                       {result.cardType}
@@ -216,7 +235,7 @@ const VnPayReturnPage = () => {
               onClick={() => navigate('/')}
               sx={{ mr: 2 }}
             >
-              Về trang chủ
+              Back to Home
             </Button>
             
             {/* {result?.responseCode === '00' && (

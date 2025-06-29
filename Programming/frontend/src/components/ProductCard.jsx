@@ -51,37 +51,37 @@ const renderBookDetails = (product) => (
   <>
     {product.authors && (
       <Typography variant="body1" gutterBottom>
-        <strong>Tác giả:</strong> {product.authors}
+        <strong>Authors:</strong> {product.authors}
       </Typography>
     )}
     {product.publisher && (
       <Typography variant="body1" gutterBottom>
-        <strong>Nhà xuất bản:</strong> {product.publisher}
+        <strong>Publisher:</strong> {product.publisher}
       </Typography>
     )}
     {product.coverType && (
       <Typography variant="body1" gutterBottom>
-        <strong>Loại bìa:</strong> {product.coverType}
+        <strong>Cover Type:</strong> {product.coverType}
       </Typography>
     )}
     {product.publicationDate && (
       <Typography variant="body1" gutterBottom>
-        <strong>Ngày xuất bản:</strong> {formatDate(product.publicationDate)}
+        <strong>Publication Date:</strong> {formatDate(product.publicationDate)}
       </Typography>
     )}
     {product.pages && (
       <Typography variant="body1" gutterBottom>
-        <strong>Số trang:</strong> {product.pages}
+        <strong>Pages:</strong> {product.pages}
       </Typography>
     )}
     {product.language && (
       <Typography variant="body1" gutterBottom>
-        <strong>Ngôn ngữ:</strong> {product.language}
+        <strong>Language:</strong> {product.language}
       </Typography>
     )}
     {product.genre && (
       <Typography variant="body1" gutterBottom>
-        <strong>Thể loại:</strong> {product.genre}
+        <strong>Genre:</strong> {product.genre}
       </Typography>
     )}
   </>
@@ -91,27 +91,27 @@ const renderCDDetails = (product) => (
   <>
     {product.artists && (
       <Typography variant="body1" gutterBottom>
-        <strong>Nghệ sĩ:</strong> {product.artists}
+        <strong>Artists:</strong> {product.artists}
       </Typography>
     )}
     {product.recordLabel && (
       <Typography variant="body1" gutterBottom>
-        <strong>Hãng thu âm:</strong> {product.recordLabel}
+        <strong>Record Label:</strong> {product.recordLabel}
       </Typography>
     )}
     {product.genre && (
       <Typography variant="body1" gutterBottom>
-        <strong>Thể loại:</strong> {product.genre}
+        <strong>Genre:</strong> {product.genre}
       </Typography>
     )}
     {product.releaseDate && (
       <Typography variant="body1" gutterBottom>
-        <strong>Ngày phát hành:</strong> {formatDate(product.releaseDate)}
+        <strong>Release Date:</strong> {formatDate(product.releaseDate)}
       </Typography>
     )}
     {product.trackList && (
       <Typography variant="body1" gutterBottom>
-        <strong>Danh sách bài hát:</strong> {product.trackList}
+        <strong>Track List:</strong> {product.trackList}
       </Typography>
     )}
   </>
@@ -121,7 +121,7 @@ const renderDVDDetails = (product) => (
   <>
     {product.director && (
       <Typography variant="body1" gutterBottom>
-        <strong>Đạo diễn:</strong> {product.director}
+        <strong>Director:</strong> {product.director}
       </Typography>
     )}
     {product.studio && (
@@ -131,32 +131,32 @@ const renderDVDDetails = (product) => (
     )}
     {product.discType && (
       <Typography variant="body1" gutterBottom>
-        <strong>Loại đĩa:</strong> {product.discType}
+        <strong>Disc Type:</strong> {product.discType}
       </Typography>
     )}
     {product.runtime && (
       <Typography variant="body1" gutterBottom>
-        <strong>Thời lượng:</strong> {product.runtime} phút
+        <strong>Runtime:</strong> {product.runtime} minutes
       </Typography>
     )}
     {product.language && (
       <Typography variant="body1" gutterBottom>
-        <strong>Ngôn ngữ:</strong> {product.language}
+        <strong>Language:</strong> {product.language}
       </Typography>
     )}
     {product.subtitles && (
       <Typography variant="body1" gutterBottom>
-        <strong>Phụ đề:</strong> {product.subtitles}
+        <strong>Subtitles:</strong> {product.subtitles}
       </Typography>
     )}
     {product.genre && (
       <Typography variant="body1" gutterBottom>
-        <strong>Thể loại:</strong> {product.genre}
+        <strong>Genre:</strong> {product.genre}
       </Typography>
     )}
     {product.releaseDate && (
       <Typography variant="body1" gutterBottom>
-        <strong>Ngày phát hành:</strong> {formatDate(product.releaseDate)}
+        <strong>Release Date:</strong> {formatDate(product.releaseDate)}
       </Typography>
     )}
   </>
@@ -200,7 +200,7 @@ const ProductCard = ({ product, onCartUpdate }) => {
       console.error('Error fetching product details:', error);
       setSnackbar({
         open: true,
-        message: 'Không thể tải thông tin chi tiết sản phẩm',
+        message: 'Unable to load product details',
         severity: 'error'
       });
     } finally {
@@ -215,12 +215,12 @@ const ProductCard = ({ product, onCartUpdate }) => {
 
   const handleAddToCart = () => {
     if (product.quantity > 0) {
-      setQuantity(1); // Reset quantity về 1 mỗi khi mở dialog
+      setQuantity(1); // Reset quantity to 1 each time dialog opens
       setOpenQuantityDialog(true);
     } else {
       setSnackbar({
         open: true,
-        message: 'Sản phẩm đã hết hàng',
+        message: 'Product is out of stock',
         severity: 'error'
       });
     }
@@ -238,11 +238,11 @@ const ProductCard = ({ product, onCartUpdate }) => {
   const handleQuantityChange = (event) => {
     const value = event.target.value;
     
-    // Cho phép input trống hoặc chỉ số
+    // Allow empty input or numbers only
     if (value === '' || /^\d+$/.test(value)) {
       const numValue = value === '' ? '' : parseInt(value);
       
-      // Nếu trống hoặc trong khoảng hợp lệ thì update
+      // If empty or within valid range then update
       if (value === '' || (numValue >= 1 && numValue <= product.quantity)) {
         setQuantity(value === '' ? 1 : numValue);
       }
@@ -265,7 +265,7 @@ const ProductCard = ({ product, onCartUpdate }) => {
       setQuantity(validQuantity);
       
       if (validQuantity > product.quantity || validQuantity < 1) {
-        throw new Error('Số lượng không hợp lệ');
+        throw new Error('Invalid quantity');
       }
 
       const response = await addToCart({
@@ -279,7 +279,7 @@ const ProductCard = ({ product, onCartUpdate }) => {
 
       setSnackbar({
         open: true,
-        message: `Đã thêm ${validQuantity} ${product.title} vào giỏ hàng`,
+        message: `Added ${validQuantity} ${product.title} to cart`,
         severity: 'success'
       });
 
@@ -289,7 +289,7 @@ const ProductCard = ({ product, onCartUpdate }) => {
       console.error('Error adding to cart:', error);
       setSnackbar({
         open: true,
-        message: error.response?.data?.message || 'Lỗi khi thêm vào giỏ hàng',
+        message: error.response?.data?.message || 'Error adding to cart',
         severity: 'error'
       });
     }
@@ -313,7 +313,7 @@ const ProductCard = ({ product, onCartUpdate }) => {
             onClick={handleViewDetails}
             sx={addToCartButtonStyles}
           >
-            Xem chi tiết
+            View Details
           </Button>
         </Box>
         <CardContent sx={cardContentStyles}>
@@ -325,6 +325,15 @@ const ProductCard = ({ product, onCartUpdate }) => {
             {product.title}
           </Typography>
           
+          {/* Hiển thị giá sản phẩm */}
+          <Typography 
+            variant="h6" 
+            color="primary" 
+            sx={{ fontWeight: 600, mb: 1 }}
+          >
+            {formatPrice(product.currentPrice || product.price || 0)}
+          </Typography>
+          
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
             <Typography 
               component="span"
@@ -333,7 +342,7 @@ const ProductCard = ({ product, onCartUpdate }) => {
               {product.category}
             </Typography>
             <Chip 
-              label={`${product.quantity} còn lại`}
+              label={`${product.quantity} in stock`}
               color={product.quantity > 0 ? "success" : "error"}
               size="small"
             />
@@ -348,7 +357,7 @@ const ProductCard = ({ product, onCartUpdate }) => {
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle>Chi tiết sản phẩm</DialogTitle>
+        <DialogTitle>Product Details</DialogTitle>
         <DialogContent>
           {loadingDetails ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
@@ -372,10 +381,19 @@ const ProductCard = ({ product, onCartUpdate }) => {
                 </Typography>
                 <Divider sx={{ my: 2 }} />
                 <Typography variant="body1" gutterBottom>
-                  <strong>Danh mục:</strong> {(productDetails || product).category}
+                  <strong>Category:</strong> {(productDetails || product).category}
                 </Typography>
                 <Typography variant="body1" gutterBottom>
-                  <strong>Còn lại:</strong> {(productDetails || product).quantity} sản phẩm
+                  <strong>In Stock:</strong> {(productDetails || product).quantity} products
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  <strong>Rush Delivery:</strong> 
+                  <Chip 
+                    label={(productDetails || product).rushOrderSupported ? "Supported" : "Not Supported"}
+                    color={(productDetails || product).rushOrderSupported ? "success" : "default"}
+                    size="small"
+                    sx={{ ml: 1 }}
+                  />
                 </Typography>
                 
                 {/* Product-specific details */}
@@ -384,12 +402,12 @@ const ProductCard = ({ product, onCartUpdate }) => {
                 {/* Common product details */}
                 {(productDetails || product).dimension && (
                   <Typography variant="body1" gutterBottom>
-                    <strong>Kích thước:</strong> {(productDetails || product).dimension}
+                    <strong>Dimensions:</strong> {(productDetails || product).dimension}
                   </Typography>
                 )}
                 {(productDetails || product).weight && (
                   <Typography variant="body1" gutterBottom>
-                    <strong>Trọng lượng:</strong> {(productDetails || product).weight} kg
+                    <strong>Weight:</strong> {(productDetails || product).weight} kg
                   </Typography>
                 )}
                 
@@ -397,7 +415,7 @@ const ProductCard = ({ product, onCartUpdate }) => {
                   <>
                     <Divider sx={{ my: 2 }} />
                     <Typography variant="h6" gutterBottom>
-                      Mô tả
+                      Description
                     </Typography>
                     <Typography variant="body1" gutterBottom>
                       {(productDetails || product).description}
@@ -413,7 +431,7 @@ const ProductCard = ({ product, onCartUpdate }) => {
                     disabled={product.quantity === 0}
                     fullWidth
                   >
-                    {product.quantity === 0 ? 'Hết hàng' : 'Thêm vào giỏ'}
+                    {product.quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
                   </Button>
                 </Box>
               </Grid>
@@ -421,7 +439,7 @@ const ProductCard = ({ product, onCartUpdate }) => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDetails}>Đóng</Button>
+          <Button onClick={handleCloseDetails}>Close</Button>
         </DialogActions>
       </Dialog>
 
@@ -431,19 +449,19 @@ const ProductCard = ({ product, onCartUpdate }) => {
         onClose={handleCloseQuantityDialog}
         sx={quantityDialogStyles}
       >
-        <DialogTitle>Thêm vào giỏ hàng</DialogTitle>
+        <DialogTitle>Add to Cart</DialogTitle>
         <DialogContent>
           <Typography variant="body1" gutterBottom>
             {product.title}
           </Typography>
           <Typography variant="body2" color="text.secondary" gutterBottom>
-            Giá: {formatPrice(product.currentPrice)}
+            Price: {formatPrice(product.currentPrice)}
           </Typography>
           <Typography variant="body2" color="text.secondary" gutterBottom>
-            Còn lại: {product.quantity} sản phẩm
+            In Stock: {product.quantity} products
           </Typography>
           <TextField
-            label="Số lượng"
+            label="Quantity"
             type="number"
             value={quantity}
             onChange={handleQuantityChange}
@@ -469,19 +487,19 @@ const ProductCard = ({ product, onCartUpdate }) => {
                 margin: 0
               }
             }}
-            helperText={`Nhập số từ 1 đến ${product.quantity}`}
+            helperText={`Enter a number from 1 to ${product.quantity}`}
             onFocus={(event) => event.target.select()}
           />
         </DialogContent>
         <DialogActions sx={dialogActionsStyles}>
-          <Button onClick={handleCloseQuantityDialog}>Hủy</Button>
+          <Button onClick={handleCloseQuantityDialog}>Cancel</Button>
           <Button 
             onClick={handleConfirmAdd} 
             variant="contained" 
             color="primary"
             disabled={!quantity || quantity < 1 || quantity > product.quantity}
           >
-            Thêm vào giỏ
+            Add to Cart
           </Button>
         </DialogActions>
       </Dialog>

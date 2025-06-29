@@ -2,6 +2,12 @@ package com.hustict.aims.service.placeOrder;
 
 import com.hustict.aims.dto.cart.CartItemRequestDTO;
 import com.hustict.aims.dto.cart.CartRequestDTO;
+import com.hustict.aims.dto.invoice.InvoiceDTO;
+import com.hustict.aims.repository.OrderRepository;
+import com.hustict.aims.model.order.Order;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Service;
 
@@ -11,32 +17,46 @@ import java.util.stream.Collectors;
 
 @Service
 public class CartCleanupService {
+    @Autowired
+    OrderRepository orderRepository;
 
-    public void removePurchasedItems(HttpSession session) {
-        CartRequestDTO cart = (CartRequestDTO) session.getAttribute("cart");
-        CartRequestDTO cartRequested = (CartRequestDTO) session.getAttribute("cartRequested");
+    public void removePurchasedItems(HttpSession session, Long orderid) {
+        
+        Order order = orderRepository.findById(orderid)
+            .orElseThrow(() -> new IllegalArgumentException("Order not found with id: " + orderid));
 
-        if (cart == null || cart.getProductList() == null || 
-            cartRequested == null || cartRequested.getProductList() == null) {
-            return;
-        }
+        boolean isRushOrder = order.getIsRushOrder();
 
-        Set<Long> purchasedIds = cartRequested.getProductList().stream()
-            .map(CartItemRequestDTO::getProductID)
-            .collect(Collectors.toSet());
+        @SuppressWarnings("unchecked")
+        List<CartRequestDTO> cartList = (List<CartRequestDTO>) session.getAttribute("cartList");
 
-        // Giữ lại các sản phẩm chưa thanh toán
-        List<CartItemRequestDTO> remainingItems = cart.getProductList().stream()
-            .filter(item -> !purchasedIds.contains(item.getProductID()))
+        @SuppressWarnings("unchecked")
+        List<InvoiceDTO> invoiceList = (List<InvoiceDTO>) session.getAttribute("invoiceList");
+
+        if (cartList == null) return; 
+
+        List<CartRequestDTO> updatedCart = cartList.stream()
+            .filter(item -> item.isRushOrder() != isRushOrder) 
             .collect(Collectors.toList());
 
-        cart.setProductList(remainingItems);
+        session.setAttribute("cartRequested", updatedCart);
 
-        cart.setTotalItem(remainingItems.stream().mapToInt(CartItemRequestDTO::getQuantity).sum());
-        cart.setTotalPrice(remainingItems.stream()
-            .mapToInt(item -> item.getQuantity() * item.getPrice())
-            .sum());
+        List<InvoiceDTO> updatedInvoiceList = invoiceList.stream()
+            .filter(invoice -> invoice.isRushOrder() != isRushOrder)
+            .collect(Collectors.toList());
 
-        session.setAttribute("cart", cart);
+        session.setAttribute("invoiceList", updatedInvoiceList);
+        
+        System.out.println("=======CLEANED UP CART LIST =======");
+        if (cartList != null) {
+            cartList.forEach(cart -> System.out.println(cart.toString()));
+        }
+
+        // In ra invoiceList
+        System.out.println("=======CLEANED UP INVOICE LIST =======");
+        if (invoiceList != null) {
+            invoiceList.forEach(invoice -> System.out.println(invoice.toString()));
+        } 
+       
     }
 }

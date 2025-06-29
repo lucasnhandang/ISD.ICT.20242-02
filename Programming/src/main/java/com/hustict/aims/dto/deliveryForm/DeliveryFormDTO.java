@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DeliveryFormDTO {
+    private Long id;
     private String customerName;
     private String phoneNumber;
     private String deliveryProvince;

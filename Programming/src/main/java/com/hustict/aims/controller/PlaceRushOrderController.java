@@ -7,13 +7,8 @@ import com.hustict.aims.dto.invoice.InvoiceDTO;
 import com.hustict.aims.service.placeRushOrder.RushOrderEligibilityService;
 import com.hustict.aims.service.placeRushOrder.RushOrderValidationService;
 import com.hustict.aims.service.placeRushOrder.RushOrderProcessingService;
-import com.hustict.aims.service.placeRushOrder.RushOrderSaveService;
 import com.hustict.aims.service.sessionValidator.SessionValidatorService;
-import com.hustict.aims.service.placeOrder.PaymentHandlerService;
-import com.hustict.aims.service.placeOrder.CartCleanupService;
 import com.hustict.aims.service.placeOrder.SaveTempOrder;
-import com.hustict.aims.service.email.EmailSenderFactory;
-import com.hustict.aims.service.reservation.ReservationService;
 import java.util.HashMap;
 import java.util.Map;
 import jakarta.servlet.http.HttpSession;
@@ -28,35 +23,20 @@ public class PlaceRushOrderController {
     private final RushOrderEligibilityService rushOrderEligibilityService;
     private final RushOrderValidationService rushOrderValidationService;
     private final RushOrderProcessingService rushOrderProcessingService;
-    private final RushOrderSaveService rushOrderSaveService;
     private final SessionValidatorService sessionValidatorService;
-    private final PaymentHandlerService paymentHandlerService;
-    private final CartCleanupService cartCleanupService;
     private final SaveTempOrder saveTempOrder;
-    private final EmailSenderFactory emailSenderFactory;
-    private final ReservationService reservationService;
 
     @Autowired
     public PlaceRushOrderController(RushOrderEligibilityService rushOrderEligibilityService,
                                    RushOrderValidationService rushOrderValidationService,
                                    RushOrderProcessingService rushOrderProcessingService,
-                                   RushOrderSaveService rushOrderSaveService,
                                    SessionValidatorService sessionValidatorService,
-                                   PaymentHandlerService paymentHandlerService,
-                                   CartCleanupService cartCleanupService,
-                                   SaveTempOrder saveTempOrder,
-                                   EmailSenderFactory emailSenderFactory,
-                                   ReservationService reservationService) {
+                                   SaveTempOrder saveTempOrder) {
         this.rushOrderEligibilityService = rushOrderEligibilityService;
         this.rushOrderValidationService = rushOrderValidationService;
         this.rushOrderProcessingService = rushOrderProcessingService;
-        this.rushOrderSaveService = rushOrderSaveService;
         this.sessionValidatorService = sessionValidatorService;
-        this.paymentHandlerService = paymentHandlerService;
-        this.cartCleanupService = cartCleanupService;
         this.saveTempOrder = saveTempOrder;
-        this.emailSenderFactory = emailSenderFactory;
-        this.reservationService = reservationService;
     }
 
     /**
@@ -166,9 +146,9 @@ public class PlaceRushOrderController {
         Map<String, Long> orderIds = saveMultipleOrders(
             processResult.getCartList(), 
             deliveryInfo, 
-            processResult.getInvoiceList()
+            processResult.getInvoiceList(),session
         );
-
+        
         // Chuẩn bị response
         Map<String, Object> response = new HashMap<>();
         
@@ -199,7 +179,7 @@ public class PlaceRushOrderController {
      */
     private Map<String, Long> saveMultipleOrders(java.util.List<com.hustict.aims.dto.cart.CartRequestDTO> cartList, 
                                                  DeliveryFormDTO deliveryInfo, 
-                                                 java.util.List<InvoiceDTO> invoiceList) {
+                                                 java.util.List<InvoiceDTO> invoiceList,HttpSession session) {
         Map<String, Long> orderIds = new HashMap<>();
         
         for (int i = 0; i < cartList.size(); i++) {
@@ -207,7 +187,7 @@ public class PlaceRushOrderController {
             InvoiceDTO currentInvoice = invoiceList.get(i);
             
             // Save temp order
-            Long orderId = saveTempOrder.save(currentCart, deliveryInfo, currentInvoice);
+            Long orderId = saveTempOrder.save(currentCart, deliveryInfo, currentInvoice,session);
             
             // Phân loại order theo rush flag
             if (currentCart.isRushOrder()) {
