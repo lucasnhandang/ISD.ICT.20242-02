@@ -4,7 +4,7 @@ import axios from 'axios';
 const api = axios.create({
   baseURL: 'http://localhost:8080/api/v1',
   timeout: 30000,
-  headers: { 'Content-Type': 'application/json' },
+  // headers: { 'Content-Type': 'application/json' },
   withCredentials: true // Tạm thời comment để test CORS issue
 });
 
@@ -338,7 +338,7 @@ export const payInvoice = async (invoiceId) => {
 const paymentApi = axios.create({
   baseURL: 'http://localhost:8080/api/v1/payment',
   timeout: 10000,
-  headers: { 'Content-Type': 'application/json' },
+  // headers: { 'Content-Type': 'application/json' },
   withCredentials: true
 });
 

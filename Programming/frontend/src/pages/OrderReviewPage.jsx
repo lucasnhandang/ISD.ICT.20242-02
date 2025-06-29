@@ -16,7 +16,7 @@ const OrderReviewPage = () => {
   const navigate = useNavigate();
   
   // Lấy dữ liệu từ API response (được truyền qua location.state)
-  const { cart, invoice, deliveryForm } = location.state || {};
+  const { cart, invoice, deliveryForm, orderId } = location.state || {};
   
   // States
   const [rushError, setRushError] = useState('');
@@ -98,7 +98,7 @@ const OrderReviewPage = () => {
       
       if (response.data.eligible) {
         navigate('/rush-order', { 
-          state: { cart, invoice, deliveryForm } 
+          state: { cart, invoice, deliveryForm, orderId } 
         });
       } else {
         setRushError(response.data.message || 'Địa chỉ không đủ điều kiện giao hàng nhanh.');
@@ -126,7 +126,8 @@ const OrderReviewPage = () => {
         invoice: invoiceWithProducts,
         deliveryForm: deliveryForm,
         cart: cart,
-        isRushOrder: false
+        isRushOrder: false,
+        orderId: orderId
       } 
     });
   };

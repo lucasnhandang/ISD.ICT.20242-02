@@ -14,7 +14,7 @@ const formatPrice = (price) => {
 const InvoicePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { invoice, invoiceList, deliveryForm, isRushOrder } = location.state || {};
+  const { invoice, invoiceList, deliveryForm, isRushOrder, orderId } = location.state || {};
   
   // State để quản lý trạng thái thanh toán
   const [paymentLoading, setPaymentLoading] = useState({});
@@ -33,14 +33,10 @@ const InvoicePage = () => {
       // Tạo VnPay payment data
       const vnPayData = {
         amount: inv.totalAmount,
-        orderInfo: `Thanh toan hoa don #${inv.id || (index + 1)}`,
+        orderInfo: `Thanh toan hoa don ${orderId || inv.id || 'N/A'}`,
         orderType: "other",
-        language: "vn",
-        billingEmail: deliveryForm?.email,
-        billingMobile: deliveryForm?.phoneNumber,
-        billingFullName: deliveryForm?.customerName,
-        billingAddress: deliveryForm?.deliveryAddress,
-        billingCity: deliveryForm?.deliveryProvince
+        locale: "vn",
+        orderId: orderId || null
       };
       
       // Gọi API tạo VnPay URL

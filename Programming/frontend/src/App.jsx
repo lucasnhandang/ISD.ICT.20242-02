@@ -11,6 +11,7 @@ import OrderReviewPage from './pages/OrderReviewPage';
 import RushOrderPage from './pages/RushOrderPage';
 import InvoicePage from './pages/InvoicePage';
 import PaymentResultPage from './pages/PaymentResultPage';
+import VnPayReturnPage from './pages/VnPayReturnPage';
 import LoginPage from './pages/LoginPage';
 
 
@@ -89,6 +90,7 @@ function App() {
                       <Route path="/rush-order" element={<RushOrderPage />} />
             <Route path="/invoice" element={<InvoicePage />} />
             <Route path="/payment-result" element={<PaymentResultPage />} />
+            <Route path="/vnpay-return" element={<VnPayReturnPage />} />
             <Route path="/api-test" element={<ApiTestComponent />} />
         </Routes>
       </Router>
