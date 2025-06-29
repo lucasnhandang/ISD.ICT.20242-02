@@ -15,11 +15,12 @@ import {
   Snackbar,
   Chip,
   Grid,
-  Divider
+  Divider,
+  CircularProgress
 } from '@mui/material';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import InfoIcon from '@mui/icons-material/Info';
-import { addToCart } from '../services/api';
+import { addToCart, getProductDetails } from '../services/api';
 import { 
   cardStyles, 
   cardMediaStyles, 
@@ -41,31 +42,185 @@ const formatPrice = (price) => {
   }).format(price);
 };
 
+const formatDate = (dateString) => {
+  if (!dateString) return 'N/A';
+  return new Date(dateString).toLocaleDateString('vi-VN');
+};
+
+const renderBookDetails = (product) => (
+  <>
+    {product.authors && (
+      <Typography variant="body1" gutterBottom>
+        <strong>Tác giả:</strong> {product.authors}
+      </Typography>
+    )}
+    {product.publisher && (
+      <Typography variant="body1" gutterBottom>
+        <strong>Nhà xuất bản:</strong> {product.publisher}
+      </Typography>
+    )}
+    {product.coverType && (
+      <Typography variant="body1" gutterBottom>
+        <strong>Loại bìa:</strong> {product.coverType}
+      </Typography>
+    )}
+    {product.publicationDate && (
+      <Typography variant="body1" gutterBottom>
+        <strong>Ngày xuất bản:</strong> {formatDate(product.publicationDate)}
+      </Typography>
+    )}
+    {product.pages && (
+      <Typography variant="body1" gutterBottom>
+        <strong>Số trang:</strong> {product.pages}
+      </Typography>
+    )}
+    {product.language && (
+      <Typography variant="body1" gutterBottom>
+        <strong>Ngôn ngữ:</strong> {product.language}
+      </Typography>
+    )}
+    {product.genre && (
+      <Typography variant="body1" gutterBottom>
+        <strong>Thể loại:</strong> {product.genre}
+      </Typography>
+    )}
+  </>
+);
+
+const renderCDDetails = (product) => (
+  <>
+    {product.artists && (
+      <Typography variant="body1" gutterBottom>
+        <strong>Nghệ sĩ:</strong> {product.artists}
+      </Typography>
+    )}
+    {product.recordLabel && (
+      <Typography variant="body1" gutterBottom>
+        <strong>Hãng thu âm:</strong> {product.recordLabel}
+      </Typography>
+    )}
+    {product.genre && (
+      <Typography variant="body1" gutterBottom>
+        <strong>Thể loại:</strong> {product.genre}
+      </Typography>
+    )}
+    {product.releaseDate && (
+      <Typography variant="body1" gutterBottom>
+        <strong>Ngày phát hành:</strong> {formatDate(product.releaseDate)}
+      </Typography>
+    )}
+    {product.trackList && (
+      <Typography variant="body1" gutterBottom>
+        <strong>Danh sách bài hát:</strong> {product.trackList}
+      </Typography>
+    )}
+  </>
+);
+
+const renderDVDDetails = (product) => (
+  <>
+    {product.director && (
+      <Typography variant="body1" gutterBottom>
+        <strong>Đạo diễn:</strong> {product.director}
+      </Typography>
+    )}
+    {product.studio && (
+      <Typography variant="body1" gutterBottom>
+        <strong>Studio:</strong> {product.studio}
+      </Typography>
+    )}
+    {product.discType && (
+      <Typography variant="body1" gutterBottom>
+        <strong>Loại đĩa:</strong> {product.discType}
+      </Typography>
+    )}
+    {product.runtime && (
+      <Typography variant="body1" gutterBottom>
+        <strong>Thời lượng:</strong> {product.runtime} phút
+      </Typography>
+    )}
+    {product.language && (
+      <Typography variant="body1" gutterBottom>
+        <strong>Ngôn ngữ:</strong> {product.language}
+      </Typography>
+    )}
+    {product.subtitles && (
+      <Typography variant="body1" gutterBottom>
+        <strong>Phụ đề:</strong> {product.subtitles}
+      </Typography>
+    )}
+    {product.genre && (
+      <Typography variant="body1" gutterBottom>
+        <strong>Thể loại:</strong> {product.genre}
+      </Typography>
+    )}
+    {product.releaseDate && (
+      <Typography variant="body1" gutterBottom>
+        <strong>Ngày phát hành:</strong> {formatDate(product.releaseDate)}
+      </Typography>
+    )}
+  </>
+);
+
+const renderProductSpecificDetails = (product) => {
+  const category = product.category?.toLowerCase();
+  
+  switch (category) {
+    case 'book':
+      return renderBookDetails(product);
+    case 'cd':
+      return renderCDDetails(product);
+    case 'dvd':
+      return renderDVDDetails(product);
+    default:
+      return null;
+  }
+};
+
 const ProductCard = ({ product, onCartUpdate }) => {
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
   const [openQuantityDialog, setOpenQuantityDialog] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [productDetails, setProductDetails] = useState(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
     severity: 'success'
   });
 
-  const handleViewDetails = () => {
+  const handleViewDetails = async () => {
     setOpenDetailsDialog(true);
+    setLoadingDetails(true);
+    
+    try {
+      const response = await getProductDetails(product.id);
+      setProductDetails(response.data);
+    } catch (error) {
+      console.error('Error fetching product details:', error);
+      setSnackbar({
+        open: true,
+        message: 'Không thể tải thông tin chi tiết sản phẩm',
+        severity: 'error'
+      });
+    } finally {
+      setLoadingDetails(false);
+    }
   };
 
   const handleCloseDetails = () => {
     setOpenDetailsDialog(false);
+    setProductDetails(null);
   };
 
   const handleAddToCart = () => {
     if (product.quantity > 0) {
+      setQuantity(1); // Reset quantity về 1 mỗi khi mở dialog
       setOpenQuantityDialog(true);
     } else {
       setSnackbar({
         open: true,
-        message: 'Product is out of stock',
+        message: 'Sản phẩm đã hết hàng',
         severity: 'error'
       });
     }
@@ -81,21 +236,41 @@ const ProductCard = ({ product, onCartUpdate }) => {
   };
 
   const handleQuantityChange = (event) => {
-    const value = parseInt(event.target.value);
-    if (value > 0 && value <= product.quantity) {
-      setQuantity(value);
+    const value = event.target.value;
+    
+    // Cho phép input trống hoặc chỉ số
+    if (value === '' || /^\d+$/.test(value)) {
+      const numValue = value === '' ? '' : parseInt(value);
+      
+      // Nếu trống hoặc trong khoảng hợp lệ thì update
+      if (value === '' || (numValue >= 1 && numValue <= product.quantity)) {
+        setQuantity(value === '' ? 1 : numValue);
+      }
+    }
+  };
+
+  const handleQuantityBlur = (event) => {
+    const value = event.target.value;
+    if (value === '' || parseInt(value) < 1) {
+      setQuantity(1);
+    } else if (parseInt(value) > product.quantity) {
+      setQuantity(product.quantity);
     }
   };
 
   const handleConfirmAdd = async () => {
     try {
-      if (quantity > product.quantity) {
-        throw new Error('Not enough quantity available');
+      // Validate quantity
+      const validQuantity = Math.max(1, Math.min(quantity, product.quantity));
+      setQuantity(validQuantity);
+      
+      if (validQuantity > product.quantity || validQuantity < 1) {
+        throw new Error('Số lượng không hợp lệ');
       }
 
       const response = await addToCart({
         productID: product.id,
-        quantity: quantity
+        quantity: validQuantity
       });
 
       if (onCartUpdate) {
@@ -104,7 +279,7 @@ const ProductCard = ({ product, onCartUpdate }) => {
 
       setSnackbar({
         open: true,
-        message: `Added ${quantity} ${product.title} to cart`,
+        message: `Đã thêm ${validQuantity} ${product.title} vào giỏ hàng`,
         severity: 'success'
       });
 
@@ -114,7 +289,7 @@ const ProductCard = ({ product, onCartUpdate }) => {
       console.error('Error adding to cart:', error);
       setSnackbar({
         open: true,
-        message: error.response?.data?.message || 'Error adding to cart',
+        message: error.response?.data?.message || 'Lỗi khi thêm vào giỏ hàng',
         severity: 'error'
       });
     }
@@ -138,7 +313,7 @@ const ProductCard = ({ product, onCartUpdate }) => {
             onClick={handleViewDetails}
             sx={addToCartButtonStyles}
           >
-            View Details
+            Xem chi tiết
           </Button>
         </Box>
         <CardContent sx={cardContentStyles}>
@@ -158,7 +333,7 @@ const ProductCard = ({ product, onCartUpdate }) => {
               {product.category}
             </Typography>
             <Chip 
-              label={`${product.quantity} in stock`}
+              label={`${product.quantity} còn lại`}
               color={product.quantity > 0 ? "success" : "error"}
               size="small"
             />
@@ -173,52 +348,80 @@ const ProductCard = ({ product, onCartUpdate }) => {
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle>Product Details</DialogTitle>
+        <DialogTitle>Chi tiết sản phẩm</DialogTitle>
         <DialogContent>
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
-              <img 
-                src={product.imageUrl || '/placeholder-book.jpg'} 
-                alt={product.title}
-                style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Typography variant="h5" gutterBottom>
-                {product.title}
-              </Typography>
-              <Typography variant="h6" color="primary" gutterBottom>
-                {formatPrice(product.currentPrice)}
-              </Typography>
-              <Divider sx={{ my: 2 }} />
-              <Typography variant="body1" gutterBottom>
-                Category: {product.category}
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                Available: {product.quantity} items
-              </Typography>
-              {product.description && (
-                <Typography variant="body1" gutterBottom>
-                  {product.description}
+          {loadingDetails ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={6}>
+                <img 
+                  src={(productDetails || product).imageUrl || '/placeholder-book.jpg'} 
+                  alt={(productDetails || product).title}
+                  style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Typography variant="h5" gutterBottom>
+                  {(productDetails || product).title}
                 </Typography>
-              )}
-              <Box sx={{ mt: 3 }}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  startIcon={<AddShoppingCartIcon />}
-                  onClick={handleAddToCart}
-                  disabled={product.quantity === 0}
-                  fullWidth
-                >
-                  {product.quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
-                </Button>
-              </Box>
+                <Typography variant="h6" color="primary" gutterBottom>
+                  {formatPrice((productDetails || product).currentPrice)}
+                </Typography>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="body1" gutterBottom>
+                  <strong>Danh mục:</strong> {(productDetails || product).category}
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  <strong>Còn lại:</strong> {(productDetails || product).quantity} sản phẩm
+                </Typography>
+                
+                {/* Product-specific details */}
+                {productDetails && renderProductSpecificDetails(productDetails)}
+                
+                {/* Common product details */}
+                {(productDetails || product).dimension && (
+                  <Typography variant="body1" gutterBottom>
+                    <strong>Kích thước:</strong> {(productDetails || product).dimension}
+                  </Typography>
+                )}
+                {(productDetails || product).weight && (
+                  <Typography variant="body1" gutterBottom>
+                    <strong>Trọng lượng:</strong> {(productDetails || product).weight} kg
+                  </Typography>
+                )}
+                
+                {(productDetails || product).description && (
+                  <>
+                    <Divider sx={{ my: 2 }} />
+                    <Typography variant="h6" gutterBottom>
+                      Mô tả
+                    </Typography>
+                    <Typography variant="body1" gutterBottom>
+                      {(productDetails || product).description}
+                    </Typography>
+                  </>
+                )}
+                <Box sx={{ mt: 3 }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<AddShoppingCartIcon />}
+                    onClick={handleAddToCart}
+                    disabled={product.quantity === 0}
+                    fullWidth
+                  >
+                    {product.quantity === 0 ? 'Hết hàng' : 'Thêm vào giỏ'}
+                  </Button>
+                </Box>
+              </Grid>
             </Grid>
-          </Grid>
+          )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDetails}>Close</Button>
+          <Button onClick={handleCloseDetails}>Đóng</Button>
         </DialogActions>
       </Dialog>
 
@@ -228,39 +431,57 @@ const ProductCard = ({ product, onCartUpdate }) => {
         onClose={handleCloseQuantityDialog}
         sx={quantityDialogStyles}
       >
-        <DialogTitle>Add to Cart</DialogTitle>
+        <DialogTitle>Thêm vào giỏ hàng</DialogTitle>
         <DialogContent>
           <Typography variant="body1" gutterBottom>
             {product.title}
           </Typography>
           <Typography variant="body2" color="text.secondary" gutterBottom>
-            Price: {formatPrice(product.currentPrice)}
+            Giá: {formatPrice(product.currentPrice)}
           </Typography>
           <Typography variant="body2" color="text.secondary" gutterBottom>
-            Available: {product.quantity} items
+            Còn lại: {product.quantity} sản phẩm
           </Typography>
           <TextField
-            label="Quantity"
+            label="Số lượng"
             type="number"
             value={quantity}
             onChange={handleQuantityChange}
+            onBlur={handleQuantityBlur}
+            autoFocus
+            fullWidth
             inputProps={{ 
               min: 1,
-              max: product.quantity
+              max: product.quantity,
+              style: { textAlign: 'center' }
             }}
-            sx={quantityInputStyles}
-            helperText={`Maximum: ${product.quantity}`}
+            sx={{
+              ...quantityInputStyles,
+              '& input[type=number]': {
+                'MozAppearance': 'textfield'
+              },
+              '& input[type=number]::-webkit-outer-spin-button': {
+                'WebkitAppearance': 'none',
+                margin: 0
+              },
+              '& input[type=number]::-webkit-inner-spin-button': {
+                'WebkitAppearance': 'none',
+                margin: 0
+              }
+            }}
+            helperText={`Nhập số từ 1 đến ${product.quantity}`}
+            onFocus={(event) => event.target.select()}
           />
         </DialogContent>
         <DialogActions sx={dialogActionsStyles}>
-          <Button onClick={handleCloseQuantityDialog}>Cancel</Button>
+          <Button onClick={handleCloseQuantityDialog}>Hủy</Button>
           <Button 
             onClick={handleConfirmAdd} 
             variant="contained" 
             color="primary"
-            disabled={quantity > product.quantity}
+            disabled={!quantity || quantity < 1 || quantity > product.quantity}
           >
-            Add to Cart
+            Thêm vào giỏ
           </Button>
         </DialogActions>
       </Dialog>

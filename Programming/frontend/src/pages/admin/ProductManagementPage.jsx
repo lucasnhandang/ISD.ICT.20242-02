@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, IconButton, Chip, TextField, InputAdornment, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, InputLabel, Select, MenuItem, Alert, CircularProgress, Fab, Tooltip, Grid, Avatar, Checkbox, FormControlLabel
+  Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, IconButton, Chip, TextField, InputAdornment, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, InputLabel, Select, MenuItem, Alert, CircularProgress, Fab, Tooltip, Grid, Avatar, Checkbox, FormControlLabel, Snackbar
 } from '@mui/material';
 import { Add, Edit, Delete, Search, Book, Album, Movie, MusicNote, Image } from '@mui/icons-material';
 import { productService } from '../../services/productService';
@@ -86,6 +86,11 @@ const ProductManagementPage = () => {
   const [success, setSuccess] = useState('');
   const [selectedIds, setSelectedIds] = useState([]);
   const [refresh, setRefresh] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
 
   // Fetch products
   useEffect(() => {
@@ -95,7 +100,11 @@ const ProductManagementPage = () => {
         const data = await productService.searchProducts({ query: searchQuery, page: 0, size: 50 });
         setProducts(data.content || []);
       } catch (e) {
-        setError(e.message);
+        setSnackbar({
+          open: true,
+          message: `Failed to load products: ${e.message}`,
+          severity: 'error'
+        });
       } finally {
         setLoading(false);
       }
@@ -122,6 +131,7 @@ const ProductManagementPage = () => {
     setError('');
     setSuccess('');
     setImageFile(null);
+    setSnackbar({ ...snackbar, open: false }); // Clear any existing snackbar
     if (mode === 'edit' && product) {
       try {
         // Lấy detail từ API để fill đủ các trường đặc thù
@@ -139,7 +149,11 @@ const ProductManagementPage = () => {
         setFormData(newFormData);
         setSelectedProduct(product);
       } catch (e) {
-        setError(e.message);
+        setSnackbar({
+          open: true,
+          message: `Failed to load product details: ${e.message}`,
+          severity: 'error'
+        });
         setFormData({ category: product.category?.toUpperCase() || 'BOOK' });
         setSelectedProduct(product);
       }
@@ -180,10 +194,18 @@ const ProductManagementPage = () => {
     try {
       if (dialogMode === 'create') {
         await productService.createProduct(formData, imageFile);
-        setSuccess('Product created successfully!');
+        setSnackbar({
+          open: true,
+          message: 'Product created successfully!',
+          severity: 'success'
+        });
       } else {
         await productService.updateProduct(selectedProduct.id, formData, imageFile);
-        setSuccess('Product updated successfully!');
+        setSnackbar({
+          open: true,
+          message: 'Product updated successfully!',
+          severity: 'success'
+        });
       }
       setDialogOpen(false);
       setRefresh(r => !r);
@@ -194,20 +216,38 @@ const ProductManagementPage = () => {
 
   // Delete products
   const handleDelete = async (ids) => {
-    if (!window.confirm('Are you sure you want to delete selected product(s)?')) return;
+    const productCount = ids.length;
+    const confirmMessage = `Are you sure you want to delete ${productCount} product${productCount > 1 ? 's' : ''}?`;
+    
+    if (!window.confirm(confirmMessage)) return;
+    
     try {
       await productService.deleteProducts(ids);
-      setSuccess('Deleted successfully!');
+      const successMessage = `${productCount} product${productCount > 1 ? 's have' : ' has'} been deleted successfully!`;
+      setSnackbar({
+        open: true,
+        message: successMessage,
+        severity: 'success'
+      });
       setRefresh(r => !r);
       setSelectedIds([]);
     } catch (e) {
-      setError(e.message);
+      setSnackbar({
+        open: true,
+        message: e.message,
+        severity: 'error'
+      });
     }
   };
 
   // Table row selection
   const toggleSelect = (id) => {
     setSelectedIds((prev) => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
+
+  // Handle snackbar close
+  const handleSnackbarClose = () => {
+    setSnackbar({ ...snackbar, open: false });
   };
 
   // Render form fields
@@ -386,6 +426,23 @@ const ProductManagementPage = () => {
           </DialogActions>
         </form>
       </Dialog>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={handleSnackbarClose} 
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

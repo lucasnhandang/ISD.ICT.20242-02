@@ -30,10 +30,14 @@ api.interceptors.response.use(
       // Handle specific error cases
       switch (error.response.status) {
         case 401:
-          // Unauthorized - redirect to login
-          localStorage.removeItem('token');
-          localStorage.removeItem('userInfo');
-          window.location.href = '/login';
+          // Unauthorized - chỉ redirect nếu có token (token hết hạn)
+          // Không redirect cho login API vì login thất bại là bình thường
+          const token = localStorage.getItem('token');
+          if (token && !error.config.url.includes('/auth/login')) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userInfo');
+            window.location.href = '/login';
+          }
           break;
         case 403:
           // Forbidden - show error message
@@ -323,15 +327,12 @@ export const processRushOrder = async () => {
   return api.post('/place-rush-order/process-rush-order');
 };
 
-export const requestToPlaceOrder = async (cart) => {
-  return api.post('/place-order/request', cart);
+export const saveRushOrders = async () => {
+  return api.post('/place-rush-order/save-rush-orders');
 };
 
-// Pay individual invoice for rush order
-export const payInvoice = async (invoiceId) => {
-  return api.post('/place-rush-order/pay-invoice', null, {
-    params: { invoiceId }
-  });
+export const requestToPlaceOrder = async (cart) => {
+  return api.post('/place-order/request', cart);
 };
 
 // Create separate axios instance for payment APIs
