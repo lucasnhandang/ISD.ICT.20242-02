@@ -1,7 +1,7 @@
 package com.hustict.aims.service.order;
+import jakarta.servlet.http.HttpSession;
 
 import com.hustict.aims.dto.order.OrderInformationDTO;
-import jakarta.servlet.http.HttpSession;
 import java.util.List;
 
 public interface OrderService {
@@ -12,3 +12,4 @@ public interface OrderService {
     void cancelOrder(Long orderId);
     OrderInformationDTO getOrderDetails(Long orderId);
 }
+

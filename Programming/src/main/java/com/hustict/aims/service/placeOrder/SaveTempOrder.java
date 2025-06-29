@@ -1,14 +1,19 @@
 package com.hustict.aims.service.placeOrder;
 
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.hustict.aims.dto.cart.CartItemRequestDTO;
 import com.hustict.aims.dto.cart.CartRequestDTO;
 import com.hustict.aims.dto.deliveryForm.DeliveryFormDTO;
 import com.hustict.aims.dto.invoice.InvoiceDTO;
 import com.hustict.aims.model.cart.Cart;
 import com.hustict.aims.model.order.Order;
+import com.hustict.aims.model.product.Product;
+
+import com.hustict.aims.model.order.OrderItem;
 import com.hustict.aims.model.invoice.Invoice;
 import com.hustict.aims.model.order.OrderStatus;
 import com.hustict.aims.model.shipping.DeliveryInfo;
@@ -16,8 +21,16 @@ import com.hustict.aims.model.shipping.DeliveryInfo;
 import com.hustict.aims.repository.InvoiceRepository;
 import com.hustict.aims.repository.OrderRepository;
 import com.hustict.aims.repository.DeliveryInfoRepository;
+import com.hustict.aims.repository.product.ProductRepository;
+
+
 
 import com.hustict.aims.utils.mapper.InvoiceMapper;
+import com.hustict.aims.utils.mapper.OrderItemMapper;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import com.hustict.aims.utils.mapper.DeliveryInfoMapper;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +52,12 @@ public class SaveTempOrder {
     @Autowired
     private OrderRepository orderRepository;
 
+    @Autowired
+    OrderItemMapper orderItemMapper;
+
+
+    @Autowired
+    ProductRepository productRepository;
 
     public Long save(CartRequestDTO cart, DeliveryFormDTO deliverformDTO, InvoiceDTO invoiceDTO){
         DeliveryInfo deliveryForm = DeliveryFormMapper.toEntity(deliverformDTO);
@@ -47,16 +66,32 @@ public class SaveTempOrder {
         deliveryForm = deliveryFormRepository.save(deliveryForm); 
         invoice = invoiceRepository.save(invoice);
         
-        Order order = new Order();
-        order.setOrderDate(LocalDateTime.now()); 
-        order.setOrderStatus(OrderStatus.PENDING); 
-        order.setIsRushOrder(cart.isRushOrder());
-        order.setCurrency(cart.getCurrency()); 
-        order.setDeliveryInfo(deliveryForm); 
-        order.setInvoice(invoice); 
-        
-        order = orderRepository.save(order);
-        return order.getId();
+        Order temp  = new Order();
+        temp.setOrderDate(LocalDateTime.now()); 
+        temp.setOrderStatus(OrderStatus.PENDING); 
+        temp.setIsRushOrder(cart.isRushOrder());
+        temp.setCurrency(cart.getCurrency()); 
+        temp.setDeliveryInfo(deliveryForm); 
+        temp.setInvoice(invoice); 
+
+        Order savedOrder = orderRepository.save(temp); // đặt tên khác
+
+        List<OrderItem> orderItems = cart.getProductList().stream()
+            .map(dto -> {
+                Product product = productRepository.getReferenceById(dto.getProductID());
+                product.setTitle(dto.getProductName()); 
+                product.setCurrentPrice(dto.getPrice());     
+                return OrderItemMapper.toEntity(dto, savedOrder, product);
+            })
+            .collect(Collectors.toList());
+
+        for (OrderItem item : orderItems) {
+            savedOrder.addOrderItem(item); // đảm bảo quan hệ 2 chiều
+        }
+
+        orderRepository.save(savedOrder);  
+
+        return savedOrder.getId();
     }
 
 }

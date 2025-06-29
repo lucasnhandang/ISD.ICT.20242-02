@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
-
 import jakarta.servlet.http.HttpSession;
 
 import com.hustict.aims.dto.deliveryForm.DeliveryFormDTO;
@@ -24,6 +23,8 @@ import com.hustict.aims.service.placeOrder.HandleRequestService;
 import com.hustict.aims.service.placeOrder.PaymentHandlerService;
 import com.hustict.aims.service.placeOrder.NormalOrderService;
 import com.hustict.aims.service.placeOrder.SaveTempOrder;
+import com.hustict.aims.service.placeOrder.CartCleanupService;
+
 
 import com.hustict.aims.service.reservation.ReservationService;
 import com.hustict.aims.service.sessionValidator.SessionValidatorService;
@@ -57,6 +58,9 @@ public class PlaceOrderController {
 
     @Autowired
     private SaveTempOrder saveTempOrder;
+
+    @Autowired
+    private CartCleanupService cartCleanupService;
 
 
    
@@ -121,10 +125,14 @@ public class PlaceOrderController {
         } else {
             System.out.println("PaymentTransactionDTO and orderId are valid");
         }
-
         paymentHandlerService.handlePaymentSuccess(paymentTransaction, orderId);
-
-
         return ResponseEntity.ok("Order is successfully created (Mock Test)");
+    }
+
+    @PostMapping("/confirm-order")
+    public ResponseEntity<String> cartCleanUp(HttpSession session, String TransactionStatus, Long orderId) {
+        
+        
+        return ResponseEntity.ok("Cart is cleaned and reservation is cleaned for");
     }
 }

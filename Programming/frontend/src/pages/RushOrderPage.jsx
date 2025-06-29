@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, Typography, Divider, Paper, Button, CircularProgress, Alert, TextField } from '@mui/material';
 import Header from '../components/Header';
-import RushOrderResults from '../components/RushOrderResults';
+// import RushOrderResults from '../components/RushOrderResults'; // REMOVED
 import { checkRushOrderEligibility, submitRushOrderInfo, saveRushOrders, getProductDetails } from '../services/api';
 
 const formatPrice = (price) => {
@@ -26,8 +26,6 @@ const RushOrderPage = () => {
     expectedDateTime: '', 
     deliveryInstructions: '' 
   });
-  const [orderData, setOrderData] = useState(null);
-  const [showResults, setShowResults] = useState(false);
   const [productDetails, setProductDetails] = useState({});
   const [loadingProducts, setLoadingProducts] = useState(true);
 
@@ -89,8 +87,48 @@ const RushOrderPage = () => {
       await submitRushOrderInfo(rushInfo);
       // 3. Save rush orders and get order IDs
       const res = await saveRushOrders();
-      setOrderData(res.data);
-      setShowResults(true);
+      
+      // Tạo invoice list từ kết quả rush order
+      const invoiceList = [];
+      
+      if (res.data.rushOrderId && res.data.rushInvoice) {
+        invoiceList.push({
+          ...res.data.rushInvoice,
+          id: res.data.rushOrderId,
+          orderId: res.data.rushOrderId,
+          isRushOrder: true,
+          orderType: 'rush',
+          deliveryTime: rushInfo.expectedDateTime,
+          status: 'unpaid'
+        });
+      }
+      
+      if (res.data.normalOrderId && res.data.normalInvoice) {
+        invoiceList.push({
+          ...res.data.normalInvoice,
+          id: res.data.normalOrderId,
+          orderId: res.data.normalOrderId,
+          isRushOrder: false,
+          orderType: 'normal',
+          status: 'unpaid'
+        });
+      }
+
+      // Chuyển thẳng đến InvoicePage với invoice list
+      navigate('/invoice', { 
+        state: { 
+          invoiceList: invoiceList,
+          deliveryForm: {
+            ...deliveryForm,
+            expectedDateTime: rushInfo.expectedDateTime,
+            deliveryInstructions: rushInfo.deliveryInstructions
+          },
+          cart: cart,
+          source: 'rush-order',
+          message: res.data.message || 'Đơn hàng đã được tách thành công!'
+        }
+      });
+      
     } catch (err) {
       setError(err.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại.');
     } finally {
@@ -98,17 +136,17 @@ const RushOrderPage = () => {
     }
   };
 
-  const handlePayment = (orderId, orderType, invoice) => {
-    // Navigate to existing invoice page for payment
-    navigate('/invoice', { 
-      state: { 
-        invoice: invoice,
-        orderId: orderId,
-        isRushOrder: orderType === 'rush',
-        source: 'rush-order'
-      }
-    });
-  };
+  // const handlePayment = (orderId, orderType, invoice) => { // REMOVED
+  //   // Navigate to existing invoice page for payment
+  //   navigate('/invoice', { 
+  //     state: { 
+  //       invoice: invoice,
+  //       orderId: orderId,
+  //       isRushOrder: orderType === 'rush',
+  //       source: 'rush-order'
+  //     }
+  //   });
+  // };
 
   // Kiểm tra dữ liệu đầu vào
   if (!cart || !invoice || !deliveryForm) {
@@ -132,22 +170,6 @@ const RushOrderPage = () => {
   }
 
   const productList = cart.productList || [];
-
-  // Hiển thị kết quả rush order nếu đã xử lý xong
-  if (showResults && orderData) {
-    return (
-      <Box sx={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
-        <Header />
-        <Box sx={{ pt: 4, px: 2 }}>
-          <RushOrderResults 
-            orderData={orderData}
-            onPayment={handlePayment}
-            expectedDateTime={rushInfo.expectedDateTime}
-          />
-        </Box>
-      </Box>
-    );
-  }
 
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
