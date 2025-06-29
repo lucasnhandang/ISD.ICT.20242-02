@@ -13,8 +13,7 @@ import InvoicePage from './pages/InvoicePage';
 import PaymentResultPage from './pages/PaymentResultPage';
 import VnPayReturnPage from './pages/VnPayReturnPage';
 import LoginPage from './pages/LoginPage';
-
-
+import OrderCancellationPage from './pages/OrderCancellationPage';
 
 import ApiTestComponent from './components/ApiTestComponent';
 
@@ -87,11 +86,12 @@ function App() {
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/management/*" element={<ManagementPanel />} />
           <Route path="/order-review" element={<OrderReviewPage />} />
-                      <Route path="/rush-order" element={<RushOrderPage />} />
-            <Route path="/invoice" element={<InvoicePage />} />
-            <Route path="/payment-result" element={<PaymentResultPage />} />
-            <Route path="/vnpay-return" element={<VnPayReturnPage />} />
-            <Route path="/api-test" element={<ApiTestComponent />} />
+          <Route path="/rush-order" element={<RushOrderPage />} />
+          <Route path="/invoice/:id" element={<InvoicePage />} />
+          <Route path="/payment-result" element={<PaymentResultPage />} />
+          <Route path="/vnpay-return" element={<VnPayReturnPage />} />
+          <Route path="/api-test" element={<ApiTestComponent />} />
+          <Route path="/order/cancel/:id" element={<OrderCancellationPage />} />
         </Routes>
       </Router>
     </ThemeProvider>
