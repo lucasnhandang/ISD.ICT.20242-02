@@ -150,9 +150,7 @@ public class ProductService {
         public int getAvailableQuantity(Long id) {
                 Product product = productRepo.findByIdNotDeleted(id).orElseThrow(() -> new NoSuchElementException(
                                 messageService.getProductNotFound() + " with ID: " + id));
-
-                int reservedQty = reservationItemRepository.getReservedQuantityByProductId(id);
-                return Math.max(0, product.getQuantity() - reservedQty);
+                return product.getQuantity();
         }
 
         public boolean isProductAvailable(Long id, int requiredQty) {
