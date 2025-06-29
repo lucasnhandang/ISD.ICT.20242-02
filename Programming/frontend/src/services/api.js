@@ -311,8 +311,8 @@ export const checkRushOrderEligibility = async () => {
   return api.post('/place-rush-order/check-eligibility');
 };
 
-export const handleNormalOrder = async () => {
-  return api.post('/place-order/normal-order');
+export const handleNormalOrder = async (cart) => {
+  return api.post('/place-order/normal-order', cart);
 };
 
 export const submitRushOrderInfo = async (data) => {
@@ -338,7 +338,7 @@ export const payInvoice = async (invoiceId) => {
 
 // Create separate axios instance for payment APIs (different base path)
 const paymentApi = axios.create({
-  baseURL: 'http://localhost:8080/api/payment',
+  baseURL: 'http://localhost:8080/api/v1/payment',  // ✅ Fixed: Added v1 to match backend
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
   // withCredentials: true  // Tạm thời comment để test CORS issue
