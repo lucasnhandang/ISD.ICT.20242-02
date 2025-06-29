@@ -151,10 +151,11 @@ public class PlaceOrderController {
 
     @PostMapping("/confirm-order")
     public ResponseEntity<String> cartCleanUp(HttpSession session, @RequestBody ConfirmOrderRequestDTO confirmOrderRequestDTO) {
-        if (confirmOrderRequestDTO.isSuccess()) {cartCleanupService.removePurchasedItems(session, confirmOrderRequestDTO.getOrderId());
+        if (confirmOrderRequestDTO.isSuccess()) 
+        {cartCleanupService.removePurchasedItems(session, confirmOrderRequestDTO.getOrderId());
             } else 
             return ResponseEntity.ok("Cart is cleaned and reservation is removed");
-
+        
         return ResponseEntity.ok("Cart is cleaned and reservation is cleaned for");
     }
 }
