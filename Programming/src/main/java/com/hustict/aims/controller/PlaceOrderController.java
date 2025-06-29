@@ -24,12 +24,13 @@ import com.hustict.aims.service.placeOrder.PaymentHandlerService;
 import com.hustict.aims.service.placeOrder.NormalOrderService;
 import com.hustict.aims.service.placeOrder.SaveTempOrder;
 import com.hustict.aims.service.placeOrder.CartCleanupService;
-
+import com.hustict.aims.dto.order.ConfirmOrderRequestDTO;
 
 import com.hustict.aims.service.reservation.ReservationService;
 import com.hustict.aims.service.sessionValidator.SessionValidatorService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
         
 @RestController
@@ -62,7 +63,7 @@ public class PlaceOrderController {
     @Autowired
     private CartCleanupService cartCleanupService;
 
-
+ 
    
    @PostMapping("/request")
     public ResponseEntity<String> requestToPlaceOrder(@RequestBody CartRequestDTO cart, HttpSession session) {
@@ -97,11 +98,30 @@ public class PlaceOrderController {
 
         DeliveryFormDTO deliveryForm = (DeliveryFormDTO) session.getAttribute("deliveryForm");
         InvoiceDTO invoice = normalOrderService.handleNormalOrder(deliveryForm, cart);
-
+        invoice.setRushOrder(false);
         cart.setRushOrder(false);
-        Long orderid = saveTempOrder.save(cart, deliveryForm, invoice);
+        Long orderid = saveTempOrder.save(cart, deliveryForm, invoice,session);
+        
+        List<InvoiceDTO> invoiceList = new java.util.ArrayList<>();
+        List<CartRequestDTO> cartList = new java.util.ArrayList<>();
 
+        invoiceList.add(invoice);
+        cartList.add(cart);
 
+        session.setAttribute("invoiceList", invoiceList);
+        session.setAttribute("cartList", cartList);
+        
+        
+        System.out.println("=======START CART LIST =======");
+        if (cartList != null) {
+            cartList.forEach(cartdto -> System.out.println(cartdto.toString()));
+        } 
+
+        // In ra invoiceList
+        System.out.println("=======START INVOICE LIST =======");
+        if (invoiceList != null) {
+            invoiceList.forEach(invoicedto -> System.out.println(invoicedto.toString()));
+        } 
         Map<String, Object> response = new HashMap<>();
         response.put("cart", cart);
         response.put("invoice", invoice);
@@ -123,16 +143,18 @@ public class PlaceOrderController {
         } else if (orderId == null) {
             throw new IllegalArgumentException("orderId must not be null");
         } else {
-            System.out.println("PaymentTransactionDTO and orderId are valid");
+            System.out.println("PaymentTransactionDTO and orderId are valid" + orderId);
         }
         paymentHandlerService.handlePaymentSuccess(paymentTransaction, orderId);
         return ResponseEntity.ok("Order is successfully created (Mock Test)");
     }
 
     @PostMapping("/confirm-order")
-    public ResponseEntity<String> cartCleanUp(HttpSession session, String TransactionStatus, Long orderId) {
-        
-        
+    public ResponseEntity<String> cartCleanUp(HttpSession session, @RequestBody ConfirmOrderRequestDTO confirmOrderRequestDTO) {
+        if (confirmOrderRequestDTO.isSuccess()) {cartCleanupService.removePurchasedItems(session, confirmOrderRequestDTO.getOrderId());
+            } else 
+            return ResponseEntity.ok("Cart is cleaned and reservation is removed");
+
         return ResponseEntity.ok("Cart is cleaned and reservation is cleaned for");
     }
 }

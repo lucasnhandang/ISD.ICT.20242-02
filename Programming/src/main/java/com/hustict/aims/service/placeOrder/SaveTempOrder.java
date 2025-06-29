@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.servlet.http.HttpSession;
 
 import com.hustict.aims.dto.cart.CartItemRequestDTO;
 import com.hustict.aims.dto.cart.CartRequestDTO;
@@ -59,13 +60,19 @@ public class SaveTempOrder {
     @Autowired
     ProductRepository productRepository;
 
-    public Long save(CartRequestDTO cart, DeliveryFormDTO deliverformDTO, InvoiceDTO invoiceDTO){
+    public Long save(CartRequestDTO cart, DeliveryFormDTO deliverformDTO, InvoiceDTO invoiceDTO,HttpSession session){
         DeliveryInfo deliveryForm = DeliveryFormMapper.toEntity(deliverformDTO);
         Invoice invoice = invoiceMapper.toEntity(invoiceDTO);
 
         deliveryForm = deliveryFormRepository.save(deliveryForm); 
         invoice = invoiceRepository.save(invoice);
         
+        Long deliveryFormid = deliveryForm.getId();
+        Long invoiceid = invoice.getId();
+
+        deliverformDTO.setId(deliveryFormid);
+        invoiceDTO.setId(invoiceid);
+
         Order temp  = new Order();
         temp.setOrderDate(LocalDateTime.now()); 
         temp.setOrderStatus(OrderStatus.PENDING); 

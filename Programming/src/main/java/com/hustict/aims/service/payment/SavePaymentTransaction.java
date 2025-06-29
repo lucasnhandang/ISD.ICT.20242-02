@@ -51,7 +51,6 @@ public class SavePaymentTransaction {
         // Tìm order tương ứng với id
         Optional<Order> orderOptional = orderRepository.findById(id);
         if (!orderOptional.isPresent()) {
-            logger.error("Không tìm thấy order với ID: " + id);
             throw new IllegalArgumentException("Không tìm thấy order với ID: " + id);
         }
 

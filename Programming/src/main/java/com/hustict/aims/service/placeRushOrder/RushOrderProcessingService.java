@@ -47,6 +47,7 @@ public class RushOrderProcessingService {
         CartRequestDTO rushCart = createRushCart(rushItems, cart);
         int rushShippingFee = rushShippingFeeCalculator.calculateShippingFee(deliveryInfo, rushCart);
         InvoiceDTO rushInvoiceDTO = invoiceCalculationService.calculateInvoice(rushCart.getTotalPrice(), rushShippingFee);
+        rushInvoiceDTO.setRushOrder(true);
         invoiceList.add(rushInvoiceDTO);
         cartList.add(rushCart);
 
@@ -54,6 +55,7 @@ public class RushOrderProcessingService {
         if (!normalItems.isEmpty()) {
             CartRequestDTO normalCart = createNormalCart(normalItems, cart);
             InvoiceDTO normalInvoiceDTO = normalOrderService.handleNormalOrder(deliveryInfo, normalCart);
+            rushInvoiceDTO.setRushOrder(false);
             invoiceList.add(normalInvoiceDTO);
             cartList.add(normalCart);
         }
