@@ -71,6 +71,10 @@ const LoginPage = ({ onLoginSuccess, onBackToHome }) => {
     return true;
   };
 
+  const handleBackToHome = () => {
+    navigate('/');
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     
@@ -94,6 +98,12 @@ const LoginPage = ({ onLoginSuccess, onBackToHome }) => {
         }, 2000);
       } else {
         setError(response.message || 'Login failed');
+        setLoading(false);
+        // Tự động ẩn thông báo lỗi sau 3 giây
+        setTimeout(() => {
+          setError('');
+        }, 3000);
+        return;
       }
     } catch (error) {
       // Handle different types of errors
@@ -112,11 +122,15 @@ const LoginPage = ({ onLoginSuccess, onBackToHome }) => {
       } else {
         errorMessage = error.message || 'Login failed';
       }
-      
       setError(errorMessage);
-    } finally {
       setLoading(false);
+      // Tự động ẩn thông báo lỗi sau 3 giây
+      setTimeout(() => {
+        setError('');
+      }, 3000);
+      return;
     }
+    setLoading(false);
   };
 
   const handleKeyPress = (event) => {
@@ -233,7 +247,7 @@ const LoginPage = ({ onLoginSuccess, onBackToHome }) => {
         <Link
           component="button"
           variant="body2"
-          onClick={onBackToHome}
+          onClick={handleBackToHome}
           sx={{
             color: 'primary.main',
             textDecoration: 'none',
