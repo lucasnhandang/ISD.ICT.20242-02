@@ -133,44 +133,77 @@ const OrderManagementPage = () => {
       setLoading(true);
       setError(null);
       
-      console.log('🔄 Đang kiểm tra kết nối backend...');
+      console.log(`🔄 [Attempt ${retryCount + 1}] Bắt đầu tải pending orders...`);
+      console.log('🌐 Frontend URL:', window.location.origin);
+      console.log('🔗 Backend URL:', 'http://localhost:8080/api/v1');
       
       // Kiểm tra kết nối backend trước
       const connectionStatus = await checkBackendConnection();
+      console.log('🔍 Backend connection status:', connectionStatus);
+      
       if (!connectionStatus.connected) {
-        throw new Error(`Không thể kết nối backend: ${connectionStatus.message}`);
+        throw new Error(`Backend không accessible: ${connectionStatus.message}`);
       }
       
       console.log('✅ Backend connection OK, đang tải pending orders...');
       const data = await orderManagementAPI.getPendingOrders();
-      setPendingOrders(data);
+      
+      console.log('📦 Raw data received:', data);
+      console.log('📊 Data type:', typeof data, 'Is Array:', Array.isArray(data));
+      
+      if (!Array.isArray(data)) {
+        console.warn('⚠️ Data không phải array, converting...', data);
+        setPendingOrders([]);
+      } else {
+        setPendingOrders(data);
+        console.log(`✅ Đã set thành công ${data.length} pending orders`);
+      }
+      
       setError(null);
       
-      console.log(`✅ Đã tải thành công ${data.length} pending orders`);
-      
     } catch (err) {
-      console.error(`❌ Lỗi lần thử ${retryCount + 1}:`, err);
+      console.error(`❌ [Attempt ${retryCount + 1}] Lỗi:`, err);
+      
+      // Detailed error analysis
+      console.log('🔍 Error analysis:', {
+        name: err.name,
+        message: err.message,
+        stack: err.stack,
+        cause: err.cause
+      });
       
       // Retry logic - thử lại tối đa 2 lần
       if (retryCount < 2) {
-        console.log(`🔄 Đang thử lại lần ${retryCount + 2}...`);
+        console.log(`🔄 Đang thử lại lần ${retryCount + 2} sau 3 giây...`);
         setTimeout(() => {
           fetchPendingOrders(retryCount + 1);
-        }, 2000); // Đợi 2 giây trước khi retry
+        }, 3000);
         return;
       }
       
-      // Thông báo lỗi chi tiết hơn
-      let errorMessage = 'Không thể tải danh sách đơn hàng. ';
+      // Detailed error message for user
+      let errorMessage = 'Không thể tải danh sách đơn hàng chờ duyệt.\n\n';
       
-      if (err.message.includes('Network Error') || err.message.includes('ERR_NETWORK')) {
-        errorMessage += 'Vui lòng kiểm tra:\n• Kết nối mạng\n• Backend server đang chạy\n• Firewall/Antivirus blocking';
+      if (err.message.includes('Backend không accessible')) {
+        errorMessage += '🔥 BACKEND SERVER KHÔNG CHẠY!\n\n';
+        errorMessage += 'Các bước khắc phục:\n';
+        errorMessage += '1. Mở terminal/cmd\n';
+        errorMessage += '2. Chạy: mvn spring-boot:run\n';
+        errorMessage += '3. Đợi server start xong\n';
+        errorMessage += '4. Thử lại trang này\n\n';
+        errorMessage += 'Backend URL: http://localhost:8080';
+      } else if (err.message.includes('Network Error') || err.message.includes('ERR_NETWORK')) {
+        errorMessage += 'Vấn đề kết nối mạng:\n';
+        errorMessage += '• Kiểm tra backend server (port 8080)\n';
+        errorMessage += '• Kiểm tra firewall/antivirus\n';
+        errorMessage += '• Thử restart backend server';
       } else if (err.message.includes('timeout')) {
-        errorMessage += 'Kết nối quá chậm. Vui lòng thử lại.';
-      } else if (err.message.includes('404')) {
-        errorMessage += 'API endpoint không tồn tại.';
+        errorMessage += 'Kết nối quá chậm:\n';
+        errorMessage += '• Server có thể đang overload\n';
+        errorMessage += '• Kiểm tra database connection\n';
+        errorMessage += '• Thử restart server';
       } else {
-        errorMessage += err.message;
+        errorMessage += `Lỗi: ${err.message}`;
       }
       
       setError(errorMessage);
@@ -244,10 +277,10 @@ const OrderManagementPage = () => {
     return (
       <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <CircularProgress size={40} sx={{ mb: 2 }} />
-        <Typography variant="h6" gutterBottom>Đang tải đơn hàng...</Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="h6" gutterBottom>Loading orders pending list...</Typography>
+        {/* <Typography variant="body2" color="text.secondary">
           Vui lòng đợi trong giây lát
-        </Typography>
+        </Typography> */}
       </Box>
     );
   }
@@ -262,7 +295,7 @@ const OrderManagementPage = () => {
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4">
-          Quản lý đơn hàng
+          Order managerment
         </Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Button
@@ -310,6 +343,35 @@ const OrderManagementPage = () => {
               >
                 Test API trực tiếp
               </Button>
+              <Button 
+                variant="outlined" 
+                color="info"
+                onClick={() => window.open('http://localhost:8080/api/v1/health', '_blank')}
+              >
+                Check Health
+              </Button>
+            </Box>
+            
+            {/* Debug Information Panel */}
+            <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.100', borderRadius: 1 }}>
+              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
+                🔧 Debug Information:
+              </Typography>
+              <Typography variant="caption" sx={{ display: 'block', fontFamily: 'monospace' }}>
+                Frontend: {window.location.origin}
+              </Typography>
+              <Typography variant="caption" sx={{ display: 'block', fontFamily: 'monospace' }}>
+                Backend: http://localhost:8080/api/v1
+              </Typography>
+              <Typography variant="caption" sx={{ display: 'block', fontFamily: 'monospace' }}>
+                Endpoint: /product-manager/orders/pending
+              </Typography>
+              <Typography variant="caption" sx={{ display: 'block', fontFamily: 'monospace' }}>
+                Full URL: http://localhost:8080/api/v1/product-manager/orders/pending
+              </Typography>
+              <Typography variant="caption" sx={{ display: 'block', fontFamily: 'monospace', mt: 1 }}>
+                Timestamp: {new Date().toLocaleString()}
+              </Typography>
             </Box>
           </CardContent>
         </Card>
