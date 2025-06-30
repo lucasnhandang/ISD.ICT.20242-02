@@ -1,15 +1,18 @@
 # ISD.ICT.20242-02
 Capstone Project: AIMS Software for ITSS Software Development course in 20242 semester.
 
+## Instructor & Teaching Assistant
+- **Instructor: Ph.D. Nguyen Thi Thu Trang**
+- **Teaching Assistant: Nguyen Thi Mai Anh**
 
-## Member
-| Student ID | Name           | Role        |
-|------------|----------------|-------------|
-| 20225990   | Dang Van Nhan  | Team Leader |
-| 20225979   | Ha Viet Khanh  | Member      |
-| 20226003   | Ho Bao Thu     | Member      |
-| 20226061   | Tran Cao Phong | Member      |
-| 20225991   | Nguyen Lan Nhi | Member      |
+## Members
+| Student ID | Name           | Role                         |
+|------------|----------------|------------------------------|
+| 20225990   | Dang Van Nhan  | Team Leader (Backend)        |
+| 20225979   | Ha Viet Khanh  | Member (Backend)             |
+| 20226003   | Ho Bao Thu     | Member (Backend)             |
+| 20226061   | Tran Cao Phong | Member (Frontend + Backend)  |
+| 20225991   | Nguyen Lan Nhi | Member (Frontend + Backend)  |
 
 ## Project Structure
 This repository is organized as follows:
@@ -20,7 +23,7 @@ ISD.ICT.20242-02/
 │   ├── Business Process/
 │   ├── Communication Diagram + Analysis Class Diagram/
 │   ├── Detailed Design/
-│   ├── Enhanced Detailed Design/
+│   ├── Enhanced Detailed Design/       # Final design for the project
 │   └── Sequence Diagram/
 ├── Programming/
 │   ├── frontend/                       # Frontend source code (React)
@@ -62,9 +65,9 @@ ISD.ICT.20242-02/
 ```
 
 ## How to run AIMS?
-This project is a **Web Application** that combines **Spring Boot (Java)** for backend and **React (JavaScript)** for frontend.
+- This project is a **Web Application** that combines **Spring Boot (Java)** for backend and **React (JavaScript)** for frontend.
 
-**Link to our group demo: https://drive.google.com/drive/folders/1VTaBhrfpIMhLZh_UGWvEi6vTW4rjtKHq?usp=sharing**
+- **Link to our group demo: https://drive.google.com/drive/folders/1VTaBhrfpIMhLZh_UGWvEi6vTW4rjtKHq**
 
 ### Tech Stack
 - **Backend**: Java Spring Boot
@@ -80,43 +83,65 @@ This project is a **Web Application** that combines **Spring Boot (Java)** for b
 
 ### Setup & Run
 
-#### 1. Clone the repository
+#### Method 1: Automatic Start (Recommended)
+The `Application.java` file is configured to automatically start both backend and frontend with a single command.
+
+**1. Clone the repository**
 ```bash
 git clone https://github.com/lucasnhandang/ISD.ICT.20242-02.git
-cd ISD.ICT.20242-02/Coding
+cd ISD.ICT.20242-02/Programming
 ```
 
-#### 2. Database setup
-- Import the SQL scripts in `docs/G2-AIMS-CreateDB.sql` and `docs/G2-AIMS-DataForDB.sql` into your PostgreSQL instance.
-- Update database connection info in `src/main/resources/application.properties` if needed.
-
-#### 3. Run Backend (Spring Boot)
+**2. Install frontend dependencies (one-time setup)**
 ```bash
-cd src
+cd frontend
+npm install
+cd ..
+```
+
+**3. Run the application**
+```bash
+# From Programming/ directory
 mvn spring-boot:run
 ```
-- The backend API will be available at: http://localhost:8080
 
-#### 4. Run Frontend (React)
+#### Method 2: Manual Start (Alternative)
+If you prefer to run frontend and backend separately:
+
+**1. Clone the repository**
+```bash
+git clone https://github.com/lucasnhandang/ISD.ICT.20242-02.git
+cd ISD.ICT.20242-02/Programming
+```
+
+**2. Run Backend (Spring Boot)**
+```bash
+mvn spring-boot:run
+```
+The backend API will be available at: http://localhost:8080
+
+**Run Frontend (React) in a separate terminal**
 ```bash
 cd frontend
 npm install
 npm start
 ```
-- The frontend will be available at: http://localhost:3000
+The frontend will be available at: http://localhost:3000
 
-#### 5. Access the Application
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:8080/api/*
+### Database Setup (Optional)
+The application is pre-configured to use our Supabase database. 
+
+If you want to use your own PostgreSQL database:
+- Import the SQL scripts in `docs/G2-AIMS-CreateDB.sql` and `docs/G2-AIMS-DataForDB.sql`
+- Update database connection info in `src/main/resources/application.properties`
 
 ---
 
 ## Ngrok Configuration for Payment Gateway
 
-### What is Ngrok?
+### What is Ngrok? Why Ngrok is Needed?
 Ngrok is a tool that creates secure tunnels to expose your local server to the internet. In this project, ngrok is used to expose the local Spring Boot server so that VNPay payment gateway can send callbacks to our application.
 
-### Why Ngrok is Needed?
 - VNPay payment gateway needs to send payment callbacks to our server
 - These callbacks include payment success/failure notifications
 - Since our server runs locally, we need ngrok to make it accessible from the internet
@@ -133,15 +158,12 @@ This URL is used in the following endpoints:
 
 ### How to Set Up Ngrok
 
-#### 1. Install Ngrok
-```bash
-# Download from https://ngrok.com/download
-```
+#### 1. Install Ngrok: Download from https://ngrok.com/download
 
 #### 2. Sign Up for Free Account
 - Go to https://ngrok.com/
 - Create a free account
-- Get your authtoken from the dashboard
+- Get your auth token from the dashboard
 
 #### 3. Authenticate Ngrok
 ```bash
@@ -161,13 +183,13 @@ Forwarding    https://abc123-def456.ngrok-free.app -> http://localhost:8080
 
 ### How to Update Ngrok URL for Other Developers
 
-#### Step 1: Get Your Ngrok URL
+#### 1. Get Your Ngrok URL
 When you start ngrok, you'll get a URL like:
 ```
 https://your-unique-id.ngrok-free.app
 ```
 
-#### Step 2: Update Configuration
+#### 2. Update Configuration
 Edit the file: `Programming/src/main/resources/application.properties`
 
 Find this line:
@@ -180,7 +202,7 @@ Replace it with your ngrok URL:
 app.ngrok.url=https://your-unique-id.ngrok-free.app
 ```
 
-#### Step 3: Restart the Application
+#### 3. Restart the Application
 After updating the configuration, restart your Spring Boot application:
 ```bash
 # Stop the current server (Ctrl+C)
@@ -213,13 +235,6 @@ If payment callbacks are not working:
 3. Test the URL in browser: `https://your-ngrok-url.ngrok-free.app/api/health`
 4. Check ngrok dashboard for any errors
 5. Restart both ngrok and Spring Boot application
-
-### Alternative Solutions for Production
-For production deployment, consider:
-- **Cloud hosting**: Deploy to AWS, Azure, or Google Cloud
-- **Domain name**: Use a proper domain name instead of ngrok
-- **Load balancer**: Use services like Cloudflare or AWS ALB
-- **VPN**: Set up VPN for secure communication
 
 ---
 
