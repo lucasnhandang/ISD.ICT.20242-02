@@ -8,7 +8,10 @@ import {
   Alert,
   CircularProgress,
   Paper,
-  Divider
+  Divider,
+  List,
+  ListItem,
+  ListItemText
 } from '@mui/material';
 import { submitDeliveryForm, checkRushOrderEligibility } from '../services/api';
 
@@ -39,6 +42,7 @@ const DeliveryForm = ({ onClose, onSuccess, initialValues, disabled }) => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [validationErrors, setValidationErrors] = useState([]);
 
   // Cập nhật form khi có initialValues
   useEffect(() => {
@@ -56,17 +60,35 @@ const DeliveryForm = ({ onClose, onSuccess, initialValues, disabled }) => {
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    // Clear errors when user starts editing
+    if (validationErrors.length > 0) {
+      setValidationErrors([]);
+    }
+    if (error) {
+      setError('');
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setValidationErrors([]);
+    
     try {
       await submitDeliveryForm(form);
       onSuccess(form);
     } catch (err) {
-      setError(err.response?.data?.message || 'An error occurred, please try again.');
+      console.log('Error response:', err.response?.data);
+      
+      // Check if it's validation errors from backend
+      if (err.response?.data?.errors && Array.isArray(err.response.data.errors)) {
+        setValidationErrors(err.response.data.errors);
+        setError(err.response.data.message || 'Please check the information below');
+      } else {
+        // Other errors (network, server error, etc.)
+        setError(err.response?.data?.message || 'An error occurred, please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -137,7 +159,33 @@ const DeliveryForm = ({ onClose, onSuccess, initialValues, disabled }) => {
             </MenuItem>
           ))}
         </TextField>
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
+        {/* Display specific validation errors */}
+        {validationErrors.length > 0 && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              Please fix the following errors:
+            </Typography>
+            <List dense sx={{ py: 0 }}>
+              {validationErrors.map((errorMsg, index) => (
+                <ListItem key={index} sx={{ py: 0, pl: 0 }}>
+                  <ListItemText 
+                    primary={`• ${errorMsg}`}
+                    primaryTypographyProps={{ variant: 'body2' }}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </Alert>
+        )}
+
+        {/* Display general errors */}
+        {error && validationErrors.length === 0 && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
           {onClose && (
             <Button onClick={onClose} disabled={loading || disabled}>
