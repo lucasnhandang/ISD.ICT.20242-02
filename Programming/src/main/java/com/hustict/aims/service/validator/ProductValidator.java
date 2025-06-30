@@ -30,23 +30,6 @@ public abstract class ProductValidator<T extends Product> {
         }
     }
     
-    /**
-     * Legacy method that returns errors list for backward compatibility.
-     * @deprecated Use validate(Product) method which throws exceptions instead.
-     */
-    @Deprecated
-    public final List<String> validateAndReturnErrors(Product product) {
-        List<String> errors = new ArrayList<>();
-        if (canValidate(product)) {
-            T typedProduct = (T) product;
-            validateCommon(typedProduct, errors);
-            validateSpecific(typedProduct, errors);
-        } else {
-            errors.add("Validator type mismatch for product: " + product.getTitle());
-        }
-        return errors;
-    }
-    
     protected void rejectIfBlank(String value, String field, int max, List<String> errs) {
         if (value == null || value.trim().isEmpty()) {
             errs.add(field + " is required");

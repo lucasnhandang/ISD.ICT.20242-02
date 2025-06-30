@@ -351,6 +351,19 @@ export const saveRushOrders = async () => {
 export const requestToPlaceOrder = async (cart) => {
   return api.post('/place-order/request', cart);
 };
+
+export const confirmOrder = async (orderId, isSuccess) => {
+  try {
+    const response = await api.post('/place-order/confirm-order', {
+      orderId: orderId,
+      success: isSuccess
+    });
+    return response;
+  } catch (error) {
+    console.error('API Error:', error);
+    throw new Error('Failed to confirm order');
+  }
+};
 // Create separate axios instance for payment APIs
 const paymentApi = axios.create({
   baseURL: 'http://localhost:8080/api/v1/payment',
