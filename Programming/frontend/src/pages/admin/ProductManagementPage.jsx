@@ -6,7 +6,7 @@ import { Add, Edit, Delete, Search, Book, Album, Movie, MusicNote, Image } from 
 import { productService } from '../../services/productService';
 
 const CATEGORY_CONFIG = {
-  BOOK: {
+  Book: {
     label: 'Book', icon: <Book />, fields: [
       { name: 'authors', label: 'Authors', required: true },
       { name: 'coverType', label: 'Cover Type', required: true },
@@ -80,7 +80,7 @@ const ProductManagementPage = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState('create');
-  const [formData, setFormData] = useState({ category: 'BOOK', entryDate: new Date().toISOString().slice(0, 10) });
+  const [formData, setFormData] = useState({ category: 'Book', entryDate: new Date().toISOString().slice(0, 10) });
   const [imageFile, setImageFile] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -144,7 +144,7 @@ const ProductManagementPage = () => {
           }
         });
         if (newFormData.category) {
-          newFormData.category = newFormData.category.toUpperCase();
+          newFormData.category = newFormData.category;
         }
         setFormData(newFormData);
         setSelectedProduct(product);
@@ -154,11 +154,11 @@ const ProductManagementPage = () => {
           message: `Failed to load product details: ${e.message}`,
           severity: 'error'
         });
-        setFormData({ category: product.category?.toUpperCase() || 'BOOK' });
+        setFormData({ category: product.category || 'Book' });
         setSelectedProduct(product);
       }
     } else {
-      setFormData({ category: 'BOOK', entryDate: new Date().toISOString().slice(0, 10) });
+              setFormData({ category: 'Book', entryDate: new Date().toISOString().slice(0, 10) });
       setSelectedProduct(null);
     }
     setDialogOpen(true);
@@ -169,7 +169,7 @@ const ProductManagementPage = () => {
     for (const field of BASE_FIELDS) {
       if (field.required && !formData[field.name]) return `${field.label} is required`;
     }
-    const catFields = CATEGORY_CONFIG[formData.category?.toUpperCase()]?.fields || [];
+    const catFields = CATEGORY_CONFIG[formData.category]?.fields || [];
     for (const field of catFields) {
       if (field.required && !formData[field.name]) return `${field.label} is required`;
     }
@@ -286,7 +286,7 @@ const ProductManagementPage = () => {
           label="Rush Order Supported"
           sx={{ mb: 1 }}
         />
-        {CATEGORY_CONFIG[formData.category?.toUpperCase()]?.fields?.map(field => (
+        {CATEGORY_CONFIG[formData.category]?.fields?.map(field => (
           <TextField
             key={field.name}
             label={field.label}

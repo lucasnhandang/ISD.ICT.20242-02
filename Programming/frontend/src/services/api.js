@@ -3,7 +3,7 @@ import axios from 'axios';
 // Axios instance for API calls
 const api = axios.create({
   baseURL: 'http://localhost:8080/api/v1',
-  timeout: 30000,
+  timeout: 10000, // Giảm timeout xuống 10 giây
   // headers: { 'Content-Type': 'application/json' },
   withCredentials: true // Tạm thời comment để test CORS issue
 });
@@ -250,16 +250,6 @@ export const orderManagementAPI = {
   getPendingOrders: async () => {
     try {
       console.log('🔄 Đang gọi API getPendingOrders...');
-      console.log('📍 URL:', `${api.defaults.baseURL}/product-manager/orders/pending`);
-      
-      // Kiểm tra kết nối backend trước
-      try {
-        const healthCheck = await api.get('/health', { timeout: 5000 });
-        console.log('✅ Health check OK:', healthCheck.status);
-      } catch (healthError) {
-        console.warn('⚠️ Health check failed:', healthError.message);
-        // Vẫn tiếp tục thử gọi API chính
-      }
       
       const response = await api.get('/product-manager/orders/pending');
       console.log('✅ Thành công getPendingOrders:', response.data);

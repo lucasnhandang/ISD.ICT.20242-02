@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Box, Typography, Divider, Paper, Button, CircularProgress, Alert, TextField } from '@mui/material';
+import { Box, Typography, Divider, Paper, Button, CircularProgress, Alert, TextField, Chip, Grid } from '@mui/material';
 import Header from '../components/Header';
 // import RushOrderResults from '../components/RushOrderResults'; // REMOVED
 import { checkRushOrderEligibility, submitRushOrderInfo, saveRushOrders, getProductDetails } from '../services/api';
+import { getDisplayName } from '../utils/provinceUtils';
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('vi-VN', {
@@ -284,12 +285,12 @@ const RushOrderPage = () => {
               <Divider sx={{ mb: 2 }} />
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography>Product Total (excl. VAT):</Typography>
+                <Typography>Product Total (excl. 10% VAT):</Typography>
                 <Typography>{formatPrice(invoice.productPriceExVAT)}</Typography>
               </Box>
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography>Product Total (incl. VAT):</Typography>
+                <Typography>Product Total (incl. 10% VAT):</Typography>
                 <Typography>{formatPrice(invoice.productPriceIncVAT)}</Typography>
               </Box>
 
@@ -365,7 +366,7 @@ const RushOrderPage = () => {
                     {deliveryForm.deliveryAddress}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {deliveryForm.deliveryProvince}
+                    {getDisplayName(deliveryForm.deliveryProvince)}
                   </Typography>
                 </Box>
               </Box>
@@ -401,7 +402,7 @@ const RushOrderPage = () => {
                     }}
                   />
                   <Typography variant="caption" color="text.secondary">
-                    Delivery time must be at least 2 hours from now
+                    Delivery time must be at most 2 hours from now.
                   </Typography>
                 </Box>
 

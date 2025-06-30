@@ -11,22 +11,7 @@ import {
   Divider
 } from '@mui/material';
 import { submitDeliveryForm, checkRushOrderEligibility } from '../services/api';
-
-// Latest province/city list (updated according to 2024 merger)
-const provinces = [
-  'Hanoi', 'Hochiminh', 'Hai Phong', 'Da Nang', 'Can Tho',
-  'Binh Duong', 'Dong Nai', 'Hai Duong', 'Thanh Hoa', 'Nghe An',
-  'Thua Thien Hue', 'Quang Ninh', 'Bac Ninh', 'Quang Nam', 'Lam Dong',
-  'Nam Dinh', 'Thai Binh', 'Phu Tho', 'Bac Giang', 'Hung Yen',
-  'Ha Nam', 'Vinh Phuc', 'Ninh Binh', 'Quang Binh', 'Quang Tri',
-  'Binh Dinh', 'Binh Thuan', 'Khanh Hoa', 'Ba Ria - Vung Tau', 'Long An',
-  'Kien Giang', 'Dak Lak', 'Ca Mau', 'Binh Phuoc', 'Bac Kan',
-  'Lao Cai', 'Lang Son', 'Tuyen Quang', 'Yen Bai', 'Dien Bien',
-  'Son La', 'Hoa Binh', 'Lai Chau', 'Ha Giang', 'Cao Bang',
-  'Kon Tum', 'Gia Lai', 'Dak Nong', 'Soc Trang', 'Tra Vinh',
-  'Ben Tre', 'Vinh Long', 'An Giang', 'Tien Giang', 'Hau Giang',
-  'Ninh Thuan', 'Phu Yen', 'Quang Ngai', 'Bac Lieu'
-];
+import { provinces, getBackendValue, getDisplayName } from '../utils/provinceUtils';
 
 const DeliveryForm = ({ onClose, onSuccess, initialValues, disabled }) => {
   const [form, setForm] = useState({
@@ -48,7 +33,7 @@ const DeliveryForm = ({ onClose, onSuccess, initialValues, disabled }) => {
         phoneNumber: initialValues.phoneNumber || '',
         email: initialValues.email || '',
         deliveryAddress: initialValues.deliveryAddress || '',
-        deliveryProvince: initialValues.deliveryProvince || '',
+        deliveryProvince: getDisplayName(initialValues.deliveryProvince) || '',
         isRushOrder: initialValues.isRushOrder || false
       });
     }
@@ -63,8 +48,13 @@ const DeliveryForm = ({ onClose, onSuccess, initialValues, disabled }) => {
     setLoading(true);
     setError('');
     try {
-      await submitDeliveryForm(form);
-      onSuccess(form);
+      // Convert display name to backend value before sending
+      const formDataForBackend = {
+        ...form,
+        deliveryProvince: getBackendValue(form.deliveryProvince)
+      };
+      await submitDeliveryForm(formDataForBackend);
+      onSuccess(formDataForBackend);
     } catch (err) {
       setError(err.response?.data?.message || 'An error occurred, please try again.');
     } finally {

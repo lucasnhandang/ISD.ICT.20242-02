@@ -1,54 +1,90 @@
 package com.hustict.aims.utils.mapper.product;
 
-import com.hustict.aims.dto.product.DVDDetailDTO;
+import com.hustict.aims.dto.product.DVDDTO;
+import com.hustict.aims.dto.product.ProductDTO;
 import com.hustict.aims.model.product.DVD;
+import com.hustict.aims.model.product.Product;
 import com.hustict.aims.utils.DateUtils;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 @Component
-public class DVDMapper extends ProductMapper<DVD, DVDDetailDTO> {
-
+public class DVDMapper extends BaseProductMapper {
     @Override
-    protected DVD createProduct() {
+    protected ProductDTO createDTO() {
+        return new DVDDTO();
+    }
+    
+    @Override
+    protected Product createEntity() {
         return new DVD();
     }
 
     @Override
-    protected DVDDetailDTO createDetailDTO() {
-        return new DVDDetailDTO();
+    protected void mapSpecificEntityToDto(Product entity, ProductDTO dto) {
+        if (!(entity instanceof DVD) || !(dto instanceof DVDDTO)) {
+            return; // Skip if types don't match
+        }
+        
+        DVD dvd = (DVD) entity;
+        DVDDTO dvdDto = (DVDDTO) dto;
+        
+        dvdDto.setDiscType(dvd.getDiscType());
+        dvdDto.setDirector(dvd.getDirector());
+        dvdDto.setRuntime(dvd.getRuntime());
+        dvdDto.setStudio(dvd.getStudio());
+        dvdDto.setLanguage(dvd.getLanguage());
+        dvdDto.setSubtitles(dvd.getSubtitles());
+        dvdDto.setGenre(dvd.getGenre());
+        dvdDto.setReleaseDate(dvd.getReleaseDate());
     }
 
     @Override
-    protected void mapSpecFields(DVD dvd, Map<String, Object> data) {
-        dvd.setDiscType(getString(data, "discType"));
-        dvd.setDirector(getString(data, "director"));
-        dvd.setRuntime(parseInt(data.get("runtime")));
-        dvd.setStudio(getString(data, "studio"));
-        dvd.setLanguage(getString(data, "language"));
-        dvd.setSubtitles(getString(data, "subtitles"));
-        dvd.setGenre(getString(data, "genre"));
-        dvd.setReleaseDate(DateUtils.parseDateNullable(data.get("releaseDate"), "releaseDate"));
+    protected void mapSpecificDtoToEntity(ProductDTO dto, Product entity) {
+        if (!(dto instanceof DVDDTO) || !(entity instanceof DVD)) {
+            return; // Skip if types don't match
+        }
+        
+        DVDDTO dvdDto = (DVDDTO) dto;
+        DVD dvd = (DVD) entity;
+        
+        dvd.setDiscType(dvdDto.getDiscType());
+        dvd.setDirector(dvdDto.getDirector());
+        dvd.setRuntime(dvdDto.getRuntime());
+        dvd.setStudio(dvdDto.getStudio());
+        dvd.setLanguage(dvdDto.getLanguage());
+        dvd.setSubtitles(dvdDto.getSubtitles());
+        dvd.setGenre(dvdDto.getGenre());
+        dvd.setReleaseDate(dvdDto.getReleaseDate());
     }
 
     @Override
-    protected void updateSpecFields(DVD dvd, Map<String, Object> data) {
-        if (data.containsKey("discType"))
-            dvd.setDiscType(getString(data, "discType"));
-        if (data.containsKey("director"))
-            dvd.setDirector(getString(data, "director"));
-        if (data.containsKey("runtime"))
-            dvd.setRuntime(parseInt(data.get("runtime")));
-        if (data.containsKey("studio"))
-            dvd.setStudio(getString(data, "studio"));
-        if (data.containsKey("language"))
-            dvd.setLanguage(getString(data, "language"));
-        if (data.containsKey("subtitles"))
-            dvd.setSubtitles(getString(data, "subtitles"));
-        if (data.containsKey("genre"))
-            dvd.setGenre(getString(data, "genre"));
-        if (data.containsKey("releaseDate"))
-            dvd.setReleaseDate(DateUtils.parseDateNullable(data.get("releaseDate"), "releaseDate"));
+    protected void mapSpecificRequestToDto(Map<String, Object> specific, ProductDTO dto) {
+        if (specific == null || !(dto instanceof DVDDTO)) return;
+        
+        DVDDTO dvdDto = (DVDDTO) dto;
+        dvdDto.setDiscType((String) specific.get("discType"));
+        dvdDto.setDirector((String) specific.get("director"));
+        dvdDto.setRuntime(specific.get("runtime") != null ? (Integer) specific.get("runtime") : 0);
+        dvdDto.setStudio((String) specific.get("studio"));
+        dvdDto.setLanguage((String) specific.get("language"));
+        dvdDto.setSubtitles((String) specific.get("subtitles"));
+        dvdDto.setGenre((String) specific.get("genre"));
+        dvdDto.setReleaseDate(DateUtils.parseDateNullable(specific.get("releaseDate"), "releaseDate"));
+    }
+
+    // Convenience methods for type-safe usage
+    public DVDDTO toDVDDTO(DVD dvd) {
+        return (DVDDTO) toDTO(dvd);
+    }
+    
+    public DVD toDVDEntity(DVDDTO dvdDto) {
+        return (DVD) toEntity(dvdDto);
+    }
+    
+    public void updateEntityFromDTO(DVDDTO dvdDto, DVD dvd) {
+        updateEntityFromDTO((ProductDTO) dvdDto, (Product) dvd);
     }
 }

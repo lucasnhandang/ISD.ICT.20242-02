@@ -40,4 +40,13 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     void updateRejectRefundedOrderById(@Param("id") Long id);
 
     List<Order> findByOrderStatus(OrderStatus status);
+    
+    @Query("SELECT DISTINCT o FROM Order o " +
+           "LEFT JOIN FETCH o.orderItems oi " +
+           "LEFT JOIN FETCH oi.product p " +
+           "LEFT JOIN FETCH o.deliveryInfo d " +
+           "LEFT JOIN FETCH o.invoice i " +
+           "WHERE o.orderStatus = :status " +
+           "ORDER BY o.orderDate DESC")
+    List<Order> findByOrderStatusWithDetails(@Param("status") OrderStatus status);
 }

@@ -55,7 +55,8 @@ public class OrderServiceImpl implements OrderService {
     public List<OrderInformationDTO> getPendingOrders() {
         try {
             System.out.println("Bắt đầu lấy danh sách pending orders...");
-            List<Order> pendingOrders = orderRepository.findByOrderStatus(OrderStatus.PENDING);
+            // Sử dụng method mới với JOIN FETCH để tránh N+1 query
+            List<Order> pendingOrders = orderRepository.findByOrderStatusWithDetails(OrderStatus.PENDING);
             System.out.println("Tìm thấy " + pendingOrders.size() + " pending orders");
             
             List<OrderInformationDTO> result = pendingOrders.stream()
