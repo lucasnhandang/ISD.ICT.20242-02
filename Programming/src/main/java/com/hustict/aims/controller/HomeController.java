@@ -51,9 +51,4 @@ public class HomeController {
         PagedResponseDTO<ProductSummaryDTO> products = homeService.getProductsByCategory(category, sortBy, sortDirection, page, size);
         return ResponseEntity.ok(products);
     }
-
-    @GetMapping("/health")
-    public ResponseEntity<String> healthCheck() {
-        return ResponseEntity.ok("OK");
-    }
 }

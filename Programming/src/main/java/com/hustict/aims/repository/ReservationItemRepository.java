@@ -10,13 +10,11 @@ import com.hustict.aims.model.reservation.ReservationItem;
 @Repository
 public interface ReservationItemRepository extends JpaRepository<ReservationItem, Long> {
 
-    @Query("""
-        SELECT COALESCE(SUM(ri.quantity), 0)
-        FROM ReservationItem ri
-        JOIN ri.reservation r
-        WHERE ri.productId = :productId
-          AND r.status = 'ACTIVE'
-    """)
+    @Query("SELECT COALESCE(SUM(ri.quantity), 0) " +
+            "FROM ReservationItem ri " +
+            "JOIN ri.reservation r " +
+            "WHERE ri.productId = :productId " +
+            "AND r.status = 'ACTIVE'")
     int getReservedQuantityByProductId(@Param("productId") Long productId);
 
   
