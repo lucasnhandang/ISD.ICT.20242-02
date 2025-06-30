@@ -16,16 +16,7 @@ import org.springframework.stereotype.Service;
 public class PaymentHandlerService {
 
     @Autowired
-    private CartCleanupService cartCleanupService;
-
-    @Autowired
-    private SaveOrderService saveOrderService;
-
-    @Autowired
     private EmailSenderFactory emailSenderFactory;
-
-    @Autowired
-    private ReservationService reservationService;
 
     @Autowired
     private SavePaymentTransaction savePaymentTransaction;

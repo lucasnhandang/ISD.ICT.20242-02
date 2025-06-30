@@ -48,6 +48,7 @@ public class OrderPMController {
         orderService.rejectOrder(id);
         orderService.prepareOrderSessionForEmail(id, session);
         //emailSenderFactory.process("rejectOrder", session);
+        
         System.out.println("Refund order "+ id);
         refundStrategySelector.refund(id);
         
