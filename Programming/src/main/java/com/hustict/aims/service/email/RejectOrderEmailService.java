@@ -11,7 +11,7 @@ import java.text.DecimalFormat;
 import org.springframework.stereotype.Service;
 
 
-@Service("refundOrder")
+@Service("rejectOrder")
 public class RejectOrderEmailService extends SendEmailServiceImpl<RejectOrderRequest> {
 
     @Override

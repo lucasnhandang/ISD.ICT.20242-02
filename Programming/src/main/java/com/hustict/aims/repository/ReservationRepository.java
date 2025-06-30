@@ -10,4 +10,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findBySessionIdAndStatus(String sessionId, Reservation.Status status);
     void deleteByStatusAndCreatedAtBefore(Reservation.Status status, LocalDateTime time);
     void deleteByStatusAndSessionId(Reservation.Status status, String sessionId);
+    List<Reservation> findByStatusAndCreatedAtBefore(Reservation.Status status, LocalDateTime time);
+
 }
