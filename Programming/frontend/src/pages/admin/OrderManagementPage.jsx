@@ -49,8 +49,8 @@ const Row = ({ order, onApprove, onReject }) => {
         <TableCell>{order.orderDate}</TableCell>
         <TableCell>
           <Chip 
-            label={order.isRushOrder ? "Rush" : "Normal"} 
-            color={order.isRushOrder ? "error" : "primary"} 
+            label={order.rushOrder ? "Rush" : "Normal"} 
+            color={order.rushOrder ? "error" : "primary"} 
             size="small" 
           />
         </TableCell>
@@ -106,7 +106,7 @@ const Row = ({ order, onApprove, onReject }) => {
                   ))}
                 </TableBody>
               </Table>
-              {order.isRushOrder && order.rushDeliveryTime && (
+              {order.rushOrder && order.rushDeliveryTime && (
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
                   Rush Delivery Time: {order.rushDeliveryTime}
                 </Typography>
@@ -126,95 +126,45 @@ const OrderManagementPage = () => {
   const [confirmDialog, setConfirmDialog] = useState({ open: false, orderId: null, action: null });
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [page, setPage] = useState(0);
+  const [totalOrders, setTotalOrders] = useState(0);
   const [rowsPerPage] = useState(30);
 
-  const fetchPendingOrders = async (retryCount = 0) => {
+  const fetchPendingOrders = async (pageNumber = 0, signal) => {
     try {
       setLoading(true);
       setError(null);
       
-      console.log(`🔄 [Attempt ${retryCount + 1}] Bắt đầu tải pending orders...`);
-      console.log('🌐 Frontend URL:', window.location.origin);
-      console.log('🔗 Backend URL:', 'http://localhost:8080/api/v1');
+      console.log(`🔄 [Page ${pageNumber}] Bắt đầu tải pending orders...`);
       
-      // Kiểm tra kết nối backend trước
-      const connectionStatus = await checkBackendConnection();
-      console.log('🔍 Backend connection status:', connectionStatus);
+      const response = await orderManagementAPI.getPendingOrders(pageNumber, rowsPerPage, signal);
       
-      if (!connectionStatus.connected) {
-        throw new Error(`Backend không accessible: ${connectionStatus.message}`);
-      }
-      
-      console.log('✅ Backend connection OK, đang tải pending orders...');
-      const data = await orderManagementAPI.getPendingOrders();
-      
-      console.log('📦 Raw data received:', data);
-      console.log('📊 Data type:', typeof data, 'Is Array:', Array.isArray(data));
-      
-      if (!Array.isArray(data)) {
-        console.warn('⚠️ Data không phải array, converting...', data);
-        setPendingOrders([]);
-      } else {
-        setPendingOrders(data);
-        console.log(`✅ Đã set thành công ${data.length} pending orders`);
-      }
-      
-      setError(null);
-      
-    } catch (err) {
-      console.error(`❌ [Attempt ${retryCount + 1}] Lỗi:`, err);
-      
-      // Detailed error analysis
-      console.log('🔍 Error analysis:', {
-        name: err.name,
-        message: err.message,
-        stack: err.stack,
-        cause: err.cause
-      });
-      
-      // Retry logic - thử lại tối đa 2 lần
-      if (retryCount < 2) {
-        console.log(`🔄 Đang thử lại lần ${retryCount + 2} sau 3 giây...`);
-        setTimeout(() => {
-          fetchPendingOrders(retryCount + 1);
-        }, 3000);
+      // Kiểm tra nếu request đã bị hủy
+      if (signal?.aborted) {
         return;
       }
       
-      // Detailed error message for user
-      let errorMessage = 'Không thể tải danh sách đơn hàng chờ duyệt.\n\n';
+      setPendingOrders(response.orders);
+      setTotalOrders(response.totalOrders);
+      setError(null);
       
-      if (err.message.includes('Backend không accessible')) {
-        errorMessage += '🔥 BACKEND SERVER KHÔNG CHẠY!\n\n';
-        errorMessage += 'Các bước khắc phục:\n';
-        errorMessage += '1. Mở terminal/cmd\n';
-        errorMessage += '2. Chạy: mvn spring-boot:run\n';
-        errorMessage += '3. Đợi server start xong\n';
-        errorMessage += '4. Thử lại trang này\n\n';
-        errorMessage += 'Backend URL: http://localhost:8080';
-      } else if (err.message.includes('Network Error') || err.message.includes('ERR_NETWORK')) {
-        errorMessage += 'Vấn đề kết nối mạng:\n';
-        errorMessage += '• Kiểm tra backend server (port 8080)\n';
-        errorMessage += '• Kiểm tra firewall/antivirus\n';
-        errorMessage += '• Thử restart backend server';
-      } else if (err.message.includes('timeout')) {
-        errorMessage += 'Kết nối quá chậm:\n';
-        errorMessage += '• Server có thể đang overload\n';
-        errorMessage += '• Kiểm tra database connection\n';
-        errorMessage += '• Thử restart server';
-      } else {
-        errorMessage += `Lỗi: ${err.message}`;
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        console.log('🚫 Request bị hủy do component unmount hoặc re-render');
+        return;
       }
-      
-      setError(errorMessage);
+
+      console.error('❌ Lỗi:', err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPendingOrders();
-  }, []);
+    const abortController = new AbortController();
+    fetchPendingOrders(page, abortController.signal);
+    return () => abortController.abort();
+  }, [page]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -284,12 +234,6 @@ const OrderManagementPage = () => {
       </Box>
     );
   }
-
-  // Calculate the orders to display on the current page
-  const displayedOrders = pendingOrders.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  );
 
   return (
     <Box sx={{ p: 3 }}>
@@ -391,7 +335,7 @@ const OrderManagementPage = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {displayedOrders.map((order) => (
+              {pendingOrders.map((order) => (
                 <Row
                   key={order.orderId}
                   order={order}
@@ -399,7 +343,7 @@ const OrderManagementPage = () => {
                   onReject={handleReject}
                 />
               ))}
-              {displayedOrders.length === 0 && (
+              {pendingOrders.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} align="center">
                     <Typography variant="body2" color="text.secondary">
@@ -413,7 +357,7 @@ const OrderManagementPage = () => {
         </TableContainer>
         <TablePagination
           component="div"
-          count={pendingOrders.length}
+          count={totalOrders}
           page={page}
           onPageChange={handleChangePage}
           rowsPerPage={rowsPerPage}

@@ -7,7 +7,8 @@ import java.util.List;
 public interface OrderService {
     void approveOrder(Long orderId);
     void rejectOrder(Long orderId);
-    List<OrderInformationDTO> getPendingOrders();
+    List<OrderInformationDTO> getPendingOrders(int page, int size);
+    long getTotalPendingOrders();
     void prepareOrderSessionForEmail(Long orderId, HttpSession session);
     void cancelOrder(Long orderId);
     OrderInformationDTO getOrderDetails(Long orderId);

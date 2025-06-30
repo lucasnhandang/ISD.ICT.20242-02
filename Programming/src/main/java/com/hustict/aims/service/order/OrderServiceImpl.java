@@ -52,11 +52,12 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<OrderInformationDTO> getPendingOrders() {
+    public List<OrderInformationDTO> getPendingOrders(int page, int size) {
         try {
-            System.out.println("Bắt đầu lấy danh sách pending orders...");
-            List<Order> pendingOrders = orderRepository.findByOrderStatus(OrderStatus.PENDING);
-            System.out.println("Tìm thấy " + pendingOrders.size() + " pending orders");
+            System.out.println("Bắt đầu lấy danh sách pending orders trang " + page + "...");
+            org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+            List<Order> pendingOrders = orderRepository.findByOrderStatus(OrderStatus.PENDING, pageable);
+            System.out.println("Tìm thấy " + pendingOrders.size() + " pending orders cho trang " + page);
             
             List<OrderInformationDTO> result = pendingOrders.stream()
                     .map(orderMapper::toDTO)
@@ -69,6 +70,12 @@ public class OrderServiceImpl implements OrderService {
             e.printStackTrace();
             throw new OrderOperationException("Không thể lấy danh sách đơn hàng chờ duyệt: " + e.getMessage());
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long getTotalPendingOrders() {
+        return orderRepository.countByOrderStatus(OrderStatus.PENDING);
     }
 
     @Override

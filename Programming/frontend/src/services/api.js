@@ -247,61 +247,32 @@ export const validateToken = async () => {
 
 // Order Management APIs
 export const orderManagementAPI = {
-  getPendingOrders: async () => {
+  getPendingOrders: async (page = 0, size = 30, signal) => {
     try {
       console.log('🔄 Đang gọi API getPendingOrders...');
-      console.log('📍 URL:', `${api.defaults.baseURL}/product-manager/orders/pending`);
+      console.log('📍 URL:', `${api.defaults.baseURL}/product-manager/orders/pending?page=${page}&size=${size}`);
       
-      // Kiểm tra kết nối backend trước
-      try {
-        const healthCheck = await api.get('/health', { timeout: 5000 });
-        console.log('✅ Health check OK:', healthCheck.status);
-      } catch (healthError) {
-        console.warn('⚠️ Health check failed:', healthError.message);
-        // Vẫn tiếp tục thử gọi API chính
-      }
-      
-      const response = await api.get('/product-manager/orders/pending');
+      const response = await api.get(`/product-manager/orders/pending?page=${page}&size=${size}`, { signal });
       console.log('✅ Thành công getPendingOrders:', response.data);
       
       // Validate response data
-      if (!Array.isArray(response.data)) {
-        console.warn('⚠️ Response data không phải array:', response.data);
-        return []; // Return empty array thay vì throw error
+      if (!response.data || !response.data.orders) {
+        console.warn('⚠️ Response data không hợp lệ:', response.data);
+        return {
+          orders: [],
+          totalOrders: 0,
+          currentPage: page
+        };
       }
       
       return response.data;
     } catch (error) {
-      console.error('❌ Lỗi getPendingOrders:', error);
-      console.error('📝 Chi tiết lỗi:', {
-        message: error.message,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        config: {
-          url: error.config?.url,
-          method: error.config?.method,
-          headers: error.config?.headers,
-          baseURL: error.config?.baseURL
-        }
-      });
-      
-      // Detailed error messages based on error type
-      if (error.code === 'ERR_NETWORK' || error.message.includes('Network Error')) {
-        throw new Error(`Không thể kết nối đến server Backend.\n\nVui lòng kiểm tra:\n• Backend server có đang chạy không (port 8080)?\n• Kết nối mạng\n• Firewall/Antivirus có block không?`);
-      } else if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
-        throw new Error('Kết nối quá chậm hoặc timeout. Vui lòng thử lại.');
-      } else if (error.response?.status === 401) {
-        throw new Error('Bạn cần đăng nhập để xem thông tin này.');
-      } else if (error.response?.status === 403) {
-        throw new Error('Bạn không có quyền truy cập chức năng này.');
-      } else if (error.response?.status === 404) {
-        throw new Error('Không tìm thấy API endpoint. Kiểm tra URL: /api/v1/product-manager/orders/pending');
-      } else if (error.response?.status >= 500) {
-        throw new Error(`Lỗi server (${error.response.status}): ${error.response?.data?.message || 'Internal Server Error'}`);
+      if (error.name === 'AbortError' || error.code === 'ERR_CANCELED') {
+        throw error;
       }
       
-      throw new Error(error.response?.data?.message || `Không thể tải danh sách đơn hàng chờ duyệt: ${error.message}`);
+      console.error('❌ Lỗi getPendingOrders:', error);
+      throw error;
     }
   },
 
