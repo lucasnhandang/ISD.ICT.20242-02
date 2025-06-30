@@ -401,7 +401,7 @@ const RushOrderPage = () => {
                     }}
                   />
                   <Typography variant="caption" color="text.secondary">
-                    Delivery time must be at least 2 hours from now
+                    Delivery time must be within 2 hours from now
                   </Typography>
                 </Box>
 

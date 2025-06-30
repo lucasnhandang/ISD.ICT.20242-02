@@ -156,14 +156,14 @@ const Header = ({ onSearch, onSignInClick, currentUser, onLogout, showLoginButto
               <ShoppingCartIcon />
             </Badge>
           </IconButton>
-          <IconButton
+          {/* <IconButton
             color="primary"
             onClick={() => setOpenInvoiceList(true)}
             sx={{ mr: 2 }}
           >
             <ReceiptLongIcon />
           </IconButton>
-          <InvoiceList open={openInvoiceList} onClose={() => setOpenInvoiceList(false)} invoiceList={invoiceList} />
+          <InvoiceList open={openInvoiceList} onClose={() => setOpenInvoiceList(false)} invoiceList={invoiceList} /> */}
 
           {currentUser ? (
             <>
