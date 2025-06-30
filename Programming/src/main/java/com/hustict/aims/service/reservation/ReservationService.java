@@ -64,8 +64,6 @@ public class ReservationService {
         
         reservationRepository.save(reservation);
 
-        // // xóa
-        // System.out.println("Reservation created for cart: ");
     }
             // sửa
 
@@ -127,6 +125,12 @@ public class ReservationService {
             throw new IllegalStateException("Reservation đã bị hủy và không thể thay đổi.");
         }
         List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderId);
+        if (orderItems.isEmpty()) {
+            reservation.setStatus(Status.CONFIRMED);
+            reservationRepository.save(reservation);
+            System.out.println("Không có OrderItem nào. Reservation đã được xác nhận.");
+            return;
+        }
         List<ReservationItem> reservationItems = reservationItemRepository.findByReservationId(reservation.getId());
 
         Map<Long, ReservationItem> reservationItemMap = reservationItems.stream()

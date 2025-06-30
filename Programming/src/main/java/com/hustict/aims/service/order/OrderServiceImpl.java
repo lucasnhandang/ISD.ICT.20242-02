@@ -53,10 +53,22 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(readOnly = true)
     public List<OrderInformationDTO> getPendingOrders() {
-        List<Order> pendingOrders = orderRepository.findByOrderStatus(OrderStatus.PENDING);
-        return pendingOrders.stream()
-                .map(orderMapper::toDTO)
-                .collect(Collectors.toList());
+        try {
+            System.out.println("Bắt đầu lấy danh sách pending orders...");
+            List<Order> pendingOrders = orderRepository.findByOrderStatus(OrderStatus.PENDING);
+            System.out.println("Tìm thấy " + pendingOrders.size() + " pending orders");
+            
+            List<OrderInformationDTO> result = pendingOrders.stream()
+                    .map(orderMapper::toDTO)
+                    .collect(Collectors.toList());
+                    
+            System.out.println("Đã convert thành công " + result.size() + " DTOs");
+            return result;
+        } catch (Exception e) {
+            System.err.println("Lỗi khi lấy pending orders: " + e.getMessage());
+            e.printStackTrace();
+            throw new OrderOperationException("Không thể lấy danh sách đơn hàng chờ duyệt: " + e.getMessage());
+        }
     }
 
     @Override
