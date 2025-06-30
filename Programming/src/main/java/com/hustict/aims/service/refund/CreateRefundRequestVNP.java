@@ -1,0 +1,150 @@
+package com.hustict.aims.service.refund;
+
+import com.hustict.aims.dto.refund.RefundRequest;
+import com.hustict.aims.model.invoice.Invoice;
+import com.hustict.aims.model.order.Order;
+import com.hustict.aims.model.payment.PaymentTransaction;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+
+import java.security.MessageDigest;
+import java.nio.charset.StandardCharsets;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.util.Formatter;
+
+@Service
+public class CreateRefundRequestVNP {
+    @Value("${vnpay.tmnCode}")
+    private String vnpTmnCode; 
+
+    @Value("${vnpay.hashSecret}")
+    private String secretKey;  // Lấy từ file cấu hình
+
+    public RefundRequest CreateRefundRequest(Order order, String ipAddr, String createBy) {
+        RefundRequest refundRequest = new RefundRequest();
+
+        Invoice invoice = order.getInvoice();
+        PaymentTransaction paymentTransaction = invoice.getPaymentTransaction();
+
+        String paymentUrl = paymentTransaction.getPaymentUrl();
+        Map<String, String> queryParams = extractQueryParams(paymentUrl);
+
+        String txnRef = queryParams.get("vnp_TxnRef");  
+        String transactionNo = queryParams.get("vnp_TransactionNo");  
+        int amount = Integer.parseInt(queryParams.get("vnp_Amount")); 
+        String transactionDate = queryParams.get("vnp_PayDate"); 
+
+        String orderInfo = "Hoàn tiền cho đơn hàng " + order.getId();
+
+        refundRequest.setRequestId(generateUniqueRequestId());  // Tạo requestId duy nhất
+        refundRequest.setVersion("2.1.0");
+        refundRequest.setCommand("refund");
+        refundRequest.setTmnCode(vnpTmnCode);  
+        refundRequest.setTransactionType("02");  
+        refundRequest.setTxnRef(txnRef); 
+        refundRequest.setAmount(amount);  
+        refundRequest.setOrderInfo(orderInfo);  
+        refundRequest.setTransactionNo(transactionNo);
+        refundRequest.setTransactionDate(transactionDate);
+        refundRequest.setCreateDate(java.time.LocalDateTime.now().toString());
+        refundRequest.setIpAddr(ipAddr);  
+        refundRequest.setCreateBy(createBy);
+        String secureHash = generateSecureHash(secretKey, refundRequest);
+        refundRequest.setSecureHash(secureHash);
+        
+        System.out.println("VNPay announce: Create request done!");
+
+        System.out.println("Invoice: " + invoice);
+        System.out.println("PaymentTransaction: " + paymentTransaction);
+        System.out.println("PaymentUrl: " + paymentUrl);
+        System.out.println("QueryParams: " + queryParams);
+        System.out.println("txnRef: " + queryParams.get("vnp_TxnRef"));
+        System.out.println("transactionNo: " + queryParams.get("vnp_TransactionNo"));
+        System.out.println("amount: " + queryParams.get("vnp_Amount"));
+        System.out.println("vnpTmnCode: " + vnpTmnCode);
+        System.out.println("secretKey: " + secretKey);
+        System.out.println("ipAddr: " + ipAddr);
+        System.out.println("createBy: " + createBy);
+
+        return refundRequest;
+    }
+
+    private Map<String, String> extractQueryParams(String paymentUrl) {
+        Map<String, String> params = new HashMap<>();
+        try {
+            // Nếu paymentUrl chứa dấu ?, chỉ lấy phần sau
+            String query = paymentUrl.contains("?") ? paymentUrl.split("\\?", 2)[1] : paymentUrl;
+
+            String[] pairs = query.split("&");
+            for (String pair : pairs) {
+                String[] keyValue = pair.split("=", 2); // đảm bảo không lỗi nếu có dấu '=' trong value
+                if (keyValue.length == 2) {
+                    params.put(keyValue[0], keyValue[1]);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error extracting parameters: " + e.getMessage());
+        }
+        return params;
+    }
+
+    public static String generateSecureHash(String secretKey, RefundRequest refundRequest) {
+        try {
+            String data = refundRequest.getRequestId() + "|" + 
+                        refundRequest.getVersion() + "|" + 
+                        refundRequest.getCommand() + "|" + 
+                        refundRequest.getTmnCode() + "|" + 
+                        refundRequest.getTransactionType() + "|" + 
+                        refundRequest.getTxnRef() + "|" + 
+                        refundRequest.getAmount() + "|" + 
+                        refundRequest.getTransactionNo() + "|" + 
+                        refundRequest.getTransactionDate() + "|" + 
+                        refundRequest.getCreateBy() + "|" + 
+                        refundRequest.getCreateDate() + "|" + 
+                        refundRequest.getIpAddr() + "|" + 
+                        refundRequest.getOrderInfo();
+
+            // Kết hợp secretKey + data
+            String input = secretKey + data;
+
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
+
+            // Chuyển byte thành hex string
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+
+            return hexString.toString();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error generating secure hash", e);
+        }
+    }
+
+
+    // Hàm chuyển đổi byte[] thành chuỗi hex
+    private static String bytesToHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        try (Formatter formatter = new Formatter(sb)) {
+            for (byte b : bytes) {
+                formatter.format("%02x", b);
+            }
+        }
+        return sb.toString();
+    }
+
+    private String generateUniqueRequestId() {
+        return String.valueOf(System.currentTimeMillis());  
+    }
+}   
