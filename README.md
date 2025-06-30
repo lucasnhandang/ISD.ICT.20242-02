@@ -64,6 +64,8 @@ ISD.ICT.20242-02/
 ## How to run AIMS?
 This project is a **Web Application** that combines **Spring Boot (Java)** for backend and **React (JavaScript)** for frontend.
 
+**Link to our group demo: https://drive.google.com/drive/folders/1VTaBhrfpIMhLZh_UGWvEi6vTW4rjtKHq?usp=sharing**
+
 ### Tech Stack
 - **Backend**: Java Spring Boot
 - **Frontend**: React
