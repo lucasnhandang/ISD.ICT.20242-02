@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/v1/product-manager/orders")
@@ -34,8 +36,23 @@ public class OrderPMController {
     }
 
     @GetMapping("/pending")
-    public ResponseEntity<List<OrderInformationDTO>> getPendingOrders() {
-        return ResponseEntity.ok(orderService.getPendingOrders());
+    public ResponseEntity<Map<String, Object>> getPendingOrders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "30") int size) {
+        try {
+            List<OrderInformationDTO> orders = orderService.getPendingOrders(page, size);
+            long totalOrders = orderService.getTotalPendingOrders();
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("orders", orders);
+            response.put("totalOrders", totalOrders);
+            response.put("currentPage", page);
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     @PutMapping("/{id}/approve")
