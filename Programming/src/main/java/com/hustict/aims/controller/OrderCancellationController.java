@@ -54,11 +54,11 @@ public class OrderCancellationController {
             String system = (String) session.getAttribute("system");
             if (system != null) {
                 paymentSystem.processRefund(id, system);
-                OrderDTO order = orderInfoService.getOrderDTOByOrderId(id);
-                emailSenderFactory.process("cancelOrder", order);
-
+                
             }
-            
+            OrderDTO order = orderInfoService.getOrderDTOByOrderId(id);
+            emailSenderFactory.process("cancelOrder", order);
+
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             e.printStackTrace();

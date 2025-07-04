@@ -3,7 +3,6 @@ package com.hustict.aims.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -12,24 +11,21 @@ import jakarta.servlet.http.HttpSession;
 
 import com.hustict.aims.dto.deliveryForm.DeliveryFormDTO;
 import com.hustict.aims.dto.invoice.InvoiceDTO;
-import com.hustict.aims.dto.order.OrderDTO;
 import com.hustict.aims.dto.payment.PaymentTransactionDTO;
 import com.hustict.aims.dto.payment.PlaceOrderRequestDTO;
-import com.hustict.aims.dto.cart.CartItemRequestDTO;
 import com.hustict.aims.dto.cart.CartRequestDTO;
 import com.hustict.aims.service.payment.SavePaymentTransaction;
 import com.hustict.aims.service.placeOrder.DeliveryFormValidator;
-import com.hustict.aims.service.placeOrder.HandleRequestService;
 import com.hustict.aims.service.placeOrder.PaymentHandlerService;
 import com.hustict.aims.service.placeOrder.NormalOrderService;
-import com.hustict.aims.service.placeOrder.ProductUpdateService;
 
 import com.hustict.aims.service.placeOrder.SaveTempOrder;
-import com.hustict.aims.service.product.ProductService;
+import com.hustict.aims.service.placeOrder.request.HandleRequestService;
 import com.hustict.aims.service.placeOrder.CartCleanupService;
 import com.hustict.aims.dto.order.ConfirmOrderRequestDTO;
 
 import com.hustict.aims.service.reservation.ReservationService;
+import com.hustict.aims.service.session.SessionManagementServiceImpl;
 import com.hustict.aims.service.sessionValidator.SessionValidatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,12 +66,14 @@ public class PlaceOrderController {
     @Autowired
     private CartCleanupService cartCleanupService;
 
- 
+    @Autowired
+    private SessionManagementServiceImpl sessionManagementService;
+
    
    @PostMapping("/request")
     public ResponseEntity<String> requestToPlaceOrder(@RequestBody CartRequestDTO cart, HttpSession session) {
-        handleRequestService.requestToPlaceOrder(cart,session.getId());
-        session.setAttribute("cartRequested", cart);
+        handleRequestService.requestToPlaceOrder(cart,session.getId()); // Tight coupling
+        sessionManagementService.saveCart(session, cart);
         return ResponseEntity.ok("Order request successfully submitted");
     }
 

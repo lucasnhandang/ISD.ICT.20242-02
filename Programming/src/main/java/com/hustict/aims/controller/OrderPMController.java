@@ -73,7 +73,6 @@ public class OrderPMController {
         emailSenderFactory.process("rejectOrder", order);
         System.out.println("Refund order "+ id);
         refundStrategySelector.refund(id);
-        
         return ResponseEntity.ok().build();
     }
 
