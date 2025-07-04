@@ -13,13 +13,12 @@ import com.hustict.aims.dto.deliveryForm.DeliveryFormDTO;
 import com.hustict.aims.dto.invoice.InvoiceDTO;
 import com.hustict.aims.dto.payment.PaymentTransactionDTO;
 import com.hustict.aims.dto.payment.PlaceOrderRequestDTO;
+import com.hustict.aims.dto.NormalOrderResult;
 import com.hustict.aims.dto.cart.CartRequestDTO;
 import com.hustict.aims.service.payment.SavePaymentTransaction;
 import com.hustict.aims.service.placeOrder.DeliveryFormValidator;
 import com.hustict.aims.service.placeOrder.PaymentHandlerService;
-import com.hustict.aims.service.placeOrder.NormalOrderService;
-
-import com.hustict.aims.service.placeOrder.SaveTempOrder;
+import com.hustict.aims.service.placeOrder.normal.NormalOrderService;
 import com.hustict.aims.service.placeOrder.request.HandleRequestService;
 import com.hustict.aims.service.placeOrder.CartCleanupService;
 import com.hustict.aims.dto.order.ConfirmOrderRequestDTO;
@@ -47,8 +46,6 @@ public class PlaceOrderController {
     @Qualifier("deliveryFormValidatorImpl")
     private DeliveryFormValidator deliveryFormValidator;
 
-    @Autowired
-    private NormalOrderService normalOrderService;
 
     @Autowired
     private PaymentHandlerService paymentHandlerService;
@@ -61,7 +58,7 @@ public class PlaceOrderController {
     private ReservationService reservationService;
 
     @Autowired
-    private SaveTempOrder saveTempOrder;
+    private NormalOrderService normalService;
 
     @Autowired
     private CartCleanupService cartCleanupService;
@@ -73,7 +70,7 @@ public class PlaceOrderController {
    @PostMapping("/request")
     public ResponseEntity<String> requestToPlaceOrder(@RequestBody CartRequestDTO cart, HttpSession session) {
         handleRequestService.requestToPlaceOrder(cart,session.getId()); // Tight coupling
-        sessionManagementService.saveCart(session, cart);
+        sessionManagementService.saveCart(session, cart); 
         return ResponseEntity.ok("Order request successfully submitted");
     }
 
@@ -81,52 +78,36 @@ public class PlaceOrderController {
     public ResponseEntity<String> submitDeliveryForm(@RequestBody DeliveryFormDTO form, HttpSession session) {
         sessionValidatorService.validateCartRequestedPresent(session);
         deliveryFormValidator.validate(form, session.getId());
-        session.setAttribute("deliveryForm", form);
+        sessionManagementService.saveDeliveryForm(session, form);
         return ResponseEntity.ok("Delivery form successfully submitted");
     }
 
-    @PostMapping("/cancel")
-    public ResponseEntity<String> cancelOrder(HttpSession session) {
-        session.removeAttribute("cartRequested");
-        session.removeAttribute("deliveryForm");
-        session.removeAttribute("invoice");
-        session.removeAttribute("paymentTransaction");
+    // @PostMapping("/cancel")
+    // public ResponseEntity<String> cancelOrder(HttpSession session) {
+    //     session.removeAttribute("cartRequested");
+    //     session.removeAttribute("deliveryForm");
+    //     session.removeAttribute("invoice");
+    //     session.removeAttribute("paymentTransaction");
 
-        reservationService.releaseReservation(session);
-        return ResponseEntity.ok("Order has been canceled.");
-    }
+    //     reservationService.releaseReservation(session);
+    //     return ResponseEntity.ok("Order has been canceled.");
+    // }
 
     @PostMapping("/normal-order")
     public ResponseEntity<Map<String, Object>> handleNormalOrder(HttpSession session, @RequestBody CartRequestDTO cart) {
-        // Validate session
+        // 1. Validate session
         sessionValidatorService.validateDeliveryAndCartForCheckout(session);
+        // 2. Create invoice and save order
+        DeliveryFormDTO deliveryForm = (DeliveryFormDTO) sessionManagementService.getDeliveryForm(session);
+        NormalOrderResult results = normalService.processNormalOrder(cart, deliveryForm);
 
-        DeliveryFormDTO deliveryForm = (DeliveryFormDTO) session.getAttribute("deliveryForm");
-        InvoiceDTO invoice = normalOrderService.handleNormalOrder(deliveryForm, cart);
-        invoice.setRushOrder(false);
-        cart.setRushOrder(false);
-        Long orderid = saveTempOrder.save(cart, deliveryForm, invoice,session);
-        
-        List<InvoiceDTO> invoiceList = new java.util.ArrayList<>();
-        List<CartRequestDTO> cartList = new java.util.ArrayList<>();
+        // 3. Manage session memory
+        InvoiceDTO invoice = results.getInvoice();
+        Long orderid = results.getOrderId();
+        sessionManagementService.addToCartList(session, cart);
+        sessionManagementService.addToInvoiceList(session, invoice);
 
-        invoiceList.add(invoice);
-        cartList.add(cart);
-
-        session.setAttribute("invoiceList", invoiceList);
-        session.setAttribute("cartList", cartList);
-        
-        
-        System.out.println("=======START CART LIST =======");
-        if (cartList != null) {
-            cartList.forEach(cartdto -> System.out.println(cartdto.toString()));
-        } 
-
-        // In ra invoiceList
-        System.out.println("=======START INVOICE LIST =======");
-        if (invoiceList != null) {
-            invoiceList.forEach(invoicedto -> System.out.println(invoicedto.toString()));
-        } 
+        // 4. Create Response 
         Map<String, Object> response = new HashMap<>();
         response.put("cart", cart);
         response.put("invoice", invoice);
@@ -162,7 +143,7 @@ public class PlaceOrderController {
             cartCleanupService.removePurchasedItems(session, confirmOrderRequestDTO.getOrderId());
             logger.info("Confirm reservation for order" + confirmOrderRequestDTO.getOrderId());
 
-            reservationService.confirmReservation(session,confirmOrderRequestDTO.getOrderId());
+            reservationService.confirmReservation(session.getId(),confirmOrderRequestDTO.getOrderId());
           
         } else//  return ResponseEntity.ok("Nothing to remove!");
 
