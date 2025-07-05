@@ -3,7 +3,7 @@ package com.hustict.aims.controller;
 import com.hustict.aims.service.email.EmailSenderFactory;
 import com.hustict.aims.service.email.OrderInfoService;
 import com.hustict.aims.service.order.OrderService;
-import com.hustict.aims.service.refund.RefundStrategySelector;
+import com.hustict.aims.service.refund.RefundSelector;
 import com.hustict.aims.dto.order.OrderDTO;
 import com.hustict.aims.dto.order.OrderInformationDTO;
 
@@ -24,12 +24,12 @@ public class OrderPMController {
 
     private final OrderService orderService;
     private final EmailSenderFactory emailSenderFactory;
-    private final RefundStrategySelector refundStrategySelector;
+    private final RefundSelector refundStrategySelector;
 
     @Autowired
     private OrderInfoService orderInfoService;
 
-    public OrderPMController(OrderService orderService, EmailSenderFactory emailSenderFactory, RefundStrategySelector refundStrategySelector) {
+    public OrderPMController(OrderService orderService, EmailSenderFactory emailSenderFactory, RefundSelector refundStrategySelector) {
         this.orderService = orderService;
         this.emailSenderFactory = emailSenderFactory;
         this.refundStrategySelector = refundStrategySelector;

@@ -2,8 +2,6 @@ package com.hustict.aims.service.placeOrder.normal;
 import org.springframework.stereotype.Service;
 
 import com.hustict.aims.service.placeOrder.InoviceService;
-import com.hustict.aims.service.placeOrder.SaveTempOrder;
-
 import com.hustict.aims.dto.deliveryForm.DeliveryFormDTO;
 import com.hustict.aims.dto.invoice.InvoiceDTO;
 import com.hustict.aims.dto.NormalOrderResult;

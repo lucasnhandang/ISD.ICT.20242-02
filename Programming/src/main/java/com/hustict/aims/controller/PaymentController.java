@@ -2,7 +2,7 @@ package com.hustict.aims.controller;
 
 import com.hustict.aims.dto.payment.PaymentResultDTO;
 import com.hustict.aims.dto.payment.PaymentTransactionDTO;
-import com.hustict.aims.dto.payment.PlaceOrderRequestDTO;
+import com.hustict.aims.dto.payment.AfterPaymentDTO;
 import com.hustict.aims.dto.payment.VnPayCreateRequestDTO;
 import com.hustict.aims.dto.payment.VnPayIpnResponseDTO;
 import com.hustict.aims.dto.order.OrderDTO;
@@ -51,18 +51,19 @@ public class PaymentController {
         String clientIp = request.getRemoteAddr();
         // Tạo mã đơn hàng (txnRef) ở đây, ví dụ lấy từ DB hoặc random
         String txnRef = String.valueOf(System.currentTimeMillis());
+        
         String url = paymentSubsystem.createPaymentUrl(req, clientIp, vnPayConfig.getReturnUrl(), txnRef);
+        
         Map<String, String> resp = new HashMap<>();
         resp.put("paymentUrl", url);
         resp.put("txnRef", txnRef);
+        
         return ResponseEntity.ok(resp);
     }
 
     @GetMapping("/vnpay-return")
     public void vnPayReturn(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
         String frontendUrl = paymentSubsystem.handleReturnAndBuildRedirect(request, response);
-
         response.sendRedirect(frontendUrl);
     }
 

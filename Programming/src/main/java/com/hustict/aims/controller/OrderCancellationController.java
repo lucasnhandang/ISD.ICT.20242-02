@@ -4,7 +4,7 @@ import com.hustict.aims.service.email.EmailSenderFactory;
 import com.hustict.aims.service.email.OrderInfoService;
 import com.hustict.aims.service.order.OrderService;
 import com.hustict.aims.service.refund.PaymentSystem;
-import com.hustict.aims.service.refund.RefundStrategySelector;
+import com.hustict.aims.service.refund.RefundSelector;
 import com.hustict.aims.dto.order.OrderDTO;
 import com.hustict.aims.dto.order.OrderInformationDTO;
 

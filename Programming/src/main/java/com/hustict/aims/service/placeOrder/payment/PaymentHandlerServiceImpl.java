@@ -1,19 +1,17 @@
-package com.hustict.aims.service.placeOrder;
+package com.hustict.aims.service.placeOrder.payment;
 
 import com.hustict.aims.dto.order.OrderDTO;
-import com.hustict.aims.dto.order.OrderInformationDTO;
+import com.hustict.aims.dto.payment.AfterPaymentDTO;
 import com.hustict.aims.dto.payment.PaymentTransactionDTO;
 import com.hustict.aims.service.email.EmailSenderFactory;
 import com.hustict.aims.service.payment.SavePaymentTransaction;
-import com.hustict.aims.service.reservation.ReservationService;
 
-import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class PaymentHandlerService {
+public class PaymentHandlerServiceImpl implements PaymentHandlerService {
 
     @Autowired
     private EmailSenderFactory emailSenderFactory;
@@ -21,9 +19,10 @@ public class PaymentHandlerService {
     @Autowired
     private SavePaymentTransaction savePaymentTransaction;
 
-
-    public void handlePaymentSuccess(PaymentTransactionDTO paymentTransaction, Long orderid) {
-        OrderDTO orderinfo = savePaymentTransaction.save(paymentTransaction, orderid);
+    public void handlePaymentSuccess(AfterPaymentDTO afterPaymentDTO) {
+        PaymentTransactionDTO paymentTransaction = afterPaymentDTO.getPaymentTransaction();
+        Long orderId = afterPaymentDTO.getOrderId();
+        OrderDTO orderinfo = savePaymentTransaction.save(paymentTransaction, orderId);
         emailSenderFactory.process("orderSuccess", orderinfo);
     }
 }

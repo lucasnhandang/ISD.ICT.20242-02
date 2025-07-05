@@ -7,9 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PlaceOrderRequestDTO {
+public class AfterPaymentDTO {
     private PaymentTransactionDTO paymentTransaction;
     private Long orderId;
-
-    // Getters and setters
 }

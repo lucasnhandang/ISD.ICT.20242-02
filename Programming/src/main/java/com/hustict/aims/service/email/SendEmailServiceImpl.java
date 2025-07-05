@@ -68,35 +68,42 @@ public abstract class SendEmailServiceImpl<T extends BaseEmailRequest> implement
     private String fromAddress;
 
     @Override
-    public void sendEmail(T request,OrderDTO order) {
-   
-         try {
-            // Tạo một MimeMessage để gửi email
-            MimeMessage message = mailSender.createMimeMessage();
-            
-            // Tạo MimeMessageHelper để cấu hình email
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+    public void sendEmail(T request, OrderDTO order) {
+        int maxRetries = 3;
+        int attempt = 0;
+        long delayBetweenRetriesMs = 2000;
 
-            helper.setFrom(fromAddress);
-            helper.setTo(request.getDeliveryInfor().getEmail());
-            helper.setSubject(buildSubject(request,order.getOrderId()));
-            helper.setText(buildBody(request), true);  // Đặt `true` để gửi email với body HTML
+        while (attempt < maxRetries) {
+            try {
+                MimeMessage message = mailSender.createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            // Gửi email
-            mailSender.send(message);
+                helper.setFrom(fromAddress);
+                helper.setTo(request.getDeliveryInfor().getEmail());
+                helper.setSubject(buildSubject(request, order.getOrderId()));
+                helper.setText(buildBody(request), true); // HTML enabled
 
-        } catch (MessagingException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error sending email: " + e.getMessage());
+                mailSender.send(message);
+                return; // success
+
+            } catch (MessagingException e) {
+                attempt++;
+                System.err.println("Failed to send email (attempt " + attempt + "): " + e.getMessage());
+                if (attempt >= maxRetries) {
+                    throw new RuntimeException("Error sending email after " + maxRetries + " attempts: " + e.getMessage(), e);
+                }
+                try {
+                    Thread.sleep(delayBetweenRetriesMs);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException("Retry interrupted", ie);
+                }
+            }
         }
     }
     
     protected void populateCommonFields(T req, OrderDTO order) {
-        // OrderInformationDTO info = (OrderInformationDTO) session.getAttribute("orderInformation");
-        // DeliveryFormDTO delivery = (DeliveryFormDTO) session.getAttribute("deliveryForm");
-        // InvoiceDTO invoice = (InvoiceDTO) session.getAttribute("invoice");
-        // PaymentTransactionDTO payment = (PaymentTransactionDTO) session.getAttribute("paymentTransaction");
-
+   
         Order orderEntity = orderRepository.findById(order.getOrderId())
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 

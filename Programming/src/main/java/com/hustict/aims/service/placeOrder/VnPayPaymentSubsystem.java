@@ -2,7 +2,7 @@ package com.hustict.aims.service.placeOrder;
 
 import com.hustict.aims.dto.payment.PaymentTransactionDTO;
 import com.hustict.aims.dto.payment.VnPayCreateRequestDTO;
-import com.hustict.aims.dto.payment.PlaceOrderRequestDTO;
+import com.hustict.aims.dto.payment.AfterPaymentDTO;
 import com.hustict.aims.model.order.Order;
 import com.hustict.aims.model.payment.PaymentTransaction;
 import com.hustict.aims.repository.OrderRepository;
@@ -181,7 +181,7 @@ public class VnPayPaymentSubsystem implements PaymentSubsystem {
             throw new IllegalArgumentException("ID không hợp lệ: " + idStr);
         }
 
-        PlaceOrderRequestDTO placeOrderRequestDTO = new PlaceOrderRequestDTO();
+        AfterPaymentDTO placeOrderRequestDTO = new AfterPaymentDTO();
         placeOrderRequestDTO.setPaymentTransaction(paymentTransaction);
         placeOrderRequestDTO.setOrderId(orderid);
 
