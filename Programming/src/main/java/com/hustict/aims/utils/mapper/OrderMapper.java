@@ -79,6 +79,7 @@ public class OrderMapper {
     public OrderInformationDTO toDTO(Order entity) {
         if (entity == null) return null;
 
+        // Tối ưu: Sử dụng data đã được fetch sẵn từ JOIN FETCH
         List<CartItemRequestDTO> items = entity.getOrderItems().stream()
             .map(OrderItemMapper::toDTO)
             .collect(Collectors.toList());
@@ -90,8 +91,14 @@ public class OrderMapper {
         dto.setCurrency(entity.getCurrency());
         dto.setOrderDate(entity.getOrderDate());
         dto.setRushDeliveryTime(entity.getRushDeliveryTime());
-        dto.setDeliveryInfoId(entity.getDeliveryInfo().getId());
-        dto.setInvoiceId(entity.getInvoice().getId());
+        
+        // Safe null check cho deliveryInfo và invoice
+        if (entity.getDeliveryInfo() != null) {
+            dto.setDeliveryInfoId(entity.getDeliveryInfo().getId());
+        }
+        if (entity.getInvoice() != null) {
+            dto.setInvoiceId(entity.getInvoice().getId());
+        }
 
         return dto;
     }

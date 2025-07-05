@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Box, Typography, Divider, Paper, Button, CircularProgress, Alert, TextField } from '@mui/material';
+import { Box, Typography, Divider, Paper, Button, CircularProgress, Alert, TextField, Chip, Grid } from '@mui/material';
 import Header from '../components/Header';
 // import RushOrderResults from '../components/RushOrderResults'; // REMOVED
 import { checkRushOrderEligibility, submitRushOrderInfo, saveRushOrders, getProductDetails } from '../services/api';
 import { getProvinceDisplayName } from '../utils/provinceUtils';
+
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('vi-VN', {
@@ -92,27 +93,37 @@ const RushOrderPage = () => {
       // Tạo invoice list từ kết quả rush order
       const invoiceList = [];
       
+      console.log('🔍 Debug RushOrderPage - Response data:', res.data);
+      console.log('🔍 Debug RushOrderPage - Rush cart:', res.data.rushCart);
+      console.log('🔍 Debug RushOrderPage - Normal cart:', res.data.normalCart);
+      
       if (res.data.rushOrderId && res.data.rushInvoice) {
-        invoiceList.push({
+        const rushInvoice = {
           ...res.data.rushInvoice,
           id: res.data.rushOrderId,
           orderId: res.data.rushOrderId,
           isRushOrder: true,
           orderType: 'rush',
           deliveryTime: rushInfo.expectedDateTime,
-          status: 'unpaid'
-        });
+          status: 'unpaid',
+          productList: res.data.rushCart?.productList || [] // Sử dụng productList từ rush cart
+        };
+        console.log('🔍 Debug RushOrderPage - Rush invoice with products:', rushInvoice);
+        invoiceList.push(rushInvoice);
       }
       
       if (res.data.normalOrderId && res.data.normalInvoice) {
-        invoiceList.push({
+        const normalInvoice = {
           ...res.data.normalInvoice,
           id: res.data.normalOrderId,
           orderId: res.data.normalOrderId,
           isRushOrder: false,
           orderType: 'normal',
-          status: 'unpaid'
-        });
+          status: 'unpaid',
+          productList: res.data.normalCart?.productList || [] // Sử dụng productList từ normal cart
+        };
+        console.log('🔍 Debug RushOrderPage - Normal invoice with products:', normalInvoice);
+        invoiceList.push(normalInvoice);
       }
 
       // Chuyển thẳng đến InvoicePage với invoice list
@@ -285,12 +296,12 @@ const RushOrderPage = () => {
               <Divider sx={{ mb: 2 }} />
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography>Product Total (excl. VAT):</Typography>
+                <Typography>Product Total (excl. 10% VAT):</Typography>
                 <Typography>{formatPrice(invoice.productPriceExVAT)}</Typography>
               </Box>
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography>Product Total (incl. VAT):</Typography>
+                <Typography>Product Total (incl. 10% VAT):</Typography>
                 <Typography>{formatPrice(invoice.productPriceIncVAT)}</Typography>
               </Box>
 

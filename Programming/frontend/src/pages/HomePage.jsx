@@ -4,7 +4,7 @@ import Header from '../components/Header';
 import Navigation from '../components/Navigation';
 import ProductCard from '../components/ProductCard';
 import ConnectionStatus from '../components/ConnectionStatus';
-import { checkBackendConnection, getProducts, searchProducts } from '../services/api';
+import { checkBackendConnection, getProducts, searchProducts, getProductsByCategory } from '../services/api';
 import { authService } from '../services/authService';
 import {
   containerStyles,
@@ -68,10 +68,16 @@ const HomePage = () => {
       setError(null);
       let data;
 
-      if (searchQuery) {
-        data = await searchProducts(searchQuery, page - 1, PRODUCTS_PER_PAGE, sortBy, sortDirection, category);
+      if (searchQuery && searchQuery.trim()) {
+        // Nếu đang search, truyền category nếu khác 'all'
+        const cat = category !== 'all' ? category : null;
+        data = await searchProducts(searchQuery.trim(), page - 1, PRODUCTS_PER_PAGE, sortBy, sortDirection, cat);
+      } else if (category && category !== 'all') {
+        // Nếu không search nhưng có category
+        data = await getProductsByCategory(category, page - 1, PRODUCTS_PER_PAGE, sortBy, sortDirection);
       } else {
-        data = await getProducts(page - 1, PRODUCTS_PER_PAGE, category, sortBy, sortDirection);
+        // All items: dùng searchProducts với query rỗng để backend sort đúng
+        data = await searchProducts('', page - 1, PRODUCTS_PER_PAGE, sortBy, sortDirection, null);
       }
 
       if (data.content && Array.isArray(data.content)) {

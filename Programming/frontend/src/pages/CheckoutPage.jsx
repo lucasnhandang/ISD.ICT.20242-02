@@ -303,7 +303,7 @@ const CheckoutPage = () => {
             <Divider sx={{ my: 2 }} />
             <Box sx={{ mb: 2 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography>Product Price (excl. VAT):</Typography>
+                <Typography>Product Price (excl. 10% VAT):</Typography>
                 <Typography>
                   {formatPrice(cart.totalPrice - (cart.discount || 0), cart.currency)}
                 </Typography>

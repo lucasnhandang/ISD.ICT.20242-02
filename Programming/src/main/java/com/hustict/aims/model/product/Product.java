@@ -1,9 +1,13 @@
 package com.hustict.aims.model.product;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
+@Getter
 @Entity
 @Table(name = "product")
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -13,46 +17,60 @@ public class Product {
     @Column(name = "id")
     private Long id;
 
+    @Setter
     @Column(name = "title", nullable = false)
     private String title;
 
+    @Setter
     @Column(name = "value", nullable = false)
     private int value;
 
+    @Setter
     @Column(name = "currentprice", nullable = false)
     private int currentPrice;
 
+    @Setter
     @Column(name = "barcode", nullable = false)
     private String barcode;
 
+    @Setter
     @Column(name = "description", nullable = false)
     private String description;
 
+    @Setter
     @Column(name = "quantity", nullable = false)
     private int quantity;
 
+    @Setter
     @Column(name = "entrydate", nullable = false)
     private LocalDate entryDate;
 
+    @Setter
     @Column(name = "dimension", nullable = false)
     private String dimension;
 
+    @Setter
     @Column(name = "weight", columnDefinition = "NUMERIC", nullable = false)
     private double weight;
 
+    @Setter
     @Column(name = "rushordersupported")
     private Boolean rushOrderSupported;
 
+    @Setter
     @Column(name = "imageurl")
     private String imageUrl;
 
+    @Setter(AccessLevel.PROTECTED)
     @Column(name = "category", nullable = false, updatable = false)
     private String category;
 
+    @Setter
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted;
 
     public Product() {
+        setCategory();
     }
 
     public Product(String title, int value, int currentPrice, String barcode, String description,
@@ -69,8 +87,7 @@ public class Product {
         this.weight = weight;
         this.rushOrderSupported = rushOrderSupported;
         this.imageUrl = imageUrl;
-
-        assignCategory();
+        setCategory();
     }
 
     public Product(Product otherProduct) {
@@ -80,50 +97,7 @@ public class Product {
             otherProduct.getRushOrderSupported(), otherProduct.getImageUrl());
     }
 
-    @PrePersist
-    @PreUpdate
-    protected void assignCategory() {
-        this.category = this.getClass().getSimpleName(); 
+    protected void setCategory() {
+        this.category = "Product";
     }
-
-    public Long getId() { return id; }
-
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-
-    public int getValue() { return value; }
-    public void setValue(int value) { this.value = value; }
-
-    public int getCurrentPrice() { return currentPrice; }
-    public void setCurrentPrice(int currentPrice) { this.currentPrice = currentPrice; }
-
-    public String getBarcode() { return barcode; }
-    public void setBarcode(String barcode) { this.barcode = barcode; }
-
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-
-    public int getQuantity() { return quantity; }
-    public void setQuantity(int quantity) { this.quantity = quantity; }
-
-    public LocalDate getEntryDate() { return entryDate; }
-    public void setEntryDate(LocalDate entryDate) { this.entryDate = entryDate; }
-
-    public String getDimension() { return dimension; }
-    public void setDimension(String dimension) { this.dimension = dimension; }
-
-    public double getWeight() { return weight; }
-    public void setWeight(double weight) { this.weight = weight; }
-
-    public Boolean getRushOrderSupported() { return rushOrderSupported; }
-    public void setRushOrderSupported(Boolean rushOrderSupported) { this.rushOrderSupported = rushOrderSupported; }
-
-    public String getImageUrl() { return imageUrl; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
-
-    public String getCategory() { return category; }
-    protected void setCategory(String category) { this.category = category; }
-
-    public boolean isDeleted() { return isDeleted; }
-    public void setIsDeleted(boolean isDeleted) { this.isDeleted = isDeleted; }
 }

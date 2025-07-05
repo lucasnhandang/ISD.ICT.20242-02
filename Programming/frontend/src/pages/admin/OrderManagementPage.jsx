@@ -129,32 +129,64 @@ const OrderManagementPage = () => {
   const [totalOrders, setTotalOrders] = useState(0);
   const [rowsPerPage] = useState(30);
 
-  const fetchPendingOrders = async (pageNumber = 0, signal) => {
+  const fetchPendingOrders = async (forceRefresh = false) => {
     try {
       setLoading(true);
       setError(null);
       
-      console.log(`🔄 [Page ${pageNumber}] Bắt đầu tải pending orders...`);
+      console.log('🔄 Bắt đầu tải pending orders...');
       
-      const response = await orderManagementAPI.getPendingOrders(pageNumber, rowsPerPage, signal);
-      
-      // Kiểm tra nếu request đã bị hủy
-      if (signal?.aborted) {
-        return;
+      // Kiểm tra cache nếu không force refresh
+      if (!forceRefresh && pendingOrders.length > 0) {
+        const cacheAge = Date.now() - (window.lastOrderFetch || 0);
+        if (cacheAge < 10000) { // Cache 10 giây thay vì 30 giây
+          console.log('📦 Sử dụng cache data, age:', cacheAge + 'ms');
+          setLoading(false);
+          return;
+        }
       }
       
-      setPendingOrders(response.orders);
-      setTotalOrders(response.totalOrders);
-      setError(null);
+      const startTime = Date.now();
+      const data = await orderManagementAPI.getPendingOrders();
+      const endTime = Date.now();
+      
+      console.log(`⏱️ API call took: ${endTime - startTime}ms`);
+      
+      if (!data || !Array.isArray(data.orders)) {
+        console.warn('⚠️ Response data không hợp lệ:', data);
+        setPendingOrders([]);
+        setTotalOrders(0);
+      } else {
+        setPendingOrders(data.orders);
+        setTotalOrders(data.totalOrders || 0);
+        window.lastOrderFetch = Date.now(); // Update cache timestamp
+        console.log(`✅ Đã set thành công ${data.orders.length} pending orders`);
+      }
       
     } catch (err) {
-      if (err.name === 'AbortError') {
-        console.log('🚫 Request bị hủy do component unmount hoặc re-render');
-        return;
+      console.error('❌ Lỗi fetchPendingOrders:', err);
+      
+      // Simplified error message
+      let errorMessage = 'Không thể tải danh sách đơn hàng chờ duyệt.\n\n';
+      
+      if (err.message.includes('Network Error') || err.message.includes('ERR_NETWORK')) {
+        errorMessage += '🔥 BACKEND SERVER KHÔNG CHẠY!\n\n';
+        errorMessage += 'Các bước khắc phục:\n';
+        errorMessage += '1. Mở terminal/cmd\n';
+        errorMessage += '2. Chạy: mvn spring-boot:run\n';
+        errorMessage += '3. Đợi server start xong\n';
+        errorMessage += '4. Thử lại trang này\n\n';
+        errorMessage += 'Backend URL: http://localhost:8080';
+      } else if (err.message.includes('timeout')) {
+        errorMessage += 'Kết nối quá chậm:\n';
+        errorMessage += '• Server có thể đang overload\n';
+        errorMessage += '• Kiểm tra database connection\n';
+        errorMessage += '• Thử restart server';
+      } else {
+        errorMessage += `Lỗi: ${err.message}`;
       }
-
-      console.error('❌ Lỗi:', err);
-      setError(err.message);
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -194,10 +226,10 @@ const OrderManagementPage = () => {
     // Remove the order from the list immediately for better UX
     setPendingOrders(prev => prev.filter(order => order.orderId !== orderId));
 
-    // Set a timeout to refresh the page after 2 seconds
+    // Set a timeout to refresh the page after 1 second
     setTimeout(() => {
       fetchPendingOrders();
-    }, 2000);
+    }, 1000);
 
     try {
       if (action === 'approve') {
@@ -223,14 +255,15 @@ const OrderManagementPage = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  if (loading) {
+  if (loading && pendingOrders.length === 0) {
     return (
       <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <CircularProgress size={40} sx={{ mb: 2 }} />
         <Typography variant="h6" gutterBottom>Loading orders pending list...</Typography>
-        {/* <Typography variant="body2" color="text.secondary">
-          Vui lòng đợi trong giây lát
-        </Typography> */}
+        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
+          Loading pending orders...<br />
+          <small>If loading takes too long, please check backend server.</small>
+        </Typography>
       </Box>
     );
   }
@@ -239,16 +272,16 @@ const OrderManagementPage = () => {
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4">
-          Order managerment
+          Order Management
         </Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Button
             variant="outlined"
-            startIcon={<RefreshIcon />}
-            onClick={() => fetchPendingOrders()}
+            startIcon={loading ? <CircularProgress size={16} /> : <RefreshIcon />}
+            onClick={() => fetchPendingOrders(true)}
             disabled={loading}
           >
-            Làm mới
+            Refresh
           </Button>
           {/* <Button
             variant="text"

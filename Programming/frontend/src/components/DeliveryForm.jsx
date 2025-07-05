@@ -14,7 +14,8 @@ import {
   ListItemText
 } from '@mui/material';
 import { submitDeliveryForm, checkRushOrderEligibility } from '../services/api';
-import { provinces } from '../utils/provinceUtils';
+import { provinces, getProvinceDisplayName } from '../utils/provinceUtils';
+
 
 const DeliveryForm = ({ onClose, onSuccess, initialValues, disabled }) => {
   const [form, setForm] = useState({
@@ -37,7 +38,7 @@ const DeliveryForm = ({ onClose, onSuccess, initialValues, disabled }) => {
         phoneNumber: initialValues.phoneNumber || '',
         email: initialValues.email || '',
         deliveryAddress: initialValues.deliveryAddress || '',
-        deliveryProvince: initialValues.deliveryProvince || '',
+        deliveryProvince: getProvinceDisplayName(initialValues.deliveryProvince) || '',
         isRushOrder: initialValues.isRushOrder || false
       });
     }
@@ -61,8 +62,13 @@ const DeliveryForm = ({ onClose, onSuccess, initialValues, disabled }) => {
     setValidationErrors([]);
     
     try {
-      await submitDeliveryForm(form);
-      onSuccess(form);
+      // Convert display name to backend value before sending
+      const formDataForBackend = {
+        ...form,
+        deliveryProvince: form.deliveryProvince
+      };
+      await submitDeliveryForm(formDataForBackend);
+      onSuccess(formDataForBackend);
     } catch (err) {
       console.log('Error response:', err.response?.data);
       

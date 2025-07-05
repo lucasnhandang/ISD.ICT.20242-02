@@ -123,13 +123,6 @@ public class ReservationServiceImpl implements ReservationService {
         }
 
         List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderId);
-        if (orderItems.isEmpty()) {
-            reservation.setStatus(Status.CONFIRMED);
-            reservationRepository.save(reservation);
-            System.out.println("Không có OrderItem nào. Reservation đã được xác nhận.");
-            return;
-        }
-
         List<ReservationItem> reservationItems = reservationItemRepository.findByReservationId(reservation.getId());
 
         Map<Long, ReservationItem> reservationItemMap = reservationItems.stream()
@@ -141,19 +134,22 @@ public class ReservationServiceImpl implements ReservationService {
 
             if (reservationItemMap.containsKey(productId)) {
                 ReservationItem reservationItem = reservationItemMap.get(productId);
-                System.out.println("Tìm thấy ReservationItem tương ứng với productId: " + productId);
-                System.out.println("Giảm số lượng sản phẩm (productId: " + productId + ") với quantity: " + reservationItem.getQuantity());
-
+                System.out.println("(ProductId: " + productId + ") với quantity: " + reservationItem.getQuantity());
                 inventoryService.decreaseQuantity(productId, reservationItem.getQuantity());
-
-                System.out.println("Xóa ReservationItem với productId: " + productId);
+                System.out.println("Remove item with product id:: " + productId);
                 reservationItemRepository.delete(reservationItem);
             } else {
-                System.out.println("Không tìm thấy ReservationItem cho productId: " + productId);
+                System.out.println("Cannot match product id: " + productId);
             }
         }
 
-        reservation.setStatus(Status.CONFIRMED);
+       List<ReservationItem> remainingItems = reservationItemRepository.findByReservationId(reservation.getId());
+
+        if (remainingItems == null || remainingItems.isEmpty()) {
+            reservation.setStatus(Status.CONFIRMED);
+            reservationRepository.save(reservation);
+            System.out.println("Confirm reservation");
+        }
         reservationRepository.save(reservation);
     }
 }

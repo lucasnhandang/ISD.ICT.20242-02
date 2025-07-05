@@ -23,7 +23,16 @@ public class InvoiceServiceImpl implements InoviceService {
 
     public InvoiceDTO createInvoice(DeliveryFormDTO deliveryForm, CartRequestDTO cart) {
         String province = deliveryForm.getDeliveryProvince();
-        int totalPriceExVat = cart.getTotalPrice();
+        
+        // Tính toán lại totalPrice từ productList để đảm bảo tính đúng
+        int totalPriceExVat = cart.getProductList().stream()
+            .mapToInt(item -> item.getPrice() * item.getQuantity())
+            .sum();
+
+        // Debug log
+        System.out.println("🔍 Debug InvoiceServiceImpl - Cart Total Price: " + cart.getTotalPrice());
+        System.out.println("🔍 Debug InvoiceServiceImpl - Calculated Total Price: " + totalPriceExVat);
+        System.out.println("🔍 Debug InvoiceServiceImpl - Product List: " + cart.getProductList());
 
         int shippingFee = shippingFeeCalculator.calculateShippingFee(province, cart.getProductList(), totalPriceExVat);
         InvoiceDTO invoice = invoiceCalculationService.calculateInvoice(totalPriceExVat, shippingFee);

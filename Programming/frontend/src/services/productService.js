@@ -66,8 +66,33 @@ export const productService = {
       const formData = new FormData();
       const normalized = normalizeProductData(data);
       
+      // Tách dữ liệu thành product và specific
+      const productData = {};
+      const specificData = {};
+      
+      // Các trường cơ bản của ProductDTO
+      const productFields = [
+        'id', 'title', 'value', 'currentPrice', 'barcode', 'description', 
+        'quantity', 'entryDate', 'dimension', 'weight', 'rushOrderSupported', 
+        'imageUrl', 'category'
+      ];
+      
+      for (const [key, value] of Object.entries(normalized)) {
+        if (productFields.includes(key)) {
+          productData[key] = value;
+        } else {
+          specificData[key] = value;
+        }
+      }
+      
+      // Tạo ProductModifyRequest structure
+      const requestData = {
+        product: productData,
+        specific: specificData
+      };
+      
       // Tạo Blob cho JSON data với Content-Type đúng
-      const jsonBlob = new Blob([JSON.stringify(normalized)], {
+      const jsonBlob = new Blob([JSON.stringify(requestData)], {
         type: 'application/json'
       });
       
@@ -98,8 +123,33 @@ export const productService = {
       const formData = new FormData();
       const normalized = normalizeProductData(data);
       
+      // Tách dữ liệu thành product và specific
+      const productData = {};
+      const specificData = {};
+      
+      // Các trường cơ bản của ProductDTO
+      const productFields = [
+        'id', 'title', 'value', 'currentPrice', 'barcode', 'description', 
+        'quantity', 'entryDate', 'dimension', 'weight', 'rushOrderSupported', 
+        'imageUrl', 'category'
+      ];
+      
+      for (const [key, value] of Object.entries(normalized)) {
+        if (productFields.includes(key)) {
+          productData[key] = value;
+        } else {
+          specificData[key] = value;
+        }
+      }
+      
+      // Tạo ProductModifyRequest structure
+      const requestData = {
+        product: productData,
+        specific: specificData
+      };
+      
       // Tạo Blob cho JSON data
-      const jsonBlob = new Blob([JSON.stringify(normalized)], {
+      const jsonBlob = new Blob([JSON.stringify(requestData)], {
         type: 'application/json'
       });
       

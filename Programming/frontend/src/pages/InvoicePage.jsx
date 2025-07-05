@@ -6,6 +6,7 @@ import { createVnPayUrl, clearCart } from '../services/api';
 import { AccessTime } from '@mui/icons-material';
 import { getProvinceDisplayName } from '../utils/provinceUtils';
 
+
 const formatPrice = (price) => {
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
@@ -27,26 +28,60 @@ const InvoicePage = () => {
   // Khởi tạo danh sách invoice
   useEffect(() => {
     const invoices = invoiceList || (invoice ? [invoice] : []);
-    setCurrentInvoices(invoices);
+    // Thêm tempId cho mỗi invoice nếu chưa có id hoặc orderId
+    const invoicesWithTempId = invoices.map((inv, idx) => ({
+      ...inv,
+      tempId: inv.id || inv.orderId ? null : idx
+    }));
+    console.log('🔍 Initializing invoices:', invoicesWithTempId);
+    setCurrentInvoices(invoicesWithTempId);
   }, [invoiceList, invoice]);
 
   // Xóa invoice đã thanh toán khỏi danh sách
   const removeInvoiceFromList = (invoiceKey) => {
-    setCurrentInvoices(prev => prev.filter(inv => (inv.id || inv.orderId) !== invoiceKey));
+    console.log('🔍 Removing invoice from list:', invoiceKey, 'Type:', typeof invoiceKey);
+    console.log('🔍 Current invoices before removal:', currentInvoices);
+    
+    setCurrentInvoices(prev => {
+      const filtered = prev.filter(inv => {
+        const invId = inv.id || inv.orderId || `temp-${inv.tempId}`;
+        console.log('🔍 Comparing:', invId, 'with', invoiceKey, 'Types:', typeof invId, typeof invoiceKey);
+        return invId !== invoiceKey;
+      });
+      console.log('🔍 Invoices after removal:', filtered);
+      return filtered;
+    });
   };
 
   // Helper function để xử lý khi payment thành công
   const handlePaymentSuccess = async (invoiceKey) => {
     try {
+      console.log('🔍 handlePaymentSuccess - InvoiceKey:', invoiceKey);
+      console.log('🔍 handlePaymentSuccess - Current invoices before removal:', currentInvoices);
+      
       // Xóa invoice khỏi danh sách
       removeInvoiceFromList(invoiceKey);
       
-      // Clear cart khi payment thành công
-      console.log("Payment successful, clearing cart...");
-      await clearCart();
-      console.log("Cart cleared successfully!");
+      // Chỉ clear cart khi tất cả invoice đã được thanh toán (cho rush order)
+      // hoặc khi chỉ có 1 invoice (normal order)
+      const remainingInvoices = currentInvoices.filter(inv => {
+        const invId = inv.id || inv.orderId || `temp-${inv.tempId}`;
+        return invId !== invoiceKey;
+      });
       
-      alert('Order has been paid successfully and removed from the list!');
+      console.log('🔍 handlePaymentSuccess - Remaining invoices:', remainingInvoices);
+      
+      if (remainingInvoices.length === 0) {
+        // Tất cả invoice đã được thanh toán, clear cart
+        console.log("All invoices paid, clearing cart...");
+        await clearCart();
+        console.log("Cart cleared successfully!");
+        alert('All orders have been paid successfully!');
+      } else {
+        // Vẫn còn invoice chưa thanh toán
+        console.log(`Invoice ${invoiceKey} paid successfully. ${remainingInvoices.length} invoices remaining.`);
+        alert(`Order has been paid successfully! ${remainingInvoices.length} order(s) remaining.`);
+      }
     } catch (error) {
       console.error("Failed to clear cart:", error);
       // Vẫn thông báo thành công cho user vì invoice đã được xóa
@@ -56,7 +91,10 @@ const InvoicePage = () => {
 
   // Kiểm tra payment status thủ công
   const checkPaymentStatusManually = async (inv) => {
-    const invoiceKey = inv.id || inv.orderId;
+    const invoiceKey = inv.id || inv.orderId || `temp-${inv.tempId || 0}`;
+    console.log('🔍 checkPaymentStatusManually - Invoice:', inv);
+    console.log('🔍 checkPaymentStatusManually - InvoiceKey:', invoiceKey, 'Type:', typeof invoiceKey);
+    
     if (!invoiceKey) return;
 
     setCheckingPaymentStatus(prev => ({ ...prev, [invoiceKey]: true }));
@@ -70,6 +108,7 @@ const InvoicePage = () => {
       const isRandomlyPaid = Math.random() > 0.95; // 10% cơ hội "đã thanh toán"
       
       if (isRandomlyPaid) {
+        console.log('🔍 Manual check - Payment successful for invoiceKey:', invoiceKey);
         await handlePaymentSuccess(invoiceKey);
       } else {
         alert('Order has not been paid yet. Please try again later.');
@@ -83,13 +122,26 @@ const InvoicePage = () => {
   };
 
   const handlePay = async (inv, index) => {
-    const invoiceKey = inv.id || inv.orderId || index;
+    const invoiceKey = inv.id || inv.orderId || `temp-${inv.tempId || index}`;
+    
+    console.log('🔍 handlePay - Invoice:', inv);
+    console.log('🔍 handlePay - InvoiceKey:', invoiceKey, 'Type:', typeof invoiceKey);
     
     // Set loading state
     setPaymentLoading(prev => ({ ...prev, [invoiceKey]: true }));
     setPaymentError(prev => ({ ...prev, [invoiceKey]: '' }));
     
     try {
+      // Debug: Log thông tin invoice
+      console.log('🔍 Debug Invoice Info:', {
+        invoiceId: inv.id || inv.orderId,
+        totalAmount: inv.totalAmount,
+        productPriceIncVAT: inv.productPriceIncVAT,
+        shippingFee: inv.shippingFee,
+        isRushOrder: inv.isRushOrder,
+        productList: inv.productList
+      });
+      
       // Tạo VnPay payment data
       const vnPayData = {
         amount: inv.totalAmount,
@@ -97,6 +149,8 @@ const InvoicePage = () => {
         orderType: "other",
         locale: "vn",
       };
+      
+      console.log('🔍 Debug VNPay Data:', vnPayData);
       
       // Gọi API tạo VnPay URL
       const response = await createVnPayUrl(vnPayData);
@@ -126,6 +180,7 @@ const InvoicePage = () => {
               
               if (isRandomlyPaid) {
                 // Xử lý payment success (xóa invoice và clear cart)
+                console.log('🔍 Polling - Payment successful for invoiceKey:', invoiceKey);
                 await handlePaymentSuccess(invoiceKey);
                 return true; // Stop polling
               }
@@ -221,13 +276,18 @@ const InvoicePage = () => {
 
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           {currentInvoices.map((inv, idx) => {
-            const invoiceKey = inv.id || inv.orderId || idx;
+            // Sử dụng một key duy nhất cho mỗi invoice
+            const invoiceKey = inv.id || inv.orderId || `temp-${inv.tempId || idx}`;
             const isLoading = paymentLoading[invoiceKey] || false;
             const isCheckingStatus = checkingPaymentStatus[invoiceKey] || false;
             const error = paymentError[invoiceKey] || '';
             
+            console.log('🔍 Render - Invoice:', inv);
+            console.log('🔍 Render - InvoiceKey:', invoiceKey, 'Type:', typeof invoiceKey);
+            console.log('🔍 Render - Loading:', isLoading, 'Checking:', isCheckingStatus);
+            
             return (
-              <Paper key={invoiceKey} elevation={2} sx={{ 
+              <Paper key={`invoice-${invoiceKey}`} elevation={2} sx={{ 
                 p: 3,
                 border: inv.isRushOrder ? '2px solid' : '1px solid',
                 borderColor: inv.isRushOrder ? 'warning.main' : 'divider',
@@ -303,7 +363,7 @@ const InvoicePage = () => {
 
                 {/* Chi tiết thanh toán */}
                 <Box sx={{ mt: 3, p: 2, backgroundColor: '#f9f9f9', borderRadius: 1 }}>
-                  {!isRushOrder && inv.productPriceExVAT && (
+                  {!inv.isRushOrder && inv.productPriceExVAT && (
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                       <Typography>Product Total (excl. VAT):</Typography>
                       <Typography>{formatPrice(inv.productPriceExVAT)}</Typography>
@@ -311,18 +371,18 @@ const InvoicePage = () => {
                   )}
                   
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography>Product Total{!isRushOrder ? ' (incl. VAT)' : ''}:</Typography>
+                    <Typography>Product Total{!inv.isRushOrder ? ' (incl. VAT)' : ''}:</Typography>
                     <Typography>{formatPrice(inv.productPriceIncVAT || inv.subtotal || 0)}</Typography>
                   </Box>
                   
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                     <Typography>Shipping Fee:</Typography>
                     <Typography sx={{ 
-                      color: isRushOrder ? 'warning.main' : 'inherit',
-                      fontWeight: isRushOrder ? 600 : 400
+                      color: inv.isRushOrder ? 'warning.main' : 'inherit',
+                      fontWeight: inv.isRushOrder ? 600 : 400
                     }}>
                       {formatPrice(inv.shippingFee || 0)}
-                      {isRushOrder && (
+                      {inv.isRushOrder && (
                         <Typography component="span" sx={{ fontSize: '0.8rem', ml: 1 }}>
                           (Rush)
                         </Typography>

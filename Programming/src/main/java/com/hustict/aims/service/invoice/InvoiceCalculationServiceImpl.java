@@ -19,6 +19,13 @@ public class InvoiceCalculationServiceImpl implements InvoiceCalculationService 
         int productPriceIncVAT = productPriceExVAT + vatAmount;
         int totalAmount = productPriceIncVAT + shippingFee;
 
+        // Debug log
+        System.out.println("🔍 Debug InvoiceCalculationService - Input productPriceExVAT: " + productPriceExVAT);
+        System.out.println("🔍 Debug InvoiceCalculationService - Input shippingFee: " + shippingFee);
+        System.out.println("🔍 Debug InvoiceCalculationService - Calculated vatAmount: " + vatAmount);
+        System.out.println("🔍 Debug InvoiceCalculationService - Calculated productPriceIncVAT: " + productPriceIncVAT);
+        System.out.println("🔍 Debug InvoiceCalculationService - Calculated totalAmount: " + totalAmount);
+
         Invoice invoice = new Invoice();
         invoice.setProductPriceExVAT(productPriceExVAT);
         invoice.setProductPriceIncVAT(productPriceIncVAT);
