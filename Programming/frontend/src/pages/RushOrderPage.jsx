@@ -4,6 +4,7 @@ import { Box, Typography, Divider, Paper, Button, CircularProgress, Alert, TextF
 import Header from '../components/Header';
 // import RushOrderResults from '../components/RushOrderResults'; // REMOVED
 import { checkRushOrderEligibility, submitRushOrderInfo, saveRushOrders, getProductDetails } from '../services/api';
+import { getProvinceDisplayName } from '../utils/provinceUtils';
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('vi-VN', {
@@ -365,7 +366,7 @@ const RushOrderPage = () => {
                     {deliveryForm.deliveryAddress}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {deliveryForm.deliveryProvince}
+                    {getProvinceDisplayName(deliveryForm.deliveryProvince)}
                   </Typography>
                 </Box>
               </Box>

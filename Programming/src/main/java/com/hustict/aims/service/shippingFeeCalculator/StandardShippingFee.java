@@ -19,8 +19,9 @@ public class StandardShippingFee implements ShippingFeeCalculator {
         for (CartItemRequestDTO item : productList) {
             totalWeight += item.getWeight() * item.getQuantity();  
         }
-    
-        if (province.equals("Hanoi") || province.equals("HoChiMinhCity")){
+        if (deliveryForm.getDeliveryProvince().equals("Hanoi") || 
+            deliveryForm.getDeliveryProvince().equals("HoChiMinhCity") || 
+            deliveryForm.getDeliveryProvince().equals("Hochiminh")){
             shippingFee = (totalWeight <= 3) ? 22000 : 22000 + ((totalWeight - 3) / 0.5) * 2500;
         } else {
             shippingFee = (totalWeight <= 0.5) ? 30000 : 30000 + ((totalWeight - 0.5) / 0.5) * 2500;
