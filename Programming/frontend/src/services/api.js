@@ -67,7 +67,7 @@ api.interceptors.response.use(
 // Health check
 export const checkBackendConnection = async () => {
   try {
-    await api.get('/health');
+    await api.get('/home');
     return { connected: true, message: 'Successfully connected to backend' };
   } catch (error) {
     return {
@@ -80,21 +80,22 @@ export const checkBackendConnection = async () => {
 // Get products (all/filter/sort)
 export const getProducts = async (page = 0, size = 12, category = null, sortBy = 'title', sortDirection = 'asc') => {
   try {
-    const params = { page, size, sortBy, sortDirection };
     let endpoint;
+    let params = { page, size, sortBy, sortDirection };
+    
     if (category && category !== 'all') {
       endpoint = `/products/category/${category}`;
     } else {
-      endpoint = '/products/search';
-      params.query = '';
+      endpoint = '/home';
     }
+    
     const response = await api.get(endpoint, { params });
     return {
-      content: response.data.content,
+      content: response.data.products,
       totalPages: response.data.totalPages,
       totalElements: response.data.totalElements,
-      size: response.data.size,
-      number: response.data.number
+      size: response.data.pageSize,
+      number: response.data.currentPage
     };
   } catch (error) {
     console.error('API Error:', error);
@@ -108,7 +109,13 @@ export const searchProducts = async (query, page = 0, size = 12, sortBy = 'title
     const params = { query, page, size, sortBy, sortDirection };
     if (category && category !== 'all') params.category = category;
     const response = await api.get('/products/search', { params });
-    return response.data;
+    return {
+      content: response.data.products,
+      totalPages: response.data.totalPages,
+      totalElements: response.data.totalElements,
+      size: response.data.pageSize,
+      number: response.data.currentPage
+    };
   } catch (error) {
     console.error('API Error:', error);
     throw new Error('Failed to search products');
@@ -122,11 +129,11 @@ export const getProductsByCategory = async (category, page = 0, size = 12, sortB
       params: { page, size, sortBy, sortDirection }
     });
     return {
-      content: response.data.content,
+      content: response.data.products,
       totalPages: response.data.totalPages,
       totalElements: response.data.totalElements,
-      size: response.data.size,
-      number: response.data.number
+      size: response.data.pageSize,
+      number: response.data.currentPage
     };
   } catch (error) {
     console.error('API Error:', error);
