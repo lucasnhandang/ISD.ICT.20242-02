@@ -30,14 +30,14 @@ public class BookFactory implements ProductFactory {
     @Override
     public ProductDTO createProduct(ProductModifyRequest request) {
         BookDTO bookDTO = (BookDTO) mapper.fromRequest(request);
-        
-        Book book = mapper.toBookEntity(bookDTO);
+
+        Book book = (Book) mapper.toEntity(bookDTO);
         
         validator.validate(book);
         
         Book savedBook = repository.save(book);
-        
-        return mapper.toBookDTO(savedBook);
+
+        return mapper.toDTO(savedBook);
     }
     
     @Override
@@ -49,14 +49,14 @@ public class BookFactory implements ProductFactory {
         Book existingBook = (Book) existing;
         
         BookDTO bookDTO = (BookDTO) mapper.updateFromRequest(existing, request);
-        
+
         mapper.updateEntityFromDTO(bookDTO, existingBook);
         
         validator.validate(existingBook);
         
         Book savedBook = repository.save(existingBook);
-        
-        return mapper.toBookDTO(savedBook);
+
+        return mapper.toDTO(savedBook);
     }
     
     @Override
@@ -64,7 +64,7 @@ public class BookFactory implements ProductFactory {
         if (!(product instanceof Book)) {
             throw new IllegalArgumentException("Product is not a Book");
         }
-        
-        return mapper.toBookDTO((Book) product);
+
+        return mapper.toDTO(product);
     }
 }

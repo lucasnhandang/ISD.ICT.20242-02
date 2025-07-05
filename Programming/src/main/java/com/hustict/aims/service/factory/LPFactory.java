@@ -31,13 +31,13 @@ public class LPFactory implements ProductFactory {
     public ProductDTO createProduct(ProductModifyRequest request) {
         LPDTO lpDTO = (LPDTO) mapper.fromRequest(request);
         
-        LP lp = mapper.toLPEntity(lpDTO);
+        LP lp = (LP) mapper.toEntity(lpDTO);
         
         validator.validate(lp);
         
         LP savedLP = repository.save(lp);
         
-        return mapper.toLPDTO(savedLP);
+        return mapper.toDTO(savedLP);
     }
     
     @Override
@@ -56,7 +56,7 @@ public class LPFactory implements ProductFactory {
         
         LP savedLP = repository.save(existingLP);
         
-        return mapper.toLPDTO(savedLP);
+        return mapper.toDTO(savedLP);
     }
     
     @Override
@@ -65,6 +65,6 @@ public class LPFactory implements ProductFactory {
             throw new IllegalArgumentException("Product is not a LP");
         }
         
-        return mapper.toLPDTO((LP) product);
+        return mapper.toDTO(product);
     }
 } 

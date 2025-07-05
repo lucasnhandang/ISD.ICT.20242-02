@@ -31,13 +31,13 @@ public class DVDFactory implements ProductFactory {
     public ProductDTO createProduct(ProductModifyRequest request) {
         DVDDTO dvdDTO = (DVDDTO) mapper.fromRequest(request);
         
-        DVD dvd = mapper.toDVDEntity(dvdDTO);
+        DVD dvd = (DVD) mapper.toEntity(dvdDTO);
         
         validator.validate(dvd);
         
         DVD savedDVD = repository.save(dvd);
         
-        return mapper.toDVDDTO(savedDVD);
+        return mapper.toDTO(savedDVD);
     }
     
     @Override
@@ -51,12 +51,12 @@ public class DVDFactory implements ProductFactory {
         DVDDTO dvdDTO = (DVDDTO) mapper.updateFromRequest(existing, request);
         
         mapper.updateEntityFromDTO(dvdDTO, existingDVD);
-        
+
         validator.validate(existingDVD);
         
         DVD savedDVD = repository.save(existingDVD);
         
-        return mapper.toDVDDTO(savedDVD);
+        return mapper.toDTO(savedDVD);
     }
     
     @Override
@@ -65,6 +65,6 @@ public class DVDFactory implements ProductFactory {
             throw new IllegalArgumentException("Product is not a DVD");
         }
         
-        return mapper.toDVDDTO((DVD) product);
+        return mapper.toDTO(product);
     }
 } 

@@ -31,13 +31,13 @@ public class CDFactory implements ProductFactory {
     public ProductDTO createProduct(ProductModifyRequest request) {
         CDDTO cdDTO = (CDDTO) mapper.fromRequest(request);
         
-        CD cd = mapper.toCDEntity(cdDTO);
+        CD cd = (CD) mapper.toEntity(cdDTO);
         
         validator.validate(cd);
         
         CD savedCD = repository.save(cd);
         
-        return mapper.toCDDTO(savedCD);
+        return mapper.toDTO(savedCD);
     }
     
     @Override
@@ -56,7 +56,7 @@ public class CDFactory implements ProductFactory {
         
         CD savedCD = repository.save(existingCD);
         
-        return mapper.toCDDTO(savedCD);
+        return mapper.toDTO(savedCD);
     }
     
     @Override
@@ -65,6 +65,6 @@ public class CDFactory implements ProductFactory {
             throw new IllegalArgumentException("Product is not a CD");
         }
         
-        return mapper.toCDDTO((CD) product);
+        return mapper.toDTO(product);
     }
 }

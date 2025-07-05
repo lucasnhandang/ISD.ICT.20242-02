@@ -24,10 +24,6 @@ public class DVDMapper extends BaseProductMapper {
 
     @Override
     protected void mapSpecificEntityToDto(Product entity, ProductDTO dto) {
-        if (!(entity instanceof DVD) || !(dto instanceof DVDDTO)) {
-            return; // Skip if types don't match
-        }
-        
         DVD dvd = (DVD) entity;
         DVDDTO dvdDto = (DVDDTO) dto;
         
@@ -43,10 +39,6 @@ public class DVDMapper extends BaseProductMapper {
 
     @Override
     protected void mapSpecificDtoToEntity(ProductDTO dto, Product entity) {
-        if (!(dto instanceof DVDDTO) || !(entity instanceof DVD)) {
-            return; // Skip if types don't match
-        }
-        
         DVDDTO dvdDto = (DVDDTO) dto;
         DVD dvd = (DVD) entity;
         
@@ -62,8 +54,6 @@ public class DVDMapper extends BaseProductMapper {
 
     @Override
     protected void mapSpecificRequestToDto(Map<String, Object> specific, ProductDTO dto) {
-        if (specific == null || !(dto instanceof DVDDTO)) return;
-        
         DVDDTO dvdDto = (DVDDTO) dto;
         dvdDto.setDiscType((String) specific.get("discType"));
         dvdDto.setDirector((String) specific.get("director"));
@@ -73,18 +63,5 @@ public class DVDMapper extends BaseProductMapper {
         dvdDto.setSubtitles((String) specific.get("subtitles"));
         dvdDto.setGenre((String) specific.get("genre"));
         dvdDto.setReleaseDate(DateUtils.parseDateNullable(specific.get("releaseDate"), "releaseDate"));
-    }
-
-    // Convenience methods for type-safe usage
-    public DVDDTO toDVDDTO(DVD dvd) {
-        return (DVDDTO) toDTO(dvd);
-    }
-    
-    public DVD toDVDEntity(DVDDTO dvdDto) {
-        return (DVD) toEntity(dvdDto);
-    }
-    
-    public void updateEntityFromDTO(DVDDTO dvdDto, DVD dvd) {
-        updateEntityFromDTO((ProductDTO) dvdDto, (Product) dvd);
     }
 }

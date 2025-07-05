@@ -24,10 +24,6 @@ public class LPMapper extends BaseProductMapper {
 
     @Override
     protected void mapSpecificEntityToDto(Product entity, ProductDTO dto) {
-        if (!(entity instanceof LP) || !(dto instanceof LPDTO)) {
-            return; // Skip if types don't match
-        }
-        
         LP lp = (LP) entity;
         LPDTO lpDto = (LPDTO) dto;
         
@@ -40,10 +36,6 @@ public class LPMapper extends BaseProductMapper {
 
     @Override
     protected void mapSpecificDtoToEntity(ProductDTO dto, Product entity) {
-        if (!(dto instanceof LPDTO) || !(entity instanceof LP)) {
-            return; // Skip if types don't match
-        }
-        
         LPDTO lpDto = (LPDTO) dto;
         LP lp = (LP) entity;
         
@@ -56,26 +48,11 @@ public class LPMapper extends BaseProductMapper {
 
     @Override
     protected void mapSpecificRequestToDto(Map<String, Object> specific, ProductDTO dto) {
-        if (specific == null || !(dto instanceof LPDTO)) return;
-        
         LPDTO lpDto = (LPDTO) dto;
         lpDto.setArtists((String) specific.get("artists"));
         lpDto.setRecordLabel((String) specific.get("recordLabel"));
         lpDto.setTrackList((String) specific.get("trackList"));
         lpDto.setGenre((String) specific.get("genre"));
         lpDto.setReleaseDate(DateUtils.parseDateNullable(specific.get("releaseDate"), "releaseDate"));
-    }
-
-    // Convenience methods for type-safe usage
-    public LPDTO toLPDTO(LP lp) {
-        return (LPDTO) toDTO(lp);
-    }
-    
-    public LP toLPEntity(LPDTO lpDto) {
-        return (LP) toEntity(lpDto);
-    }
-    
-    public void updateEntityFromDTO(LPDTO lpDto, LP lp) {
-        updateEntityFromDTO((ProductDTO) lpDto, (Product) lp);
     }
 }

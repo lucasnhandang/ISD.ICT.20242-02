@@ -199,20 +199,20 @@ const VnPayReturnPage = () => {
                   <Alert severity="info" sx={{ mt: 1 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <CircularProgress size={20} />
-                      <Typography>Đang xác nhận đơn hàng...</Typography>
+                      <Typography>Confirming order...</Typography>
                     </Box>
                   </Alert>
                 )}
                 
                 {confirmOrderStatus.success && (
                   <Alert severity="success" sx={{ mt: 1 }}>
-                    Đơn hàng đã được xác nhận thành công! Cart đã được làm sạch.
+                    Order has been confirmed successfully! Cart has been cleared.
                   </Alert>
                 )}
                 
                 {confirmOrderStatus.error && (
                   <Alert severity="error" sx={{ mt: 1 }}>
-                    Lỗi khi xác nhận đơn hàng: {confirmOrderStatus.error}
+                    Error confirming order: {confirmOrderStatus.error}
                   </Alert>
                 )}
               </Box>

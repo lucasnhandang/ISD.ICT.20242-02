@@ -24,10 +24,6 @@ public class BookMapper extends BaseProductMapper {
 
     @Override
     protected void mapSpecificEntityToDto(Product entity, ProductDTO dto) {
-        if (!(entity instanceof Book) || !(dto instanceof BookDTO)) {
-            return; // Skip if types don't match
-        }
-        
         Book book = (Book) entity;
         BookDTO bookDto = (BookDTO) dto;
         
@@ -42,10 +38,6 @@ public class BookMapper extends BaseProductMapper {
 
     @Override
     protected void mapSpecificDtoToEntity(ProductDTO dto, Product entity) {
-        if (!(dto instanceof BookDTO) || !(entity instanceof Book)) {
-            return; // Skip if types don't match
-        }
-        
         BookDTO bookDto = (BookDTO) dto;
         Book book = (Book) entity;
         
@@ -60,8 +52,6 @@ public class BookMapper extends BaseProductMapper {
 
     @Override
     protected void mapSpecificRequestToDto(Map<String, Object> specific, ProductDTO dto) {
-        if (specific == null || !(dto instanceof BookDTO)) return;
-        
         BookDTO bookDto = (BookDTO) dto;
         bookDto.setAuthors((String) specific.get("authors"));
         bookDto.setCoverType((String) specific.get("coverType"));
@@ -70,18 +60,5 @@ public class BookMapper extends BaseProductMapper {
         bookDto.setPages((Integer) specific.get("pages"));
         bookDto.setLanguage((String) specific.get("language"));
         bookDto.setGenre((String) specific.get("genre"));
-    }
-
-    // Convenience methods for type-safe usage
-    public BookDTO toBookDTO(Book book) {
-        return (BookDTO) toDTO(book);
-    }
-    
-    public Book toBookEntity(BookDTO bookDto) {
-        return (Book) toEntity(bookDto);
-    }
-    
-    public void updateEntityFromDTO(BookDTO bookDto, Book book) {
-        updateEntityFromDTO((ProductDTO) bookDto, (Product) book);
     }
 }
