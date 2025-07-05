@@ -46,7 +46,12 @@ public class RushOrderProcessingService {
         // Xử lý rush order
         CartRequestDTO rushCart = createRushCart(rushItems, cart);
         String province = deliveryInfo.getDeliveryProvince();
-        int rushShippingFee = rushShippingFeeCalculator.calculateShippingFee(province, cart.getProductList(), cart.getTotalPrice());
+        
+        // Debug log
+        System.out.println("🔍 Debug RushOrderProcessingService - Rush Cart Total Price: " + rushCart.getTotalPrice());
+        System.out.println("🔍 Debug RushOrderProcessingService - Rush Items: " + rushItems);
+        
+        int rushShippingFee = rushShippingFeeCalculator.calculateShippingFee(province, rushCart.getProductList(), rushCart.getTotalPrice());
         InvoiceDTO rushInvoiceDTO = invoiceCalculationService.calculateInvoice(rushCart.getTotalPrice(), rushShippingFee);
         rushInvoiceDTO.setRushOrder(true);
         invoiceList.add(rushInvoiceDTO);
@@ -56,7 +61,7 @@ public class RushOrderProcessingService {
         if (!normalItems.isEmpty()) {
             CartRequestDTO normalCart = createNormalCart(normalItems, cart);
             InvoiceDTO normalInvoiceDTO = normalOrderService.createInvoice(deliveryInfo, normalCart);
-            rushInvoiceDTO.setRushOrder(false);
+            normalInvoiceDTO.setRushOrder(false);
             invoiceList.add(normalInvoiceDTO);
             cartList.add(normalCart);
         }
@@ -76,7 +81,7 @@ public class RushOrderProcessingService {
         rushCart.setTotalItem(rushItems.size());
         rushCart.setCurrency(originalCart.getCurrency());
         rushCart.setDiscount(originalCart.getDiscount());
-        rushCart.setTotalPrice(rushItems.stream().mapToInt(CartItemRequestDTO::getPrice).sum());
+        rushCart.setTotalPrice(rushItems.stream().mapToInt(item -> item.getPrice() * item.getQuantity()).sum());
         rushCart.setRushOrder(true); // Đánh dấu đây là rush order
         return rushCart;
     }
@@ -87,7 +92,7 @@ public class RushOrderProcessingService {
         normalCart.setTotalItem(normalItems.size());
         normalCart.setCurrency(originalCart.getCurrency());
         normalCart.setDiscount(originalCart.getDiscount());
-        normalCart.setTotalPrice(normalItems.stream().mapToInt(CartItemRequestDTO::getPrice).sum());
+        normalCart.setTotalPrice(normalItems.stream().mapToInt(item -> item.getPrice() * item.getQuantity()).sum());
         normalCart.setRushOrder(false); // Đánh dấu đây là normal order
         return normalCart;
     }

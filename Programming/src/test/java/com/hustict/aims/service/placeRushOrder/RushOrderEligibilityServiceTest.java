@@ -150,7 +150,7 @@ public class RushOrderEligibilityServiceTest {
             () -> rushOrderEligibilityService.checkEligibility(validCart, nonHanoiDeliveryInfo)
         );
 
-        assertEquals("Delivery address does not support rush order delivery. Rush order is only available for addresses within Hanoi and Ho Chi Minh City inner areas.", 
+        assertEquals("Delivery address does not support rush order delivery. Rush order is only available for addresses within Hanoi inner city.", 
                     exception.getMessage());
         assertEquals("ADDRESS_NOT_ELIGIBLE", exception.getErrorCode());
         assertNull(exception.getExpectedDateTime());
@@ -258,31 +258,28 @@ public class RushOrderEligibilityServiceTest {
     }
 
     @Test
-    void checkEligibility_AddressHochiminh_Success() {
+    void checkEligibility_AddressHochiminh_NotEligible() {
         // Arrange
         DeliveryFormDTO hcmDeliveryInfo = new DeliveryFormDTO();
         hcmDeliveryInfo.setCustomerName("Test User");
         hcmDeliveryInfo.setPhoneNumber("0123456789");
         hcmDeliveryInfo.setEmail("test@example.com");
         hcmDeliveryInfo.setDeliveryAddress("Test Address");
-        hcmDeliveryInfo.setDeliveryProvince("Hochiminh"); // Test Ho Chi Minh City
+        hcmDeliveryInfo.setDeliveryProvince("Hochiminh"); // Ho Chi Minh không được hỗ trợ
 
-        List<CartItemRequestDTO> rushItems = Arrays.asList(rushItem1);
-        List<CartItemRequestDTO> normalItems = Collections.emptyList();
-        CartSplitter.Pair<List<CartItemRequestDTO>, List<CartItemRequestDTO>> splitResult = 
-            new CartSplitter.Pair<>(rushItems, normalItems);
+        // Act & Assert
+        RushOrderException exception = assertThrows(
+            RushOrderException.class,
+            () -> rushOrderEligibilityService.checkEligibility(validCart, hcmDeliveryInfo)
+        );
 
-        when(cartSplitter.splitRushAndNormal(validCart, productRepository))
-            .thenReturn(splitResult);
+        assertEquals("Delivery address does not support rush order delivery. Rush order is only available for addresses within Hanoi inner city.", 
+                    exception.getMessage());
+        assertEquals("ADDRESS_NOT_ELIGIBLE", exception.getErrorCode());
+        assertNull(exception.getExpectedDateTime());
 
-        // Act
-        RushOrderEligibilityResponseDTO result = rushOrderEligibilityService.checkEligibility(validCart, hcmDeliveryInfo);
-
-        // Assert
-        assertNotNull(result);
-        assertTrue(result.isEligible());
-        assertEquals(1, result.getRushItems().size());
-        assertEquals("Rush order is eligible for your cart and delivery address.", result.getMessage());
+        // Verify cartSplitter không được gọi khi địa chỉ không hợp lệ
+        verify(cartSplitter, never()).splitRushAndNormal(any(), any());
     }
 
     @Test
@@ -341,4 +338,52 @@ public class RushOrderEligibilityServiceTest {
         // Verify content của normal items
         assertEquals(normalItem1.getProductID(), result.getNormalItems().get(0).getProductID());
     }
-} 
+
+    @Test
+    void checkEligibility_NullProvince_NotEligible() {
+        // Arrange
+        DeliveryFormDTO nullProvinceInfo = new DeliveryFormDTO();
+        nullProvinceInfo.setCustomerName("Test User");
+        nullProvinceInfo.setPhoneNumber("0123456789");
+        nullProvinceInfo.setEmail("test@example.com");
+        nullProvinceInfo.setDeliveryAddress("Test Address");
+        nullProvinceInfo.setDeliveryProvince(null); // Province is null
+
+        // Act & Assert
+        RushOrderException exception = assertThrows(
+            RushOrderException.class,
+            () -> rushOrderEligibilityService.checkEligibility(validCart, nullProvinceInfo)
+        );
+
+        assertEquals("Delivery address does not support rush order delivery. Rush order is only available for addresses within Hanoi inner city.", 
+                    exception.getMessage());
+        assertEquals("ADDRESS_NOT_ELIGIBLE", exception.getErrorCode());
+
+        // Verify cartSplitter không được gọi khi địa chỉ không hợp lệ
+        verify(cartSplitter, never()).splitRushAndNormal(any(), any());
+    }
+
+    @Test
+    void checkEligibility_EmptyProvince_NotEligible() {
+        // Arrange
+        DeliveryFormDTO emptyProvinceInfo = new DeliveryFormDTO();
+        emptyProvinceInfo.setCustomerName("Test User");
+        emptyProvinceInfo.setPhoneNumber("0123456789");
+        emptyProvinceInfo.setEmail("test@example.com");
+        emptyProvinceInfo.setDeliveryAddress("Test Address");
+        emptyProvinceInfo.setDeliveryProvince(""); // Province is empty
+
+        // Act & Assert
+        RushOrderException exception = assertThrows(
+            RushOrderException.class,
+            () -> rushOrderEligibilityService.checkEligibility(validCart, emptyProvinceInfo)
+        );
+
+        assertEquals("Delivery address does not support rush order delivery. Rush order is only available for addresses within Hanoi inner city.", 
+                    exception.getMessage());
+        assertEquals("ADDRESS_NOT_ELIGIBLE", exception.getErrorCode());
+
+        // Verify cartSplitter không được gọi khi địa chỉ không hợp lệ
+        verify(cartSplitter, never()).splitRushAndNormal(any(), any());
+    }
+}
