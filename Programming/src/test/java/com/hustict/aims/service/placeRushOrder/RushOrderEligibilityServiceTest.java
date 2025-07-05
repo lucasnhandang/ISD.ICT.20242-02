@@ -87,8 +87,8 @@ public class RushOrderEligibilityServiceTest {
         nonHanoiDeliveryInfo.setCustomerName("Tran Van B");
         nonHanoiDeliveryInfo.setPhoneNumber("0987654321");
         nonHanoiDeliveryInfo.setEmail("test2@example.com");
-        nonHanoiDeliveryInfo.setDeliveryAddress("456 District 1");
-        nonHanoiDeliveryInfo.setDeliveryProvince("Hochiminh");
+        nonHanoiDeliveryInfo.setDeliveryAddress("456 Test Street");
+        nonHanoiDeliveryInfo.setDeliveryProvince("DaNang"); // Use a province that doesn't support rush order
         nonHanoiDeliveryInfo.setRushOrder(false);
 
         // Setup default mock behavior
@@ -150,7 +150,7 @@ public class RushOrderEligibilityServiceTest {
             () -> rushOrderEligibilityService.checkEligibility(validCart, nonHanoiDeliveryInfo)
         );
 
-        assertEquals("Delivery address does not support rush order delivery. Rush order is only available for addresses within Hanoi inner city.", 
+        assertEquals("Delivery address does not support rush order delivery. Rush order is only available for addresses within Hanoi and Ho Chi Minh City inner areas.", 
                     exception.getMessage());
         assertEquals("ADDRESS_NOT_ELIGIBLE", exception.getErrorCode());
         assertNull(exception.getExpectedDateTime());
@@ -255,6 +255,34 @@ public class RushOrderEligibilityServiceTest {
         // Assert
         assertNotNull(result);
         assertTrue(result.isEligible());
+    }
+
+    @Test
+    void checkEligibility_AddressHochiminh_Success() {
+        // Arrange
+        DeliveryFormDTO hcmDeliveryInfo = new DeliveryFormDTO();
+        hcmDeliveryInfo.setCustomerName("Test User");
+        hcmDeliveryInfo.setPhoneNumber("0123456789");
+        hcmDeliveryInfo.setEmail("test@example.com");
+        hcmDeliveryInfo.setDeliveryAddress("Test Address");
+        hcmDeliveryInfo.setDeliveryProvince("Hochiminh"); // Test Ho Chi Minh City
+
+        List<CartItemRequestDTO> rushItems = Arrays.asList(rushItem1);
+        List<CartItemRequestDTO> normalItems = Collections.emptyList();
+        CartSplitter.Pair<List<CartItemRequestDTO>, List<CartItemRequestDTO>> splitResult = 
+            new CartSplitter.Pair<>(rushItems, normalItems);
+
+        when(cartSplitter.splitRushAndNormal(validCart, productRepository))
+            .thenReturn(splitResult);
+
+        // Act
+        RushOrderEligibilityResponseDTO result = rushOrderEligibilityService.checkEligibility(validCart, hcmDeliveryInfo);
+
+        // Assert
+        assertNotNull(result);
+        assertTrue(result.isEligible());
+        assertEquals(1, result.getRushItems().size());
+        assertEquals("Rush order is eligible for your cart and delivery address.", result.getMessage());
     }
 
     @Test

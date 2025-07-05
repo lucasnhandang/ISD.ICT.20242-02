@@ -4,7 +4,8 @@ import { Box, Typography, Divider, Paper, Button, CircularProgress, Alert, TextF
 import Header from '../components/Header';
 // import RushOrderResults from '../components/RushOrderResults'; // REMOVED
 import { checkRushOrderEligibility, submitRushOrderInfo, saveRushOrders, getProductDetails } from '../services/api';
-import { getDisplayName } from '../utils/provinceUtils';
+import { getProvinceDisplayName } from '../utils/provinceUtils';
+
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('vi-VN', {
@@ -366,7 +367,7 @@ const RushOrderPage = () => {
                     {deliveryForm.deliveryAddress}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {getDisplayName(deliveryForm.deliveryProvince)}
+                    {getProvinceDisplayName(deliveryForm.deliveryProvince)}
                   </Typography>
                 </Box>
               </Box>
@@ -402,7 +403,7 @@ const RushOrderPage = () => {
                     }}
                   />
                   <Typography variant="caption" color="text.secondary">
-                    Delivery time must be at most 2 hours from now.
+                    Delivery time must be within 2 hours from now
                   </Typography>
                 </Box>
 

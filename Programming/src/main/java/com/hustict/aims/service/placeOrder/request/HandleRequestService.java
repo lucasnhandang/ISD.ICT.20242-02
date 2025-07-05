@@ -1,8 +1,9 @@
-package com.hustict.aims.service.placeOrder;
+package com.hustict.aims.service.placeOrder.request;
 
 import org.springframework.stereotype.Service;
 
 import com.hustict.aims.dto.cart.CartRequestDTO;
+import com.hustict.aims.service.placeOrder.ProductAvailabilityService;
 import com.hustict.aims.service.reservation.ReservationService;
 
 

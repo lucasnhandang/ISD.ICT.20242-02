@@ -3,7 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, Typography, Divider, Paper, Button, Alert, CircularProgress, Chip, Grid } from '@mui/material';
 import Header from '../components/Header';
 import { checkRushOrderEligibility, getProductDetails } from '../services/api';
-import { getDisplayName } from '../utils/provinceUtils';
+import { getProvinceDisplayName } from '../utils/provinceUtils';
+
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('vi-VN', {
@@ -326,7 +327,7 @@ const OrderReviewPage = () => {
                     {deliveryForm.deliveryAddress}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {getDisplayName(deliveryForm.deliveryProvince)}
+                    {getProvinceDisplayName(deliveryForm.deliveryProvince)}
                   </Typography>
                 </Box>
 
