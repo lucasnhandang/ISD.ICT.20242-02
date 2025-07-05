@@ -1,24 +1,25 @@
 package com.hustict.aims.service.validator;
 
 import com.hustict.aims.model.product.DVD;
+import com.hustict.aims.model.product.Product;
 import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class DVDValidator extends ProductValidator<DVD> {
+public class DVDValidator extends ProductValidator {
     @Override
-    public String getType() { return "DVD"; }
-
-    @Override
-    protected Class<DVD> getSupportedClass() { return DVD.class; }
-
-    @Override
-    protected void validateSpecific(DVD d, List<String> errs) {
-        rejectIfBlank(d.getDiscType(), "Disc type", 50, errs);
-        rejectIfBlank(d.getDirector(), "Director", 100, errs);
-        rejectIfNegative(d.getRuntime(), "Runtime", errs);
-        rejectIfBlank(d.getStudio(), "Studio", 100, errs);
-        rejectIfBlank(d.getLanguage(), "Language", 50, errs);
-        rejectIfBlank(d.getSubtitles(), "Subtitles", 255, errs);
+    protected void validateSpecific(Product product, List<String> errors) {
+        if (!(product instanceof DVD)) {
+            errors.add("Invalid product type for DVD validator");
+            return;
+        }
+        
+        DVD dvd = (DVD) product;
+        rejectIfBlank(dvd.getDirector(), "DVD director", 100, errors);
+        rejectIfBlank(dvd.getStudio(), "DVD studio", 100, errors);
+        
+        if (dvd.getRuntime() <= 0) {
+            errors.add("DVD runtime must be positive!");
+        }
     }
 }

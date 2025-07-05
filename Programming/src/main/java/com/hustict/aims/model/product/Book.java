@@ -1,9 +1,13 @@
 package com.hustict.aims.model.product;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "book")
 public class Book extends Product {
@@ -28,9 +32,10 @@ public class Book extends Product {
     @Column(name = "genre")
     private String genre;
 
-    public Book() {}
+    public Book() { super(); }
 
-    public Book(Product product, String authors, String coverType, String publisher, Integer pages, String language, String genre, LocalDate publicationDate) {
+    public Book(Product product, String authors, String coverType, String publisher, Integer pages,
+                String language, String genre, LocalDate publicationDate) {
         super(product);
         this.authors = authors;
         this.coverType = coverType;
@@ -41,18 +46,8 @@ public class Book extends Product {
         this.publicationDate = publicationDate;
     }
 
-    public void setAuthors(String authors) { this.authors = authors; }
-    public String getAuthors() { return authors; }
-    public void setCoverType(String coverType) { this.coverType = coverType; }
-    public String getCoverType() { return coverType; }
-    public void setPublisher(String publisher) { this.publisher = publisher; }
-    public String getPublisher() { return publisher; }
-    public void setPages(Integer pages) { this.pages = pages; }
-    public Integer getPages() { return pages; }
-    public void setLanguage(String language) { this.language = language; }
-    public String getLanguage() { return language; }
-    public void setGenre(String genre) { this.genre = genre; }
-    public String getGenre() { return genre; }
-    public void setPublicationDate(LocalDate publicationDate) { this.publicationDate = publicationDate; }
-    public LocalDate getPublicationDate() { return publicationDate; }
+    @Override
+    protected void setCategory() {
+        this.setCategory("Book");
+    }
 }

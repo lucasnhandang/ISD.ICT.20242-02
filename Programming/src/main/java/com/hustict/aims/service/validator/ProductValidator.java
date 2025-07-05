@@ -5,51 +5,18 @@ import com.hustict.aims.exception.ProductValidationException;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class ProductValidator<T extends Product> {
-    public abstract String getType();
-
-    protected abstract Class<T> getSupportedClass();
-
-    public boolean canValidate(Product product) {
-        return getSupportedClass().isInstance(product);
-    }
-
-    @SuppressWarnings("unchecked")
+public abstract class ProductValidator {
     public final void validate(Product product) {
         List<String> errors = new ArrayList<>();
-        if (canValidate(product)) {
-            T typedProduct = (T) product;
-            validateCommon(typedProduct, errors);
-            validateSpecific(typedProduct, errors);
-        } else {
-            throw new ProductValidationException("Validator type mismatch for product: " + product.getTitle());
-        }
+        
+        validateCommon(product, errors);
+        validateSpecific(product, errors);
         
         if (!errors.isEmpty()) {
             throw new ProductValidationException(errors);
         }
     }
     
-    protected void rejectIfBlank(String value, String field, int max, List<String> errs) {
-        if (value == null || value.trim().isEmpty()) {
-            errs.add(field + " is required");
-        } else if (max > 0 && value.length() > max) {
-            errs.add(field + " must not exceed " + max + " characters!");
-        }
-    }
-
-    protected void rejectIfNegative(int num, String field, List<String> errs) {
-        if (num <= 0) {
-            errs.add(field + " must be positive!");
-        }
-    }
-
-    protected void rejectIfNull(Object o, String field, List<String> errs) {
-        if (o == null) {
-            errs.add(field + " is required!");
-        }
-    }
-
     protected void validateCommon(Product p, List<String> errs) {
         rejectIfBlank(p.getTitle(), "Product title", 255, errs);
         rejectIfNegative(p.getValue(), "Product value", errs);
@@ -74,5 +41,25 @@ public abstract class ProductValidator<T extends Product> {
         }
     }
 
-    protected abstract void validateSpecific(T product, List<String> errs);
+    protected void rejectIfBlank(String value, String field, int max, List<String> errs) {
+        if (value == null || value.trim().isEmpty()) {
+            errs.add(field + " is required");
+        } else if (max > 0 && value.length() > max) {
+            errs.add(field + " must not exceed " + max + " characters!");
+        }
+    }
+
+    protected void rejectIfNegative(int num, String field, List<String> errs) {
+        if (num <= 0) {
+            errs.add(field + " must be positive!");
+        }
+    }
+
+    protected void rejectIfNull(Object o, String field, List<String> errs) {
+        if (o == null) {
+            errs.add(field + " is required!");
+        }
+    }
+
+    protected abstract void validateSpecific(Product product, List<String> errors);
 }

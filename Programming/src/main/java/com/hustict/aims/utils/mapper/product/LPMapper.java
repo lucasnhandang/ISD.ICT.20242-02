@@ -1,45 +1,81 @@
 package com.hustict.aims.utils.mapper.product;
 
-import com.hustict.aims.dto.product.LPDetailDTO;
+import com.hustict.aims.dto.product.LPDTO;
+import com.hustict.aims.dto.product.ProductDTO;
 import com.hustict.aims.model.product.LP;
+import com.hustict.aims.model.product.Product;
 import com.hustict.aims.utils.DateUtils;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 @Component
-public class LPMapper extends ProductMapper<LP, LPDetailDTO> {
-
+public class LPMapper extends BaseProductMapper {
     @Override
-    protected LP createProduct() {
+    protected ProductDTO createDTO() {
+        return new LPDTO();
+    }
+    
+    @Override
+    protected Product createEntity() {
         return new LP();
     }
 
     @Override
-    protected LPDetailDTO createDetailDTO() {
-        return new LPDetailDTO();
+    protected void mapSpecificEntityToDto(Product entity, ProductDTO dto) {
+        if (!(entity instanceof LP) || !(dto instanceof LPDTO)) {
+            return; // Skip if types don't match
+        }
+        
+        LP lp = (LP) entity;
+        LPDTO lpDto = (LPDTO) dto;
+        
+        lpDto.setArtists(lp.getArtists());
+        lpDto.setRecordLabel(lp.getRecordLabel());
+        lpDto.setTrackList(lp.getTrackList());
+        lpDto.setGenre(lp.getGenre());
+        lpDto.setReleaseDate(lp.getReleaseDate());
     }
 
     @Override
-    protected void mapSpecFields(LP lp, Map<String, Object> data) {
-        lp.setArtists(getString(data, "artists"));
-        lp.setRecordLabel(getString(data, "recordLabel"));
-        lp.setTrackList(getString(data, "trackList"));
-        lp.setGenre(getString(data, "genre"));
-        lp.setReleaseDate(DateUtils.parseDateNullable(data.get("releaseDate"), "releaseDate"));
+    protected void mapSpecificDtoToEntity(ProductDTO dto, Product entity) {
+        if (!(dto instanceof LPDTO) || !(entity instanceof LP)) {
+            return; // Skip if types don't match
+        }
+        
+        LPDTO lpDto = (LPDTO) dto;
+        LP lp = (LP) entity;
+        
+        lp.setArtists(lpDto.getArtists());
+        lp.setRecordLabel(lpDto.getRecordLabel());
+        lp.setTrackList(lpDto.getTrackList());
+        lp.setGenre(lpDto.getGenre());
+        lp.setReleaseDate(lpDto.getReleaseDate());
     }
 
     @Override
-    protected void updateSpecFields(LP lp, Map<String, Object> data) {
-        if (data.containsKey("artists"))
-            lp.setArtists(getString(data, "artists"));
-        if (data.containsKey("recordLabel"))
-            lp.setRecordLabel(getString(data, "recordLabel"));
-        if (data.containsKey("trackList"))
-            lp.setTrackList(getString(data, "trackList"));
-        if (data.containsKey("genre"))
-            lp.setGenre(getString(data, "genre"));
-        if (data.containsKey("releaseDate"))
-            lp.setReleaseDate(DateUtils.parseDateNullable(data.get("releaseDate"), "releaseDate"));
+    protected void mapSpecificRequestToDto(Map<String, Object> specific, ProductDTO dto) {
+        if (specific == null || !(dto instanceof LPDTO)) return;
+        
+        LPDTO lpDto = (LPDTO) dto;
+        lpDto.setArtists((String) specific.get("artists"));
+        lpDto.setRecordLabel((String) specific.get("recordLabel"));
+        lpDto.setTrackList((String) specific.get("trackList"));
+        lpDto.setGenre((String) specific.get("genre"));
+        lpDto.setReleaseDate(DateUtils.parseDateNullable(specific.get("releaseDate"), "releaseDate"));
+    }
+
+    // Convenience methods for type-safe usage
+    public LPDTO toLPDTO(LP lp) {
+        return (LPDTO) toDTO(lp);
+    }
+    
+    public LP toLPEntity(LPDTO lpDto) {
+        return (LP) toEntity(lpDto);
+    }
+    
+    public void updateEntityFromDTO(LPDTO lpDto, LP lp) {
+        updateEntityFromDTO((ProductDTO) lpDto, (Product) lp);
     }
 }

@@ -16,6 +16,7 @@ import {
 import { submitDeliveryForm, checkRushOrderEligibility } from '../services/api';
 import { provinces } from '../utils/provinceUtils';
 
+
 const DeliveryForm = ({ onClose, onSuccess, initialValues, disabled }) => {
   const [form, setForm] = useState({
     customerName: '',
@@ -37,7 +38,7 @@ const DeliveryForm = ({ onClose, onSuccess, initialValues, disabled }) => {
         phoneNumber: initialValues.phoneNumber || '',
         email: initialValues.email || '',
         deliveryAddress: initialValues.deliveryAddress || '',
-        deliveryProvince: initialValues.deliveryProvince || '',
+        deliveryProvince: getDisplayName(initialValues.deliveryProvince) || '',
         isRushOrder: initialValues.isRushOrder || false
       });
     }
@@ -61,8 +62,13 @@ const DeliveryForm = ({ onClose, onSuccess, initialValues, disabled }) => {
     setValidationErrors([]);
     
     try {
-      await submitDeliveryForm(form);
-      onSuccess(form);
+      // Convert display name to backend value before sending
+      const formDataForBackend = {
+        ...form,
+        deliveryProvince: getBackendValue(form.deliveryProvince)
+      };
+      await submitDeliveryForm(formDataForBackend);
+      onSuccess(formDataForBackend);
     } catch (err) {
       console.log('Error response:', err.response?.data);
       

@@ -1,51 +1,70 @@
 package com.hustict.aims.service.factory;
 
-import com.hustict.aims.dto.product.DVDDetailDTO;
+import com.hustict.aims.dto.product.DVDDTO;
+import com.hustict.aims.dto.product.ProductDTO;
+import com.hustict.aims.dto.product.ProductModifyRequest;
+import com.hustict.aims.model.product.Product;
 import com.hustict.aims.model.product.DVD;
-import com.hustict.aims.service.handler.DVDHandler;
+import com.hustict.aims.repository.product.DVDRepository;
 import com.hustict.aims.service.validator.DVDValidator;
+import com.hustict.aims.utils.mapper.product.DVDMapper;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-
 @Component
-public class DVDFactory implements ProductFactory<DVD, DVDDetailDTO> {
-    private final DVDHandler handler;
+public class DVDFactory implements ProductFactory {
+    private final DVDRepository repository;
     private final DVDValidator validator;
+    private final DVDMapper mapper;
     
-    public DVDFactory(DVDHandler handler, DVDValidator validator) {
-        this.handler = handler;
+    public DVDFactory(DVDRepository repository, DVDValidator validator, DVDMapper mapper) {
+        this.repository = repository;
         this.validator = validator;
+        this.mapper = mapper;
     }
     
     @Override
-    public String getProductType() {
+    public String getCategory() {
         return "DVD";
     }
     
     @Override
-    public boolean supports(String productType) {
-        return "DVD".equalsIgnoreCase(productType);
-    }
-    
-    @Override
-    public DVDDetailDTO createProduct(Map<String, Object> data) {
-        DVD dvd = (DVD) handler.toEntity(data);
+    public ProductDTO createProduct(ProductModifyRequest request) {
+        DVDDTO dvdDTO = (DVDDTO) mapper.fromRequest(request);
+        
+        DVD dvd = mapper.toDVDEntity(dvdDTO);
+        
         validator.validate(dvd);
-        DVD savedDVD = (DVD) handler.save(dvd);
-        return (DVDDetailDTO) handler.toDTO(savedDVD);
+        
+        DVD savedDVD = repository.save(dvd);
+        
+        return mapper.toDVDDTO(savedDVD);
     }
     
     @Override
-    public DVDDetailDTO updateProduct(DVD existing, Map<String, Object> data) {
-        DVD updatedDVD = (DVD) handler.updateEntity(existing, data);
-        validator.validate(updatedDVD);
-        DVD savedDVD = (DVD) handler.save(updatedDVD);
-        return (DVDDetailDTO) handler.toDTO(savedDVD);
+    public ProductDTO updateProduct(Product existing, ProductModifyRequest request) {
+        if (!(existing instanceof DVD)) {
+            throw new IllegalArgumentException("Existing product is not a DVD");
+        }
+        
+        DVD existingDVD = (DVD) existing;
+        
+        DVDDTO dvdDTO = (DVDDTO) mapper.updateFromRequest(existing, request);
+        
+        mapper.updateEntityFromDTO(dvdDTO, existingDVD);
+        
+        validator.validate(existingDVD);
+        
+        DVD savedDVD = repository.save(existingDVD);
+        
+        return mapper.toDVDDTO(savedDVD);
     }
     
     @Override
-    public DVDDetailDTO viewProduct(DVD product) {
-        return (DVDDetailDTO) handler.toDTO(product);
+    public ProductDTO viewProduct(Product product) {
+        if (!(product instanceof DVD)) {
+            throw new IllegalArgumentException("Product is not a DVD");
+        }
+        
+        return mapper.toDVDDTO((DVD) product);
     }
 } 

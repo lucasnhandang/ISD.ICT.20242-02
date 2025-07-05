@@ -54,10 +54,10 @@ public class OrderServiceImpl implements OrderService {
     @Transactional(readOnly = true)
     public List<OrderInformationDTO> getPendingOrders(int page, int size) {
         try {
-            System.out.println("Bắt đầu lấy danh sách pending orders trang " + page + "...");
-            org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
-            List<Order> pendingOrders = orderRepository.findByOrderStatus(OrderStatus.PENDING, pageable);
-            System.out.println("Tìm thấy " + pendingOrders.size() + " pending orders cho trang " + page);
+            System.out.println("Bắt đầu lấy danh sách pending orders...");
+            // Sử dụng method mới với JOIN FETCH để tránh N+1 query
+            List<Order> pendingOrders = orderRepository.findByOrderStatusWithDetails(OrderStatus.PENDING);
+            System.out.println("Tìm thấy " + pendingOrders.size() + " pending orders");
             
             List<OrderInformationDTO> result = pendingOrders.stream()
                     .map(orderMapper::toDTO)
