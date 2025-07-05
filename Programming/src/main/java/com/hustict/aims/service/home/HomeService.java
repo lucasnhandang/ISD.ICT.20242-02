@@ -4,7 +4,7 @@ import com.hustict.aims.dto.PagedResponseDTO;
 import com.hustict.aims.dto.home.ProductSearchRequestDTO;
 import com.hustict.aims.dto.home.ProductSummaryDTO;
 import com.hustict.aims.model.product.Product;
-import com.hustict.aims.repository.HomeRepository;
+import com.hustict.aims.repository.product.ProductRepository;
 import com.hustict.aims.utils.builder.PagedResponseBuilder;
 import com.hustict.aims.utils.mapper.ProductSummaryMapper;
 
@@ -27,24 +27,24 @@ import java.util.Map;
 @Transactional(readOnly = true)
 public class HomeService {
 
-    private final HomeRepository homeRepo;
-    private final ProductSummaryMapper productSummaryMapper;
+    private final ProductRepository repository;
+    private final ProductSummaryMapper mapper;
 
     private static final Map<String, String> SORT_FIELD_MAP = Map.of(
             "price", "currentPrice",
             "title", "title"
     );
 
-    public HomeService(HomeRepository homeRepo, ProductSummaryMapper productMapper) {
-        this.homeRepo = homeRepo;
-        this.productSummaryMapper = productMapper;
+    public HomeService(ProductRepository repository, ProductSummaryMapper productMapper) {
+        this.repository = repository;
+        this.mapper = productMapper;
     }
 
     public PagedResponseDTO<ProductSummaryDTO> getRandomProducts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Product> productPage = homeRepo.getRandomProducts(pageable);
+        Page<Product> productPage = repository.getRandomProducts(pageable);
 
-        return PagedResponseBuilder.fromPage(productPage, productSummaryMapper::toSummaryDTO);
+        return PagedResponseBuilder.fromPage(productPage, mapper::toSummaryDTO);
     }
 
     public PagedResponseDTO<ProductSummaryDTO> searchProducts(ProductSearchRequestDTO searchRequest) {
@@ -57,17 +57,17 @@ public class HomeService {
         Page<Product> page;
 
         if (searchRequest.getCategory() != null && !searchRequest.getCategory().isEmpty()) {
-            page = homeRepo.searchByTitleAndCategory(searchRequest.getSearchQuery(), searchRequest.getCategory(), pageable);
+            page = repository.searchByTitleAndCategory(searchRequest.getSearchQuery(), searchRequest.getCategory(), pageable);
         } else {
-            page = homeRepo.searchByTitle(searchRequest.getSearchQuery(), pageable);
+            page = repository.searchByTitle(searchRequest.getSearchQuery(), pageable);
         }
-        return PagedResponseBuilder.fromPage(page, productSummaryMapper::toSummaryDTO);
+        return PagedResponseBuilder.fromPage(page, mapper::toSummaryDTO);
     }
 
     public PagedResponseDTO<ProductSummaryDTO> getProductsByCategory(String category, String sortBy, String sortDirection, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, createSort(sortBy, sortDirection));
-        Page<Product> pageResult = homeRepo.findByCategory(category, pageable);
-        return PagedResponseBuilder.fromPage(pageResult, productSummaryMapper::toSummaryDTO);
+        Page<Product> pageResult = repository.findByCategory(category, pageable);
+        return PagedResponseBuilder.fromPage(pageResult, mapper::toSummaryDTO);
     }
 
     private Sort createSort(String sortBy, String sortDirection) {

@@ -1,7 +1,7 @@
 package com.hustict.aims.service.rules;
 
-import java.util.Map;
+import com.hustict.aims.dto.product.ProductModifyRequest;
 
 public interface ProductUpdateRule {
-    void validate(Long userId, Long productId, Map<String, Object> data);
+    void validate(Long userId, Long productId, ProductModifyRequest request);
 }

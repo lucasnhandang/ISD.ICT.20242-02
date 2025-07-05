@@ -162,6 +162,36 @@ const renderDVDDetails = (product) => (
   </>
 );
 
+const renderLPDetails = (product) => (
+  <>
+    {product.artists && (
+      <Typography variant="body1" gutterBottom>
+        <strong>Artists:</strong> {product.artists}
+      </Typography>
+    )}
+    {product.recordLabel && (
+      <Typography variant="body1" gutterBottom>
+        <strong>Record Label:</strong> {product.recordLabel}
+      </Typography>
+    )}
+    {product.genre && (
+      <Typography variant="body1" gutterBottom>
+        <strong>Genre:</strong> {product.genre}
+      </Typography>
+    )}
+    {product.releaseDate && (
+      <Typography variant="body1" gutterBottom>
+        <strong>Release Date:</strong> {formatDate(product.releaseDate)}
+      </Typography>
+    )}
+    {product.trackList && (
+      <Typography variant="body1" gutterBottom>
+        <strong>Track List:</strong> {product.trackList}
+      </Typography>
+    )}
+  </>
+);
+
 const renderProductSpecificDetails = (product) => {
   const category = product.category?.toLowerCase();
   
@@ -172,6 +202,8 @@ const renderProductSpecificDetails = (product) => {
       return renderCDDetails(product);
     case 'dvd':
       return renderDVDDetails(product);
+    case 'lp':
+      return renderLPDetails(product);
     default:
       return null;
   }
