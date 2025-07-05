@@ -21,7 +21,8 @@ public class RushShippingFee implements ShippingFeeCalculator {
         double shippingFee;
         // Tính phí ship theo tỉnh và khối lượng
         if (deliveryInfo.getDeliveryProvince().equalsIgnoreCase("Hanoi") 
-         || deliveryInfo.getDeliveryProvince().equalsIgnoreCase("HoChiMinhCity")) {
+         || deliveryInfo.getDeliveryProvince().equalsIgnoreCase("HoChiMinhCity")
+         || deliveryInfo.getDeliveryProvince().equalsIgnoreCase("Hochiminh")) {
             shippingFee = (totalWeight <= 3)
                 ? 22000
                 : 22000 + Math.ceil((totalWeight - 3) / 0.5) * 2500;

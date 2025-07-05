@@ -4,6 +4,7 @@ import { Box, Typography, Divider, Paper, Button, Alert, CircularProgress, Chip 
 import Header from '../components/Header';
 import { createVnPayUrl, clearCart } from '../services/api';
 import { AccessTime } from '@mui/icons-material';
+import { getProvinceDisplayName } from '../utils/provinceUtils';
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('vi-VN', {
@@ -436,7 +437,7 @@ const InvoicePage = () => {
                   {deliveryForm.deliveryAddress}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {deliveryForm.deliveryProvince}
+                  {getProvinceDisplayName(deliveryForm.deliveryProvince)}
                 </Typography>
               </Box>
               
