@@ -1,8 +1,9 @@
 package com.hustict.aims.service.shippingFeeCalculator;
 
-import com.hustict.aims.dto.cart.CartRequestDTO;
-import com.hustict.aims.dto.deliveryForm.DeliveryFormDTO;
+
+import com.hustict.aims.dto.cart.CartItemRequestDTO;
+import java.util.List;
 
 public interface ShippingFeeCalculator {
-    int calculateShippingFee(DeliveryFormDTO deliveryForm,CartRequestDTO cart);
+    int calculateShippingFee(String province, List<CartItemRequestDTO> productList, int totalPrice);
 }

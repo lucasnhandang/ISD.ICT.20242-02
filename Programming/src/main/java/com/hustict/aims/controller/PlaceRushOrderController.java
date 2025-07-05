@@ -187,7 +187,7 @@ public class PlaceRushOrderController {
             InvoiceDTO currentInvoice = invoiceList.get(i);
             
             // Save temp order
-            Long orderId = saveTempOrder.save(currentCart, deliveryInfo, currentInvoice,session);
+            Long orderId = saveTempOrder.save(currentCart, deliveryInfo, currentInvoice);
             
             // Phân loại order theo rush flag
             if (currentCart.isRushOrder()) {
