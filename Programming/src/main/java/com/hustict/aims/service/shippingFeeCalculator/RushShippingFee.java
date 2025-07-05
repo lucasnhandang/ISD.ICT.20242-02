@@ -6,23 +6,28 @@ import com.hustict.aims.dto.cart.CartItemRequestDTO;
 import com.hustict.aims.dto.cart.CartRequestDTO;
 import com.hustict.aims.dto.deliveryForm.DeliveryFormDTO;
 
+import com.hustict.aims.dto.cart.CartItemRequestDTO;
+import java.util.List;
+
 @Service("rushShippingFee")
 public class RushShippingFee implements ShippingFeeCalculator {
 
     @Override
-    public int calculateShippingFee(DeliveryFormDTO deliveryInfo, CartRequestDTO rushCart) {
+    public int calculateShippingFee(String province, List<CartItemRequestDTO> productList, int totalPrice) {
         double totalWeight = 0;
+        int totalItem = 0;
+        //List<CartItemRequestDTO> productList= rushCart.getProductList();
 
         // Tính tổng khối lượng đơn hàng
-        for (CartItemRequestDTO item : rushCart.getProductList()) {
+        for (CartItemRequestDTO item : productList) {
             totalWeight += item.getWeight() * item.getQuantity();
+            totalItem += 1;
         }
 
         double shippingFee;
         // Tính phí ship theo tỉnh và khối lượng
-        if (deliveryInfo.getDeliveryProvince().equalsIgnoreCase("Hanoi") 
-         || deliveryInfo.getDeliveryProvince().equalsIgnoreCase("HoChiMinhCity")
-         || deliveryInfo.getDeliveryProvince().equalsIgnoreCase("Hochiminh")) {
+        if (province.equalsIgnoreCase("Hanoi") 
+         || province.equalsIgnoreCase("HoChiMinhCity")) {
             shippingFee = (totalWeight <= 3)
                 ? 22000
                 : 22000 + Math.ceil((totalWeight - 3) / 0.5) * 2500;
@@ -33,7 +38,7 @@ public class RushShippingFee implements ShippingFeeCalculator {
         }
 
         // Phí rush: 10.000 cho mỗi sản phẩm trong giỏ hàng
-        int rushFee = 10000 * rushCart.getProductList().size();
+        int rushFee = 10000 * totalItem;
 
         // Tổng phí = phí ship + phí rush
         return (int) Math.round(shippingFee + rushFee);

@@ -1,6 +1,5 @@
 package com.hustict.aims.service.placeOrder;
 
-import com.hustict.aims.dto.cart.CartItemRequestDTO;
 import com.hustict.aims.dto.cart.CartRequestDTO;
 import com.hustict.aims.dto.invoice.InvoiceDTO;
 import com.hustict.aims.repository.OrderRepository;
@@ -12,7 +11,6 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
