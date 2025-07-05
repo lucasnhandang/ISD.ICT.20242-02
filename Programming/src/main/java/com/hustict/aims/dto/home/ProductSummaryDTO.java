@@ -5,10 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- DTO for product summary information displayed on home page and search results
- Follows Data Transfer Object pattern to reduce coupling between layers
- */
 @Setter
 @Getter
 @NoArgsConstructor

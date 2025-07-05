@@ -1,18 +1,12 @@
 package com.hustict.aims.dto.home;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- DTO for product search requests
- Support search/sort A-Z by name, and sort by price
- */
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class ProductSearchRequestDTO {
     private String searchQuery;
     private String category;
@@ -20,4 +14,13 @@ public class ProductSearchRequestDTO {
     private String sortDirection = "asc";
     private int page = 0;
     private int size = 20;
+
+    public ProductSearchRequestDTO(String searchQuery, String category, String sortBy, String sortDirection, int page, int size) {
+        this.searchQuery = searchQuery;
+        this.category = category;
+        this.sortBy = sortBy != null ? sortBy : "title";
+        this.sortDirection = sortDirection != null ? sortDirection : "asc";
+        this.page = page;
+        this.size = size;
+    }
 }
