@@ -48,6 +48,7 @@ public class DeliveryFormValidatorImpl implements DeliveryFormValidator {
         System.out.println("Delivery form saved for session: " + sessionId);
         System.out.println("Delivery Info: " + form.getCustomerName() + ", " + form.getDeliveryProvince());
     }
+    
     private boolean isValidEmail(String email) {
         String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";  // Biểu thức chính quy kiểm tra định dạng email
         Pattern pattern = Pattern.compile(emailRegex);

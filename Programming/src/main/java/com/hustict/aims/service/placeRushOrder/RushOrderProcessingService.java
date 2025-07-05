@@ -5,7 +5,7 @@ import com.hustict.aims.dto.deliveryForm.DeliveryFormDTO;
 import com.hustict.aims.dto.invoice.InvoiceDTO;
 import com.hustict.aims.dto.order.RushOrderResponseDTO;
 import com.hustict.aims.dto.cart.CartItemRequestDTO;
-import com.hustict.aims.service.placeOrder.NormalOrderService;
+import com.hustict.aims.service.placeOrder.InoviceService;
 import com.hustict.aims.service.shippingFeeCalculator.ShippingFeeCalculator;
 import com.hustict.aims.service.invoice.InvoiceCalculationService;
 import com.hustict.aims.service.MessageService;
@@ -19,13 +19,13 @@ import java.util.List;
 @Service
 public class RushOrderProcessingService {
     
-    private final NormalOrderService normalOrderService;
+    private final InoviceService normalOrderService;
     private final ShippingFeeCalculator rushShippingFeeCalculator;
     private final InvoiceCalculationService invoiceCalculationService;
     private final MessageService messageService;
 
     @Autowired
-    public RushOrderProcessingService(NormalOrderService normalOrderService,
+    public RushOrderProcessingService(InoviceService normalOrderService,
                                     @Qualifier("rushShippingFee") ShippingFeeCalculator rushShippingFeeCalculator,
                                     InvoiceCalculationService invoiceCalculationService,
                                     MessageService messageService) {
@@ -45,7 +45,8 @@ public class RushOrderProcessingService {
 
         // Xử lý rush order
         CartRequestDTO rushCart = createRushCart(rushItems, cart);
-        int rushShippingFee = rushShippingFeeCalculator.calculateShippingFee(deliveryInfo, rushCart);
+        String province = deliveryInfo.getDeliveryProvince();
+        int rushShippingFee = rushShippingFeeCalculator.calculateShippingFee(province, cart.getProductList(), cart.getTotalPrice());
         InvoiceDTO rushInvoiceDTO = invoiceCalculationService.calculateInvoice(rushCart.getTotalPrice(), rushShippingFee);
         rushInvoiceDTO.setRushOrder(true);
         invoiceList.add(rushInvoiceDTO);
@@ -54,7 +55,7 @@ public class RushOrderProcessingService {
         // Xử lý đơn thường nếu có
         if (!normalItems.isEmpty()) {
             CartRequestDTO normalCart = createNormalCart(normalItems, cart);
-            InvoiceDTO normalInvoiceDTO = normalOrderService.handleNormalOrder(deliveryInfo, normalCart);
+            InvoiceDTO normalInvoiceDTO = normalOrderService.createInvoice(deliveryInfo, normalCart);
             rushInvoiceDTO.setRushOrder(false);
             invoiceList.add(normalInvoiceDTO);
             cartList.add(normalCart);
