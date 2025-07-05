@@ -206,7 +206,7 @@ const VnPayReturnPage = () => {
                 
                 {confirmOrderStatus.success && (
                   <Alert severity="success" sx={{ mt: 1 }}>
-                    Order has been confirmed successfully! Cart has been cleared.
+                    Order confirmed successfully!
                   </Alert>
                 )}
                 

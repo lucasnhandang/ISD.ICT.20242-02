@@ -52,7 +52,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<OrderInformationDTO> getPendingOrders() {
+    public List<OrderInformationDTO> getPendingOrders(int page, int size) {
         try {
             System.out.println("Bắt đầu lấy danh sách pending orders...");
             // Sử dụng method mới với JOIN FETCH để tránh N+1 query
@@ -70,6 +70,12 @@ public class OrderServiceImpl implements OrderService {
             e.printStackTrace();
             throw new OrderOperationException("Không thể lấy danh sách đơn hàng chờ duyệt: " + e.getMessage());
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long getTotalPendingOrders() {
+        return orderRepository.countByOrderStatus(OrderStatus.PENDING);
     }
 
     @Override

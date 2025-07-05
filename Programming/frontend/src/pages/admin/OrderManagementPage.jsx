@@ -49,8 +49,8 @@ const Row = ({ order, onApprove, onReject }) => {
         <TableCell>{order.orderDate}</TableCell>
         <TableCell>
           <Chip 
-            label={order.isRushOrder ? "Rush" : "Normal"} 
-            color={order.isRushOrder ? "error" : "primary"} 
+            label={order.rushOrder ? "Rush" : "Normal"} 
+            color={order.rushOrder ? "error" : "primary"} 
             size="small" 
           />
         </TableCell>
@@ -106,7 +106,7 @@ const Row = ({ order, onApprove, onReject }) => {
                   ))}
                 </TableBody>
               </Table>
-              {order.isRushOrder && order.rushDeliveryTime && (
+              {order.rushOrder && order.rushDeliveryTime && (
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
                   Rush Delivery Time: {order.rushDeliveryTime}
                 </Typography>
@@ -126,6 +126,7 @@ const OrderManagementPage = () => {
   const [confirmDialog, setConfirmDialog] = useState({ open: false, orderId: null, action: null });
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [page, setPage] = useState(0);
+  const [totalOrders, setTotalOrders] = useState(0);
   const [rowsPerPage] = useState(30);
 
   const fetchPendingOrders = async (forceRefresh = false) => {
@@ -157,9 +158,11 @@ const OrderManagementPage = () => {
       } else {
         setPendingOrders(data);
         window.lastOrderFetch = Date.now(); // Update cache timestamp
-        console.log(`✅ Đã set thành công ${data.length} pending orders`);
+        console.log(`✅ Đã set thành công ${data.length} pending orders`);s
       }
       
+      setPendingOrders(response.orders);
+      setTotalOrders(response.totalOrders);
       setError(null);
       
     } catch (err) {
@@ -192,8 +195,10 @@ const OrderManagementPage = () => {
   };
 
   useEffect(() => {
-    fetchPendingOrders();
-  }, []);
+    const abortController = new AbortController();
+    fetchPendingOrders(page, abortController.signal);
+    return () => abortController.abort();
+  }, [page]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -264,12 +269,6 @@ const OrderManagementPage = () => {
       </Box>
     );
   }
-
-  // Calculate the orders to display on the current page
-  const displayedOrders = pendingOrders.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  );
 
   return (
     <Box sx={{ p: 3 }}>
@@ -371,7 +370,7 @@ const OrderManagementPage = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {displayedOrders.map((order) => (
+              {pendingOrders.map((order) => (
                 <Row
                   key={order.orderId}
                   order={order}
@@ -379,7 +378,7 @@ const OrderManagementPage = () => {
                   onReject={handleReject}
                 />
               ))}
-              {displayedOrders.length === 0 && (
+              {pendingOrders.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} align="center">
                     <Typography variant="body2" color="text.secondary">
@@ -393,7 +392,7 @@ const OrderManagementPage = () => {
         </TableContainer>
         <TablePagination
           component="div"
-          count={pendingOrders.length}
+          count={totalOrders}
           page={page}
           onPageChange={handleChangePage}
           rowsPerPage={rowsPerPage}

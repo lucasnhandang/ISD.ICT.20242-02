@@ -115,8 +115,26 @@ const ProductManagementPage = () => {
   // Handle form field change
   const handleInputChange = (field) => (event) => {
     let value = event.target.value;
-    if (event.target.type === 'number') value = value === '' ? '' : Number(value);
-    if (event.target.type === 'checkbox') value = event.target.checked;
+    
+    // Xử lý riêng cho từng loại input
+    if (event.target.type === 'number') {
+      if (value === '') {
+        value = '';
+      } else {
+        // Sử dụng parseFloat cho weight, parseInt cho các trường khác
+        if (field === 'weight') {
+          const parsed = parseFloat(value);
+          value = isNaN(parsed) ? '' : parsed;
+        } else {
+          // Đối với value, currentPrice, quantity, pages, runtime - sử dụng parseInt
+          const parsed = parseInt(value, 10);
+          value = isNaN(parsed) ? '' : parsed;
+        }
+      }
+    } else if (event.target.type === 'checkbox') {
+      value = event.target.checked;
+    }
+    
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -265,7 +283,28 @@ const ProductManagementPage = () => {
             fullWidth
             margin="dense"
             InputLabelProps={field.type === 'date' ? { shrink: true } : undefined}
-            // Thêm helper text cho các trường giá
+            // Thêm inputProps cho number fields
+            inputProps={
+              field.type === 'number' 
+                ? { 
+                    min: 0,
+                    step: field.name === 'weight' ? 0.1 : 1,
+                    // Ngăn spinner buttons gây lỗi
+                    onWheel: (e) => e.target.blur()
+                  }
+                : undefined
+            }
+            // Xử lý onBlur để đảm bảo giá trị hợp lệ
+            onBlur={field.type === 'number' ? (e) => {
+              const value = e.target.value;
+              if (value && !isNaN(value)) {
+                const parsed = field.name === 'weight' ? parseFloat(value) : parseInt(value, 10);
+                if (!isNaN(parsed) && parsed >= 0) {
+                  setFormData(prev => ({ ...prev, [field.name]: parsed }));
+                }
+              }
+            } : undefined}
+            // Helper text cho các trường giá
             helperText={
               (field.name === 'value' || field.name === 'currentPrice') && formData[field.name] 
                 ? `Preview: ${formatVND(formData[field.name])}`
@@ -297,6 +336,26 @@ const ProductManagementPage = () => {
             fullWidth
             margin="dense"
             InputLabelProps={field.type === 'date' ? { shrink: true } : undefined}
+            // Thêm inputProps cho number fields trong category
+            inputProps={
+              field.type === 'number' 
+                ? { 
+                    min: 0,
+                    step: 1,
+                    onWheel: (e) => e.target.blur()
+                  }
+                : undefined
+            }
+            // Xử lý onBlur cho category number fields
+            onBlur={field.type === 'number' ? (e) => {
+              const value = e.target.value;
+              if (value && !isNaN(value)) {
+                const parsed = parseInt(value, 10);
+                if (!isNaN(parsed) && parsed >= 0) {
+                  setFormData(prev => ({ ...prev, [field.name]: parsed }));
+                }
+              }
+            } : undefined}
           />
         ))}
         <Button

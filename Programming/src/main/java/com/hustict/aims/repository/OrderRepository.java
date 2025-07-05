@@ -2,6 +2,7 @@ package com.hustict.aims.repository;
 
 import com.hustict.aims.model.order.Order;
 import com.hustict.aims.model.order.OrderStatus;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

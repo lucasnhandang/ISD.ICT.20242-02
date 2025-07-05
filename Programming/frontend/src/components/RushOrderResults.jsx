@@ -195,9 +195,6 @@ const RushOrderResults = ({ orderData, onPayment, expectedDateTime }) => {
         <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
           Your Order Has Been Split
         </Typography>
-        <Typography variant="body1" color="text.secondary">
-          You can pay for each order separately as needed
-        </Typography>
       </Box>
 
       {/* Rush Order Invoice */}
