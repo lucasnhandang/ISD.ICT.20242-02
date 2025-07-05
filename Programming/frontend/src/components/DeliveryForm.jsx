@@ -14,7 +14,7 @@ import {
   ListItemText
 } from '@mui/material';
 import { submitDeliveryForm, checkRushOrderEligibility } from '../services/api';
-import { provinces } from '../utils/provinceUtils';
+import { provinces, getProvinceDisplayName } from '../utils/provinceUtils';
 
 
 const DeliveryForm = ({ onClose, onSuccess, initialValues, disabled }) => {
@@ -38,7 +38,7 @@ const DeliveryForm = ({ onClose, onSuccess, initialValues, disabled }) => {
         phoneNumber: initialValues.phoneNumber || '',
         email: initialValues.email || '',
         deliveryAddress: initialValues.deliveryAddress || '',
-        deliveryProvince: getDisplayName(initialValues.deliveryProvince) || '',
+        deliveryProvince: getProvinceDisplayName(initialValues.deliveryProvince) || '',
         isRushOrder: initialValues.isRushOrder || false
       });
     }
@@ -65,7 +65,7 @@ const DeliveryForm = ({ onClose, onSuccess, initialValues, disabled }) => {
       // Convert display name to backend value before sending
       const formDataForBackend = {
         ...form,
-        deliveryProvince: getBackendValue(form.deliveryProvince)
+        deliveryProvince: form.deliveryProvince
       };
       await submitDeliveryForm(formDataForBackend);
       onSuccess(formDataForBackend);

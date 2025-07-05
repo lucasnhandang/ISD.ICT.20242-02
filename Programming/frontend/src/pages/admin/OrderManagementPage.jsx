@@ -152,18 +152,16 @@ const OrderManagementPage = () => {
       
       console.log(`⏱️ API call took: ${endTime - startTime}ms`);
       
-      if (!Array.isArray(data)) {
-        console.warn('⚠️ Data không phải array, converting...', data);
+      if (!data || !Array.isArray(data.orders)) {
+        console.warn('⚠️ Response data không hợp lệ:', data);
         setPendingOrders([]);
+        setTotalOrders(0);
       } else {
-        setPendingOrders(data);
+        setPendingOrders(data.orders);
+        setTotalOrders(data.totalOrders || 0);
         window.lastOrderFetch = Date.now(); // Update cache timestamp
-        console.log(`✅ Đã set thành công ${data.length} pending orders`);s
+        console.log(`✅ Đã set thành công ${data.orders.length} pending orders`);
       }
-      
-      setPendingOrders(response.orders);
-      setTotalOrders(response.totalOrders);
-      setError(null);
       
     } catch (err) {
       console.error('❌ Lỗi fetchPendingOrders:', err);

@@ -50,4 +50,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
            "WHERE o.orderStatus = :status " +
            "ORDER BY o.orderDate DESC")
     List<Order> findByOrderStatusWithDetails(@Param("status") OrderStatus status);
+
+    long countByOrderStatus(OrderStatus orderStatus);
 }
