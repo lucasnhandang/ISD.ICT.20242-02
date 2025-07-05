@@ -1,8 +1,17 @@
 package com.hustict.aims.model.payment;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "paymenttransaction")
 public class PaymentTransaction {
@@ -34,46 +43,4 @@ public class PaymentTransaction {
 
     @Column(name = "payment_url", length = 800)
     private String paymentUrl;
-
-
-    public PaymentTransaction() {}
-
-    public PaymentTransaction(String bankTransactionId, String content, 
-                             LocalDateTime paymentTime, int paymentAmount, 
-                             String cardType, String currency) {
-        this.bankTransactionId = bankTransactionId;
-        this.content = content;
-        this.paymentTime = paymentTime;
-        this.paymentAmount = paymentAmount;
-        this.cardType = cardType;
-        this.currency = currency;
-    }
-
-    public Long getId() { return id; }
-    public String getBankTransactionId() { return bankTransactionId; }
-    public void setBankTransactionId(String bankTransactionId) { this.bankTransactionId = bankTransactionId; }
-    public String getContent() { return content; }
-    public void setContent(String content) { this.content = content; }
-    public LocalDateTime getPaymentTime() { return paymentTime; }
-    public void setPaymentTime(LocalDateTime paymentTime) { this.paymentTime = paymentTime; }
-    public int getPaymentAmount() { return paymentAmount; }
-    public void setPaymentAmount(int paymentAmount) { this.paymentAmount = paymentAmount; }
-    public String getCardType() { return cardType; }
-    public void setCardType(String cardType) { this.cardType = cardType; }
-    public String getCurrency() { return currency; }
-    public void setCurrency(String currency) { this.currency = currency; }
-    public String getSystems() {
-        return systems;
-    }
-
-    public void setSystems(String systems) {
-        this.systems = systems;
-    }
-    public String getPaymentUrl() {
-        return paymentUrl;
-    }
-
-    public void setPaymentUrl(String paymentUrl) {
-        this.paymentUrl = paymentUrl;
-    }
 } 

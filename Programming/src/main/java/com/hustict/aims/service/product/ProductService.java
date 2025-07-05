@@ -1,22 +1,22 @@
 package com.hustict.aims.service.product;
 
-import com.hustict.aims.dto.product.ProductDetailDTO;
+import com.hustict.aims.dto.product.ProductDTO;
+import com.hustict.aims.dto.product.ProductModifyRequest;
 import com.hustict.aims.model.product.Product;
 import com.hustict.aims.model.user.ActionType;
 import com.hustict.aims.repository.product.ProductRepository;
-import com.hustict.aims.service.MessageService;
 import com.hustict.aims.service.factory.ProductFactoryProvider;
 import com.hustict.aims.service.factory.ProductFactory;
 import com.hustict.aims.exception.ProductNotFoundException;
 import com.hustict.aims.exception.ProductTypeException;
 import com.hustict.aims.exception.ProductOperationException;
+import com.hustict.aims.service.rules.ActionTypeStrategy;
 
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class ProductService {
@@ -24,68 +24,78 @@ public class ProductService {
         private final ProductFactoryProvider factoryProvider;
         private final ProductActionService actionService;
         private final ProductRepository productRepo;
+        private final ActionTypeStrategy actionTypeStrategy;
 
         public ProductService(ProductFactoryProvider factoryProvider,
                                 ProductRepository productRepo,
                                 ProductActionService actionService,
-                                ImageService imageService) {
+                                ImageService imageService,
+                                ActionTypeStrategy actionTypeStrategy) {
                 this.factoryProvider = factoryProvider;
                 this.productRepo = productRepo;
                 this.actionService = actionService;
                 this.imageService = imageService;
+                this.actionTypeStrategy = actionTypeStrategy;
         }
 
-        private void uploadImage(MultipartFile image, Map<String, Object> data) {
-                if (image != null && !image.isEmpty()) {
+        private void uploadImage(MultipartFile image, ProductModifyRequest request) {
+                if (image != null && !image.isEmpty() && request.getProduct() != null) {
                         String imageUrl = imageService.upload(image);
-                        data.put("imageUrl", imageUrl);
+                        request.getProduct().setImageUrl(imageUrl);
                 }
         }
 
-        public ProductDetailDTO createProduct(Map<String, Object> data, MultipartFile image) {
-                String type = (String) data.get("category");
-                if (type == null) {
+        public ProductDTO createProduct(ProductModifyRequest request, MultipartFile image) {
+                if (request.getProduct() == null) {
+                        throw new ProductOperationException("create", "Product data is required");
+                }
+                
+                ProductDTO productDTO = request.getProduct();
+                String category = productDTO.getCategory();
+                
+                if (category == null) {
                         throw new ProductOperationException("create", "Missing category field");
                 }
 
-                uploadImage(image, data);
+                uploadImage(image, request);
 
-                ProductFactory<Product, ProductDetailDTO> factory = factoryProvider.getFactory(type)
-                        .orElseThrow(() -> new ProductTypeException(type));
+                ProductFactory factory = factoryProvider.getFactory(category)
+                        .orElseThrow(() -> new ProductTypeException(category));
 
-                // Factory handles validate + save + toDTO
-                return factory.createProduct(data);
+                return factory.createProduct(request);
         }
 
-        public ProductDetailDTO updateProduct(Long id, Map<String, Object> data, MultipartFile image, Long userId) {
-                // Validate action limits before processing
-                actionService.validateUpdate(userId, id, data);
+        public ProductDTO updateProduct(Long id, ProductModifyRequest request, MultipartFile image, Long userId) {
+                if (request.getProduct() == null) {
+                        throw new ProductOperationException("update", "Product data is required");
+                }
+                
+                actionService.validateUpdate(userId, id, request);
 
-                Product existing = productRepo.findById(id)
-                        .orElseThrow(() -> new ProductNotFoundException(id));
+                Product existing = productRepo.findByIdNotDeleted(id).orElseThrow(() -> new ProductNotFoundException(id));
 
-                uploadImage(image, data);
+                uploadImage(image, request);
 
-                String type = existing.getCategory();
-                ProductFactory<Product, ProductDetailDTO> factory = factoryProvider.getFactory(type)
-                        .orElseThrow(() -> new ProductTypeException(type));
+                String category = existing.getCategory();
 
-                // Factory handles validate + save + toDTO
-                ProductDetailDTO result = factory.updateProduct(existing, data);
+                ProductFactory factory = factoryProvider.getFactory(category)
+                        .orElseThrow(() -> new ProductTypeException(category));
 
-                // Log the action after successful update
-                ActionType actionType = data.containsKey("currentPrice") ? ActionType.UPDATE_PRICE : ActionType.UPDATE;
+                ActionType actionType = actionTypeStrategy.determine(existing, request);
+                ProductDTO result = factory.updateProduct(existing, request);
                 actionService.logProductAction(userId, id, actionType);
 
                 return result;
         }
 
-        public ProductDetailDTO viewProduct(Long id) {
-                Product p = productRepo.findById(id)
+        public ProductDTO viewProduct(Long id) {
+                Product p = productRepo.findByIdNotDeleted(id)
                         .orElseThrow(() -> new ProductNotFoundException(id));
 
-                ProductFactory<Product, ProductDetailDTO> factory = factoryProvider.getFactory(p.getCategory())
-                        .orElseThrow(() -> new ProductTypeException(p.getCategory()));
+                String category = p.getCategory();
+
+                ProductFactory factory = factoryProvider.getFactory(category)
+                        .orElseThrow(() -> new ProductTypeException(category));
 
                 return factory.viewProduct(p);
         }
@@ -93,28 +103,21 @@ public class ProductService {
         @Transactional
         public void deleteProducts(Long userId, List<Long> productIds) {
                 if (productIds == null || productIds.isEmpty()) {
-                        throw new ProductOperationException("delete", "Product IDs cannot be empty");
+                        throw new ProductOperationException("delete", "Product IDs cannot be empty!");
                 }
 
                 if (productIds.size() > 10) {
-                        throw new ProductOperationException("delete", "Cannot delete more than 10 products at once");
+                        throw new ProductOperationException("delete", "Cannot delete more than 10 products at once!");
                 }
 
                 actionService.validateDelete(userId, productIds);
 
-                List<Product> productsToDelete = productRepo.findAllById(productIds);
+                List<Product> productsToDelete = productRepo.findAllByIdNotDeleted(productIds);
                 if (productsToDelete.size() != productIds.size()) {
-                        throw new ProductNotFoundException("One or more products not found or already deleted");
+                        throw new ProductNotFoundException("One or more products not found or already deleted!");
                 }
 
                 for (Long productId : productIds) {
-                        Product p = productRepo.findById(productId)
-                                .orElseThrow(() -> new ProductNotFoundException(productId));
-
-                        if (p.isDeleted()) {
-                                throw new ProductOperationException("delete", "Product with ID " + productId + " has already been deleted");
-                        }
-
                         actionService.logProductAction(userId, productId, ActionType.DELETE);
                         productRepo.softDeleteById(productId);
                 }

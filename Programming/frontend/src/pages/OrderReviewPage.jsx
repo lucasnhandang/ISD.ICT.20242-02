@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Box, Typography, Divider, Paper, Button, Alert, CircularProgress } from '@mui/material';
+import { Box, Typography, Divider, Paper, Button, Alert, CircularProgress, Chip, Grid } from '@mui/material';
 import Header from '../components/Header';
 import { checkRushOrderEligibility, getProductDetails } from '../services/api';
 import { getProvinceDisplayName } from '../utils/provinceUtils';
+
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('vi-VN', {
@@ -245,12 +246,12 @@ const OrderReviewPage = () => {
               <Divider sx={{ mb: 2 }} />
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography>Product Total (excl. VAT):</Typography>
+                <Typography>Product Total (excl. 10% VAT):</Typography>
                 <Typography>{formatPrice(invoice.productPriceExVAT)}</Typography>
               </Box>
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography>Product Total (incl. VAT):</Typography>
+                <Typography>Product Total (incl. 10% VAT):</Typography>
                 <Typography>{formatPrice(invoice.productPriceIncVAT)}</Typography>
               </Box>
 

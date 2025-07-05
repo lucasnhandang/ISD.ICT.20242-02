@@ -1,10 +1,14 @@
 package com.hustict.aims.model.product;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "lp")
 public class LP extends Product {
     @Column(name = "artists")
@@ -22,7 +26,7 @@ public class LP extends Product {
     @Column(name = "releasedate")
     private LocalDate releaseDate;
 
-    public LP() {}
+    public LP() { super(); }
 
     public LP(Product product, String artists, String recordLabel, String trackList, String genre, LocalDate releaseDate) {
         super(product);
@@ -33,14 +37,8 @@ public class LP extends Product {
         this.releaseDate = releaseDate;
     }
 
-    public String getArtists() { return artists; }
-    public void setArtists(String artists) { this.artists = artists; }
-    public String getRecordLabel() { return recordLabel; }
-    public void setRecordLabel(String recordLabel) { this.recordLabel = recordLabel; }
-    public String getTrackList() { return trackList; }
-    public void setTrackList(String trackList) { this.trackList = trackList; }
-    public String getGenre() { return genre; }
-    public void setGenre(String genre) { this.genre = genre; }
-    public LocalDate getReleaseDate() { return releaseDate; }
-    public void setReleaseDate(LocalDate releaseDate) { this.releaseDate = releaseDate; }
+    @Override
+    protected void setCategory() {
+        this.setCategory("LP");
+    }
 } 

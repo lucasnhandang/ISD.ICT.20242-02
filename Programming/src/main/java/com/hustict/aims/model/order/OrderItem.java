@@ -2,11 +2,13 @@ package com.hustict.aims.model.order;
 
 import com.hustict.aims.model.product.Product;
 import jakarta.persistence.*;
+import lombok.Setter;
 
 @Entity
 @Table(name = "orderitem")
 public class OrderItem {
 
+    @Setter
     @EmbeddedId
     private OrderItemKey id = new OrderItemKey();
 
@@ -20,14 +22,17 @@ public class OrderItem {
     @JoinColumn(name = "productid")
     private Product product;
 
+    @Setter
     @Column(name = "quantity")
     private int quantity;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
     private OrderType type;
 
 
+    @Setter
     @Column(name = "price", nullable = false)
     private int price;
 
@@ -42,11 +47,7 @@ public class OrderItem {
         this.id = new OrderItemKey(order.getId(), product.getId());
     }
 
-
-    // Getters & Setters
-
     public OrderItemKey getId() { return id; }
-    public void setId(OrderItemKey id) { this.id = id; }
 
     public Order getOrder() { return order; }
     public void setOrder(Order order) {
@@ -61,17 +62,10 @@ public class OrderItem {
     }
 
     public int getQuantity() { return quantity; }
-    public void setQuantity(int quantity) { this.quantity = quantity; }
 
     public OrderType getType() { return type; }
-    public void setType(OrderType type) { this.type = type; }
+
     public int getPrice() {
         return price;
     }
-
-    public void setPrice(int price) {
-        this.price = price;
-    }
-
-
 }

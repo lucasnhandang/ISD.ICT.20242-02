@@ -3,7 +3,13 @@ package com.hustict.aims.model.invoice;
 import com.hustict.aims.model.payment.PaymentTransaction;
 import com.hustict.aims.model.payment.RefundTransaction;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "invoice")
 public class Invoice {
@@ -44,18 +50,4 @@ public class Invoice {
         this.paymentTransaction = paymentTransaction;
         this.refundTransaction = refundTransaction;
     }
-
-    public Long getId() { return id; }
-    public int getProductPriceExVAT() { return productPriceExVAT; }
-    public void setProductPriceExVAT(int productPriceExVAT) { this.productPriceExVAT = productPriceExVAT; }
-    public int getProductPriceIncVAT() { return productPriceIncVAT; }
-    public void setProductPriceIncVAT(int productPriceIncVAT) { this.productPriceIncVAT = productPriceIncVAT; }
-    public int getShippingFee() { return shippingFee; }
-    public void setShippingFee(int shippingFee) { this.shippingFee = shippingFee; }
-    public int getTotalAmount() { return totalAmount; }
-    public void setTotalAmount(int totalAmount) { this.totalAmount = totalAmount; }
-    public PaymentTransaction getPaymentTransaction() { return paymentTransaction; }
-    public void setPaymentTransaction(PaymentTransaction paymentTransaction) { this.paymentTransaction = paymentTransaction; }
-    public RefundTransaction getRefundTransaction() { return refundTransaction; }
-    public void setRefundTransaction(RefundTransaction refundTransaction) { this.refundTransaction = refundTransaction; }
 } 

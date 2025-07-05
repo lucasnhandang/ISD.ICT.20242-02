@@ -1,22 +1,21 @@
 package com.hustict.aims.service.validator;
 
 import com.hustict.aims.model.product.CD;
+import com.hustict.aims.model.product.Product;
 import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class CDValidator extends ProductValidator<CD> {
+public class CDValidator extends ProductValidator {
     @Override
-    public String getType() { return "CD"; }
-
-    @Override
-    protected Class<CD> getSupportedClass() { return CD.class; }
-
-    @Override
-    protected void validateSpecific(CD cd, List<String> errs) {
-        rejectIfBlank(cd.getArtists(), "Artists", 100, errs);
-        rejectIfBlank(cd.getRecordLabel(), "Record label", 100, errs);
-        rejectIfBlank(cd.getTrackList(), "Track list", 0, errs);
-        rejectIfBlank(cd.getGenre(), "Genre", 100, errs);
+    protected void validateSpecific(Product product, List<String> errors) {
+        if (!(product instanceof CD)) {
+            errors.add("Invalid product type for CD validator");
+            return;
+        }
+        
+        CD cd = (CD) product;
+        rejectIfBlank(cd.getArtists(), "CD artists", 100, errors);
+        rejectIfBlank(cd.getRecordLabel(), "CD record label", 100, errors);
     }
 }
