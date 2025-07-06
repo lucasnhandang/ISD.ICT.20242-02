@@ -17,12 +17,12 @@ public class GlobalExceptionHandler {
 
     // Standardized error response format
     private Map<String, Object> createErrorResponse(String error, String message, HttpStatus status) {
-        return Map.of(
-            "timestamp", LocalDateTime.now(),
-            "status", status.value(),
-            "error", error,
-            "message", message
-        );
+        Map<String, Object> map = new HashMap<>();
+        map.put("timestamp", LocalDateTime.now());
+        map.put("status", status.value());
+        map.put("error", error);
+        map.put("message", message);
+        return map;
     }
 
     // === NEW PRODUCT EXCEPTION HANDLERS ===

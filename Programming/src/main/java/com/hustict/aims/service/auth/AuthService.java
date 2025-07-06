@@ -12,11 +12,8 @@ import com.hustict.aims.utils.AuthUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import io.jsonwebtoken.Claims;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.Map;
+
+import java.util.*;
 
 @Service
 public class AuthService {
@@ -95,9 +92,10 @@ public class AuthService {
     }
     
     private String generateUserToken(User user) {
-        List<String> roleNames = user.getRoles().stream()
-                .map(Role::getName)
-                .collect(Collectors.toList());
+        List<String> roleNames = new ArrayList<>();
+        for (Role role : user.getRoles()) {
+            roleNames.add(role.getName());
+        }
         
         return jwtUtils.generateToken(
                 String.valueOf(user.getId()),
@@ -109,9 +107,10 @@ public class AuthService {
     }
     
     private UserInfoDTO createUserInfo(User user) {
-        List<String> roleNames = user.getRoles().stream()
-                .map(Role::getName)
-                .collect(Collectors.toList());
+        List<String> roleNames = new ArrayList<>();
+        for (Role role : user.getRoles()) {
+            roleNames.add(role.getName());
+        }
         
         return new UserInfoDTO(
                 user.getId(),

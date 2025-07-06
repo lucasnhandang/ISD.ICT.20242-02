@@ -1,18 +1,20 @@
 package com.hustict.aims.service;
 
-import com.hustict.aims.dto.product.ProductDetailDTO;
+import com.hustict.aims.dto.product.ProductDTO;
+import com.hustict.aims.dto.product.ProductModifyRequest;
 import com.hustict.aims.exception.ProductNotFoundException;
 import com.hustict.aims.exception.ProductOperationException;
 import com.hustict.aims.exception.ProductTypeException;
-import com.hustict.aims.exception.ProductValidationException;
 import com.hustict.aims.model.product.Book;
 import com.hustict.aims.model.product.Product;
+import com.hustict.aims.model.user.ActionType;
 import com.hustict.aims.repository.product.ProductRepository;
 import com.hustict.aims.service.factory.ProductFactory;
 import com.hustict.aims.service.factory.ProductFactoryProvider;
 import com.hustict.aims.service.product.ImageService;
 import com.hustict.aims.service.product.ProductActionService;
 import com.hustict.aims.service.product.ProductService;
+import com.hustict.aims.service.rules.ActionTypeStrategy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,40 +36,49 @@ public class ProductServiceTest {
     @Mock private ImageService imageService;
     @Mock private ProductFactoryProvider factoryProvider;
     @Mock private ProductActionService actionService;
-    @Mock private MessageService messageService;
     @Mock private ProductRepository productRepo;
-    @Mock private ProductFactory<Product, ProductDetailDTO> productFactory;
+    @Mock private ProductFactory productFactory;
+    @Mock private ActionTypeStrategy actionTypeStrategy;
 
     @InjectMocks private ProductService productService;
 
-    private Map<String, Object> validProductData;
+    private ProductModifyRequest validRequest;
+    private ProductDTO validProductDTO;
     private Product validProduct;
-    private ProductDetailDTO expectedDTO;
+    private ProductDTO expectedDTO;
     private MockMultipartFile mockImage;
     private MockMultipartFile emptyImage;
 
     @BeforeEach
     void setUp() {
-        validProductData = new HashMap<>();
-        validProductData.put("category", "Book");
-        validProductData.put("title", "Test Book");
-        validProductData.put("value", 100000);
-        validProductData.put("currentPrice", 90000);
-        validProductData.put("barcode", "BOOK001");
-        validProductData.put("description", "A test book");
-        validProductData.put("quantity", 10);
-        validProductData.put("entryDate", "2025-01-15");
-        validProductData.put("dimension", "13x20x2 cm");
-        validProductData.put("weight", 0.3);
-        validProductData.put("rushOrderSupported", true);
-        validProductData.put("authors", "Test Author");
-        validProductData.put("coverType", "Hardcover");
-        validProductData.put("publisher", "Test Publisher");
-        validProductData.put("publicationDate", "2024-01-01");
-        validProductData.put("numPages", 300);
-        validProductData.put("language", "English");
-        validProductData.put("genre", "Fiction");
+        // Setup ProductDTO
+        validProductDTO = new ProductDTO();
+        validProductDTO.setId(1L);
+        validProductDTO.setTitle("Test Book");
+        validProductDTO.setValue(100000);
+        validProductDTO.setCurrentPrice(90000);
+        validProductDTO.setBarcode("BOOK001");
+        validProductDTO.setDescription("A test book");
+        validProductDTO.setQuantity(10);
+        validProductDTO.setEntryDate(LocalDate.of(2025, 1, 15));
+        validProductDTO.setDimension("13x20x2 cm");
+        validProductDTO.setWeight(0.3);
+        validProductDTO.setRushOrderSupported(true);
+        validProductDTO.setCategory("Book");
 
+        // Setup ProductModifyRequest
+        Map<String, Object> specificData = new HashMap<>();
+        specificData.put("authors", "Test Author");
+        specificData.put("coverType", "Hardcover");
+        specificData.put("publisher", "Test Publisher");
+        specificData.put("publicationDate", "2024-01-01");
+        specificData.put("numPages", 300);
+        specificData.put("language", "English");
+        specificData.put("genre", "Fiction");
+        
+        validRequest = new ProductModifyRequest(validProductDTO, specificData);
+
+        // Setup Product entity
         validProduct = new Book();
         validProduct.setTitle("Test Book");
         validProduct.setValue(100000);
@@ -79,8 +90,10 @@ public class ProductServiceTest {
         validProduct.setDimension("13x20x2 cm");
         validProduct.setWeight(0.3);
         validProduct.setRushOrderSupported(true);
+        // Category is set automatically by the Book constructor
 
-        expectedDTO = new ProductDetailDTO();
+        // Setup expected DTO
+        expectedDTO = new ProductDTO();
         expectedDTO.setId(1L);
         expectedDTO.setTitle("Test Book");
         expectedDTO.setValue(100000);
@@ -94,6 +107,7 @@ public class ProductServiceTest {
         expectedDTO.setRushOrderSupported(true);
         expectedDTO.setCategory("Book");
 
+        // Setup mock images
         mockImage = new MockMultipartFile(
                 "image", "test-image.jpg", "image/jpeg", "test image content".getBytes()
         );
@@ -101,9 +115,6 @@ public class ProductServiceTest {
         emptyImage = new MockMultipartFile(
                 "image", "empty.jpg", "image/jpeg", new byte[0]
         );
-
-        lenient().when(messageService.getInvalidInput()).thenReturn("Invalid input provided");
-        lenient().when(messageService.getValidationError()).thenReturn("Validation failed");
     }
 
     @Test
@@ -112,9 +123,9 @@ public class ProductServiceTest {
         
         when(imageService.upload(mockImage)).thenReturn(expectedImageUrl);
         when(factoryProvider.getFactory("Book")).thenReturn(Optional.of(productFactory));
-        when(productFactory.createProduct(any())).thenReturn(expectedDTO);
+        when(productFactory.createProduct(any(ProductModifyRequest.class))).thenReturn(expectedDTO);
 
-        ProductDetailDTO result = productService.createProduct(validProductData, mockImage);
+        ProductDTO result = productService.createProduct(validRequest, mockImage);
 
         assertNotNull(result);
         assertEquals(expectedDTO.getId(), result.getId());
@@ -122,50 +133,52 @@ public class ProductServiceTest {
 
         verify(imageService).upload(mockImage);
         verify(factoryProvider).getFactory("Book");
-        verify(productFactory).createProduct(argThat(data ->
-                data.containsKey("imageUrl") &&
-                        data.get("imageUrl").equals(expectedImageUrl)
+        verify(productFactory).createProduct(argThat(request ->
+                request.getProduct().getImageUrl() != null &&
+                request.getProduct().getImageUrl().equals(expectedImageUrl)
         ));
     }
 
     @Test
     void createProduct_Success_WithoutImage() {
         when(factoryProvider.getFactory("Book")).thenReturn(Optional.of(productFactory));
-        when(productFactory.createProduct(validProductData)).thenReturn(expectedDTO);
+        when(productFactory.createProduct(validRequest)).thenReturn(expectedDTO);
 
-        ProductDetailDTO result = productService.createProduct(validProductData, null);
+        ProductDTO result = productService.createProduct(validRequest, null);
 
         assertNotNull(result);
         assertEquals(expectedDTO.getId(), result.getId());
 
         verify(imageService, never()).upload(any());
         verify(factoryProvider).getFactory("Book");
-        verify(productFactory).createProduct(validProductData);
+        verify(productFactory).createProduct(validRequest);
     }
 
     @Test
     void createProduct_Success_WithEmptyImage() {
         when(factoryProvider.getFactory("Book")).thenReturn(Optional.of(productFactory));
-        when(productFactory.createProduct(validProductData)).thenReturn(expectedDTO);
+        when(productFactory.createProduct(validRequest)).thenReturn(expectedDTO);
 
-        ProductDetailDTO result = productService.createProduct(validProductData, emptyImage);
+        ProductDTO result = productService.createProduct(validRequest, emptyImage);
 
         assertNotNull(result);
         assertEquals(expectedDTO.getId(), result.getId());
 
         verify(imageService, never()).upload(any());
         verify(factoryProvider).getFactory("Book");
-        verify(productFactory).createProduct(validProductData);
+        verify(productFactory).createProduct(validRequest);
     }
 
     @Test
     void createProduct_MissingCategory_ThrowsException() {
-        Map<String, Object> invalidData = new HashMap<>(validProductData);
-        invalidData.remove("category");
+        ProductDTO invalidProductDTO = new ProductDTO();
+        invalidProductDTO.setTitle("Test Book");
+        // Missing category
+        ProductModifyRequest invalidRequest = new ProductModifyRequest(invalidProductDTO, new HashMap<>());
 
         ProductOperationException exception = assertThrows(
                 ProductOperationException.class,
-                () -> productService.createProduct(invalidData, null)
+                () -> productService.createProduct(invalidRequest, null)
         );
 
         assertTrue(exception.getMessage().contains("Missing category field"));
@@ -175,14 +188,15 @@ public class ProductServiceTest {
 
     @Test
     void createProduct_UnsupportedCategory_ThrowsException() {
-        Map<String, Object> invalidData = new HashMap<>(validProductData);
-        invalidData.put("category", "InvalidCategory");
+        ProductDTO invalidProductDTO = new ProductDTO();
+        invalidProductDTO.setCategory("InvalidCategory");
+        ProductModifyRequest invalidRequest = new ProductModifyRequest(invalidProductDTO, new HashMap<>());
 
         when(factoryProvider.getFactory("InvalidCategory")).thenReturn(Optional.empty());
 
         ProductTypeException exception = assertThrows(
                 ProductTypeException.class,
-                () -> productService.createProduct(invalidData, null)
+                () -> productService.createProduct(invalidRequest, null)
         );
 
         assertTrue(exception.getMessage().contains("InvalidCategory"));
@@ -191,30 +205,12 @@ public class ProductServiceTest {
     }
 
     @Test
-    void createProduct_ValidationErrors_ThrowsException() {
-        List<String> errors = List.of("Title is required", "Price must be positive");
-        ProductValidationException validationException = new ProductValidationException(errors);
-
-        when(factoryProvider.getFactory("Book")).thenReturn(Optional.of(productFactory));
-        when(productFactory.createProduct(validProductData)).thenThrow(validationException);
-
-        ProductValidationException exception = assertThrows(
-                ProductValidationException.class,
-                () -> productService.createProduct(validProductData, null)
-        );
-
-        assertEquals(errors, exception.getValidationErrors());
-        verify(factoryProvider).getFactory("Book");
-        verify(productFactory).createProduct(validProductData);
-    }
-
-    @Test
     void createProduct_ImageUploadFailure_ThrowsException() {
         when(imageService.upload(mockImage)).thenThrow(new RuntimeException("Upload failed"));
 
         RuntimeException exception = assertThrows(
                 RuntimeException.class,
-                () -> productService.createProduct(validProductData, mockImage)
+                () -> productService.createProduct(validRequest, mockImage)
         );
 
         assertTrue(exception.getMessage().contains("Upload failed"));
@@ -228,28 +224,27 @@ public class ProductServiceTest {
         Long userId = 10L;
         String expectedImageUrl = "http://example.com/updated-image.jpg";
         
-        Product mockProduct = mock(Product.class);
-        when(mockProduct.getCategory()).thenReturn("Book");
-        
-        when(productRepo.findById(productId)).thenReturn(Optional.of(mockProduct));
+        when(productRepo.findByIdNotDeleted(productId)).thenReturn(Optional.of(validProduct));
         when(imageService.upload(mockImage)).thenReturn(expectedImageUrl);
         when(factoryProvider.getFactory("Book")).thenReturn(Optional.of(productFactory));
-        when(productFactory.updateProduct(eq(mockProduct), any())).thenReturn(expectedDTO);
+        when(productFactory.updateProduct(eq(validProduct), any(ProductModifyRequest.class))).thenReturn(expectedDTO);
+        when(actionTypeStrategy.determine(eq(validProduct), any(ProductModifyRequest.class))).thenReturn(ActionType.UPDATE);
 
-        ProductDetailDTO result = productService.updateProduct(productId, validProductData, mockImage, userId);
+        ProductDTO result = productService.updateProduct(productId, validRequest, mockImage, userId);
 
         assertNotNull(result);
         assertEquals(expectedDTO.getId(), result.getId());
 
-        verify(actionService).validateUpdate(userId, productId, validProductData);
-        verify(productRepo).findById(productId);
+        verify(actionService).validateUpdate(userId, productId, validRequest);
+        verify(productRepo).findByIdNotDeleted(productId);
         verify(imageService).upload(mockImage);
         verify(factoryProvider).getFactory("Book");
-        verify(productFactory).updateProduct(eq(mockProduct), argThat(data ->
-                data.containsKey("imageUrl") &&
-                        data.get("imageUrl").equals(expectedImageUrl)
+        verify(productFactory).updateProduct(eq(validProduct), argThat(request ->
+                request.getProduct().getImageUrl() != null &&
+                request.getProduct().getImageUrl().equals(expectedImageUrl)
         ));
-        verify(actionService).logProductAction(eq(userId), eq(productId), any());
+        verify(actionTypeStrategy).determine(eq(validProduct), any(ProductModifyRequest.class));
+        verify(actionService).logProductAction(eq(userId), eq(productId), eq(ActionType.UPDATE));
     }
 
     @Test
@@ -257,45 +252,63 @@ public class ProductServiceTest {
         Long productId = 1L;
         Long userId = 10L;
 
-        when(productRepo.findById(productId)).thenReturn(Optional.empty());
+        when(productRepo.findByIdNotDeleted(productId)).thenReturn(Optional.empty());
 
         ProductNotFoundException exception = assertThrows(
                 ProductNotFoundException.class,
-                () -> productService.updateProduct(productId, validProductData, null, userId)
+                () -> productService.updateProduct(productId, validRequest, null, userId)
         );
 
         assertTrue(exception.getMessage().contains(productId.toString()));
-        verify(actionService).validateUpdate(userId, productId, validProductData);
-        verify(productRepo).findById(productId);
+        verify(actionService).validateUpdate(userId, productId, validRequest);
+        verify(productRepo).findByIdNotDeleted(productId);
         verify(factoryProvider, never()).getFactory(any());
+    }
+
+    @Test
+    void updateProduct_UnsupportedCategory_ThrowsException() {
+        Long productId = 1L;
+        Long userId = 10L;
+        Product invalidProduct = mock(Product.class);
+        when(invalidProduct.getCategory()).thenReturn("InvalidCategory");
+
+        when(productRepo.findByIdNotDeleted(productId)).thenReturn(Optional.of(invalidProduct));
+        when(factoryProvider.getFactory("InvalidCategory")).thenReturn(Optional.empty());
+
+        ProductTypeException exception = assertThrows(
+                ProductTypeException.class,
+                () -> productService.updateProduct(productId, validRequest, null, userId)
+        );
+
+        assertTrue(exception.getMessage().contains("InvalidCategory"));
+        verify(actionService).validateUpdate(userId, productId, validRequest);
+        verify(productRepo).findByIdNotDeleted(productId);
+        verify(factoryProvider).getFactory("InvalidCategory");
     }
 
     @Test
     void viewProduct_Success() {
         Long productId = 1L;
 
-        Product mockProduct = mock(Product.class);
-        when(mockProduct.getCategory()).thenReturn("Book");
-
-        when(productRepo.findById(productId)).thenReturn(Optional.of(mockProduct));
+        when(productRepo.findByIdNotDeleted(productId)).thenReturn(Optional.of(validProduct));
         when(factoryProvider.getFactory("Book")).thenReturn(Optional.of(productFactory));
-        when(productFactory.viewProduct(mockProduct)).thenReturn(expectedDTO);
+        when(productFactory.viewProduct(validProduct)).thenReturn(expectedDTO);
 
-        ProductDetailDTO result = productService.viewProduct(productId);
+        ProductDTO result = productService.viewProduct(productId);
 
         assertNotNull(result);
         assertEquals(expectedDTO.getId(), result.getId());
 
-        verify(productRepo).findById(productId);
+        verify(productRepo).findByIdNotDeleted(productId);
         verify(factoryProvider).getFactory("Book");
-        verify(productFactory).viewProduct(mockProduct);
+        verify(productFactory).viewProduct(validProduct);
     }
 
     @Test
     void viewProduct_ProductNotFound_ThrowsException() {
         Long productId = 1L;
 
-        when(productRepo.findById(productId)).thenReturn(Optional.empty());
+        when(productRepo.findByIdNotDeleted(productId)).thenReturn(Optional.empty());
 
         ProductNotFoundException exception = assertThrows(
                 ProductNotFoundException.class,
@@ -303,17 +316,17 @@ public class ProductServiceTest {
         );
 
         assertTrue(exception.getMessage().contains(productId.toString()));
-        verify(productRepo).findById(productId);
+        verify(productRepo).findByIdNotDeleted(productId);
         verify(factoryProvider, never()).getFactory(any());
     }
 
     @Test
     void viewProduct_UnsupportedCategory_ThrowsException() {
         Long productId = 1L;
-        Product mockProduct = mock(Product.class);
-        when(mockProduct.getCategory()).thenReturn("InvalidCategory");
+        Product invalidProduct = mock(Product.class);
+        when(invalidProduct.getCategory()).thenReturn("InvalidCategory");
 
-        when(productRepo.findById(productId)).thenReturn(Optional.of(mockProduct));
+        when(productRepo.findByIdNotDeleted(productId)).thenReturn(Optional.of(invalidProduct));
         when(factoryProvider.getFactory("InvalidCategory")).thenReturn(Optional.empty());
 
         ProductTypeException exception = assertThrows(
@@ -322,7 +335,77 @@ public class ProductServiceTest {
         );
 
         assertTrue(exception.getMessage().contains("InvalidCategory"));
-        verify(productRepo).findById(productId);
+        verify(productRepo).findByIdNotDeleted(productId);
         verify(factoryProvider).getFactory("InvalidCategory");
+    }
+
+    @Test
+    void deleteProducts_Success() {
+        Long userId = 10L;
+        List<Long> productIds = Arrays.asList(1L, 2L, 3L);
+        List<Product> products = Arrays.asList(validProduct, validProduct, validProduct);
+
+        when(productRepo.findAllByIdNotDeleted(productIds)).thenReturn(products);
+
+        productService.deleteProducts(userId, productIds);
+
+        verify(actionService).validateDelete(userId, productIds);
+        verify(productRepo).findAllByIdNotDeleted(productIds);
+        for (Long productId : productIds) {
+            verify(actionService).logProductAction(userId, productId, ActionType.DELETE);
+            verify(productRepo).softDeleteById(productId);
+        }
+    }
+
+    @Test
+    void deleteProducts_EmptyList_ThrowsException() {
+        Long userId = 10L;
+        List<Long> productIds = new ArrayList<>();
+
+        ProductOperationException exception = assertThrows(
+                ProductOperationException.class,
+                () -> productService.deleteProducts(userId, productIds)
+        );
+
+        assertTrue(exception.getMessage().contains("Product IDs cannot be empty"));
+        verify(actionService, never()).validateDelete(any(), any());
+        verify(productRepo, never()).findAllByIdNotDeleted(any());
+    }
+
+    @Test
+    void deleteProducts_TooManyProducts_ThrowsException() {
+        Long userId = 10L;
+        List<Long> productIds = new ArrayList<>();
+        for (int i = 0; i < 11; i++) {
+            productIds.add((long) i);
+        }
+
+        ProductOperationException exception = assertThrows(
+                ProductOperationException.class,
+                () -> productService.deleteProducts(userId, productIds)
+        );
+
+        assertTrue(exception.getMessage().contains("Cannot delete more than 10 products"));
+        verify(actionService, never()).validateDelete(any(), any());
+        verify(productRepo, never()).findAllByIdNotDeleted(any());
+    }
+
+    @Test
+    void deleteProducts_ProductNotFound_ThrowsException() {
+        Long userId = 10L;
+        List<Long> productIds = Arrays.asList(1L, 2L, 3L);
+        List<Product> foundProducts = Arrays.asList(validProduct, validProduct); // Only 2 products found
+
+        when(productRepo.findAllByIdNotDeleted(productIds)).thenReturn(foundProducts);
+
+        ProductNotFoundException exception = assertThrows(
+                ProductNotFoundException.class,
+                () -> productService.deleteProducts(userId, productIds)
+        );
+
+        assertTrue(exception.getMessage().contains("One or more products not found"));
+        verify(actionService).validateDelete(userId, productIds);
+        verify(productRepo).findAllByIdNotDeleted(productIds);
+        verify(productRepo, never()).softDeleteById(any());
     }
 }

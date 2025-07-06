@@ -14,22 +14,7 @@ import {
   ListItemText
 } from '@mui/material';
 import { submitDeliveryForm, checkRushOrderEligibility } from '../services/api';
-
-// Latest province/city list (updated according to 2024 merger)
-const provinces = [
-  'Hanoi', 'Hochiminh', 'HaiPhong', 'DaNang', 'CanTho',
-  'BinhDuong', 'DongNai', 'HaiDuong', 'ThanhHoa', 'NgheAn',
-  'ThuaThienHue', 'QuangNinh', 'BacNinh', 'QuangNam', 'LamDong',
-  'NamDinh', 'ThaiBinh', 'PhuTho', 'BacGiang', 'HungYen',
-  'HaNam', 'VinhPhuc', 'NinhBinh', 'QuangBinh', 'QuangTri',
-  'BinhDinh', 'BinhThuan', 'KhanhHoa', 'BaRiaVungTau', 'LongAn',
-  'KienGiang', 'DakLak', 'CaMau', 'BinhPhuoc', 'BacKan',
-  'LaoCai', 'LangSon', 'TuyenQuang', 'YenBai', 'DienBien',
-  'SonLa', 'HoaBinh', 'LaiChau', 'HaGiang', 'CaoBang',
-  'KonTum', 'GiaLai', 'DakNong', 'SocTrang', 'TraVinh',
-  'BenTre', 'VinhLong', 'AnGiang', 'TienGiang', 'HauGiang',
-  'NinhThuan', 'PhuYen', 'QuangNgai', 'BacLieu'
-];
+import { provinces, getProvinceDisplayName } from '../utils/provinceUtils';
 
 
 const DeliveryForm = ({ onClose, onSuccess, initialValues, disabled }) => {
@@ -53,7 +38,7 @@ const DeliveryForm = ({ onClose, onSuccess, initialValues, disabled }) => {
         phoneNumber: initialValues.phoneNumber || '',
         email: initialValues.email || '',
         deliveryAddress: initialValues.deliveryAddress || '',
-        deliveryProvince: initialValues.deliveryProvince || '',
+        deliveryProvince: getProvinceDisplayName(initialValues.deliveryProvince) || '',
         isRushOrder: initialValues.isRushOrder || false
       });
     }
@@ -77,8 +62,13 @@ const DeliveryForm = ({ onClose, onSuccess, initialValues, disabled }) => {
     setValidationErrors([]);
     
     try {
-      await submitDeliveryForm(form);
-      onSuccess(form);
+      // Convert display name to backend value before sending
+      const formDataForBackend = {
+        ...form,
+        deliveryProvince: form.deliveryProvince
+      };
+      await submitDeliveryForm(formDataForBackend);
+      onSuccess(formDataForBackend);
     } catch (err) {
       console.log('Error response:', err.response?.data);
       
@@ -155,8 +145,8 @@ const DeliveryForm = ({ onClose, onSuccess, initialValues, disabled }) => {
           sx={{ mb: 2 }}
         >
           {provinces.map((province) => (
-            <MenuItem key={province} value={province}>
-              {province}
+            <MenuItem key={province.value} value={province.value}>
+              {province.display}
             </MenuItem>
           ))}
         </TextField>

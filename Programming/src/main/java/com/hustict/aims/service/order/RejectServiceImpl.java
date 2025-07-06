@@ -1,0 +1,31 @@
+package com.hustict.aims.service.order;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.hustict.aims.exception.OrderOperationException;
+import com.hustict.aims.model.order.Order;
+import com.hustict.aims.model.order.OrderStatus;
+import com.hustict.aims.repository.OrderRepository;
+import org.springframework.stereotype.Service;
+
+@Service
+public class RejectServiceImpl implements RejectService {
+    
+    @Autowired
+    private OrderRepository orderRepository;
+    
+    @Override
+    @Transactional
+    public void rejectOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderOperationException("Order not found with id: " + orderId));
+
+        if (order.getOrderStatus() != OrderStatus.PENDING) {
+            throw new OrderOperationException("Only PENDING orders can be rejected. Current status: " + order.getOrderStatus());
+        }
+
+        orderRepository.rejectOrderById(orderId);
+    }
+
+}

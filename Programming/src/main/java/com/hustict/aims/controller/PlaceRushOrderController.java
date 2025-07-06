@@ -4,11 +4,12 @@ import com.hustict.aims.dto.order.RushOrderEligibilityResponseDTO;
 import com.hustict.aims.dto.order.RushOrderResponseDTO;
 import com.hustict.aims.dto.deliveryForm.DeliveryFormDTO;
 import com.hustict.aims.dto.invoice.InvoiceDTO;
+import com.hustict.aims.service.placeOrder.normal.SaveTempOrder;
 import com.hustict.aims.service.placeRushOrder.RushOrderEligibilityService;
 import com.hustict.aims.service.placeRushOrder.RushOrderValidationService;
 import com.hustict.aims.service.placeRushOrder.RushOrderProcessingService;
 import com.hustict.aims.service.sessionValidator.SessionValidatorService;
-import com.hustict.aims.service.placeOrder.SaveTempOrder;
+
 import java.util.HashMap;
 import java.util.Map;
 import jakarta.servlet.http.HttpSession;
@@ -152,10 +153,12 @@ public class PlaceRushOrderController {
         // Chuẩn bị response
         Map<String, Object> response = new HashMap<>();
         
-        // Thêm order IDs
+        // Thêm order IDs và cart information
         if (orderIds.containsKey("rush")) {
             response.put("rushOrderId", orderIds.get("rush"));
             response.put("rushInvoice", processResult.getInvoiceList().get(0));
+            // Thêm rush cart với productList
+            response.put("rushCart", processResult.getCartList().get(0));
         }
         
         if (orderIds.containsKey("normal")) {
@@ -163,6 +166,8 @@ public class PlaceRushOrderController {
             // Normal invoice sẽ là phần tử thứ 2 nếu có rush, hoặc phần tử đầu nếu không có rush
             int normalInvoiceIndex = orderIds.containsKey("rush") ? 1 : 0;
             response.put("normalInvoice", processResult.getInvoiceList().get(normalInvoiceIndex));
+            // Thêm normal cart với productList
+            response.put("normalCart", processResult.getCartList().get(normalInvoiceIndex));
         }
         
         response.put("message", "Rush orders saved successfully. You can now pay for each order separately.");
@@ -187,7 +192,7 @@ public class PlaceRushOrderController {
             InvoiceDTO currentInvoice = invoiceList.get(i);
             
             // Save temp order
-            Long orderId = saveTempOrder.save(currentCart, deliveryInfo, currentInvoice,session);
+            Long orderId = saveTempOrder.save(currentCart, deliveryInfo, currentInvoice);
             
             // Phân loại order theo rush flag
             if (currentCart.isRushOrder()) {

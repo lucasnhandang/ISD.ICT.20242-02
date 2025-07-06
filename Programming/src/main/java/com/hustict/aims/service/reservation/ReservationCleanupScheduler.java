@@ -14,7 +14,7 @@ import java.util.List;
 @Component
 public class ReservationCleanupScheduler {
 
-    private static final int RESERVATION_TIMEOUT_MINUTES = 30;
+    private static final int RESERVATION_TIMEOUT_MINUTES = 2;
 
     @Autowired
     private ReservationRepository reservationRepository;

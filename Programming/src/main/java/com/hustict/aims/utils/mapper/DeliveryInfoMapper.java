@@ -19,8 +19,7 @@ public class DeliveryInfoMapper {
         entity.setShippingInstruction(dto.getDeliveryInstructions());
         entity.setEmail(dto.getEmail());
         entity.setExpectedTime(dto.getExpectedDateTime());
-        //entity.setExpectedDate(dto.getExpectedDate());
-        //entity.setExpectedDateTime(dto.getExpectedDateTime());
+
         return entity;
     }
 
@@ -36,8 +35,7 @@ public class DeliveryInfoMapper {
         dto.setDeliveryInstructions(entity.getShippingInstruction());
         dto.setEmail(entity.getEmail());
         dto.setExpectedDateTime(entity.getExpectedTime());
-        //dto.setExpectedDate(entity.get());
-        //dto.setExpectedDateTime(entity.getExpectedDateTime());
+       
         return dto;
     }
 }

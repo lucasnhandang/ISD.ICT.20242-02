@@ -5,7 +5,7 @@ import com.hustict.aims.dto.deliveryForm.DeliveryFormDTO;
 import com.hustict.aims.dto.invoice.InvoiceDTO;
 import com.hustict.aims.dto.order.RushOrderResponseDTO;
 import com.hustict.aims.dto.cart.CartItemRequestDTO;
-import com.hustict.aims.service.placeOrder.NormalOrderService;
+import com.hustict.aims.service.placeOrder.InoviceService;
 import com.hustict.aims.service.shippingFeeCalculator.ShippingFeeCalculator;
 import com.hustict.aims.service.invoice.InvoiceCalculationService;
 import com.hustict.aims.service.MessageService;
@@ -19,13 +19,13 @@ import java.util.List;
 @Service
 public class RushOrderProcessingService {
     
-    private final NormalOrderService normalOrderService;
+    private final InoviceService normalOrderService;
     private final ShippingFeeCalculator rushShippingFeeCalculator;
     private final InvoiceCalculationService invoiceCalculationService;
     private final MessageService messageService;
 
     @Autowired
-    public RushOrderProcessingService(NormalOrderService normalOrderService,
+    public RushOrderProcessingService(InoviceService normalOrderService,
                                     @Qualifier("rushShippingFee") ShippingFeeCalculator rushShippingFeeCalculator,
                                     InvoiceCalculationService invoiceCalculationService,
                                     MessageService messageService) {
@@ -45,7 +45,13 @@ public class RushOrderProcessingService {
 
         // Xử lý rush order
         CartRequestDTO rushCart = createRushCart(rushItems, cart);
-        int rushShippingFee = rushShippingFeeCalculator.calculateShippingFee(deliveryInfo, rushCart);
+        String province = deliveryInfo.getDeliveryProvince();
+        
+        // Debug log
+        System.out.println("🔍 Debug RushOrderProcessingService - Rush Cart Total Price: " + rushCart.getTotalPrice());
+        System.out.println("🔍 Debug RushOrderProcessingService - Rush Items: " + rushItems);
+        
+        int rushShippingFee = rushShippingFeeCalculator.calculateShippingFee(province, rushCart.getProductList(), rushCart.getTotalPrice());
         InvoiceDTO rushInvoiceDTO = invoiceCalculationService.calculateInvoice(rushCart.getTotalPrice(), rushShippingFee);
         rushInvoiceDTO.setRushOrder(true);
         invoiceList.add(rushInvoiceDTO);
@@ -54,8 +60,8 @@ public class RushOrderProcessingService {
         // Xử lý đơn thường nếu có
         if (!normalItems.isEmpty()) {
             CartRequestDTO normalCart = createNormalCart(normalItems, cart);
-            InvoiceDTO normalInvoiceDTO = normalOrderService.handleNormalOrder(deliveryInfo, normalCart);
-            rushInvoiceDTO.setRushOrder(false);
+            InvoiceDTO normalInvoiceDTO = normalOrderService.createInvoice(deliveryInfo, normalCart);
+            normalInvoiceDTO.setRushOrder(false);
             invoiceList.add(normalInvoiceDTO);
             cartList.add(normalCart);
         }
@@ -75,7 +81,7 @@ public class RushOrderProcessingService {
         rushCart.setTotalItem(rushItems.size());
         rushCart.setCurrency(originalCart.getCurrency());
         rushCart.setDiscount(originalCart.getDiscount());
-        rushCart.setTotalPrice(rushItems.stream().mapToInt(CartItemRequestDTO::getPrice).sum());
+        rushCart.setTotalPrice(rushItems.stream().mapToInt(item -> item.getPrice() * item.getQuantity()).sum());
         rushCart.setRushOrder(true); // Đánh dấu đây là rush order
         return rushCart;
     }
@@ -86,7 +92,7 @@ public class RushOrderProcessingService {
         normalCart.setTotalItem(normalItems.size());
         normalCart.setCurrency(originalCart.getCurrency());
         normalCart.setDiscount(originalCart.getDiscount());
-        normalCart.setTotalPrice(normalItems.stream().mapToInt(CartItemRequestDTO::getPrice).sum());
+        normalCart.setTotalPrice(normalItems.stream().mapToInt(item -> item.getPrice() * item.getQuantity()).sum());
         normalCart.setRushOrder(false); // Đánh dấu đây là normal order
         return normalCart;
     }

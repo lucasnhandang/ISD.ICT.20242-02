@@ -303,7 +303,7 @@ const CheckoutPage = () => {
             <Divider sx={{ my: 2 }} />
             <Box sx={{ mb: 2 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography>Product Price (excl. VAT):</Typography>
+                <Typography>Product Price (excl. 10% VAT):</Typography>
                 <Typography>
                   {formatPrice(cart.totalPrice - (cart.discount || 0), cart.currency)}
                 </Typography>
@@ -355,7 +355,7 @@ const CheckoutPage = () => {
                 <li>Shipping fees are not subject to tax.</li>
                 <li>Orders above 100,000 VND get free shipping up to 25,000 VND (not applicable for rush delivery).</li>
                 <li>Shipping fee calculated based on weight and delivery address.</li>
-                <li>Rush delivery only available in Hanoi city center, additional 10,000 VND per item.</li>
+                <li>Rush delivery only available in Ha Noi city center, additional 10,000 VND per item.</li>
                 <li>Detailed fees will be displayed after entering delivery address.</li>
               </Box>
             </Box>

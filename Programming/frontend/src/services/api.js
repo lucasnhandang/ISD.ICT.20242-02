@@ -3,7 +3,7 @@ import axios from 'axios';
 // Axios instance for API calls
 const api = axios.create({
   baseURL: 'http://localhost:8080/api/v1',
-  timeout: 30000,
+  timeout: 10000, // Giảm timeout xuống 10 giây
   // headers: { 'Content-Type': 'application/json' },
   withCredentials: true // Tạm thời comment để test CORS issue
 });
@@ -67,7 +67,7 @@ api.interceptors.response.use(
 // Health check
 export const checkBackendConnection = async () => {
   try {
-    await api.get('/health');
+    await api.get('/home');
     return { connected: true, message: 'Successfully connected to backend' };
   } catch (error) {
     return {
@@ -80,21 +80,22 @@ export const checkBackendConnection = async () => {
 // Get products (all/filter/sort)
 export const getProducts = async (page = 0, size = 12, category = null, sortBy = 'title', sortDirection = 'asc') => {
   try {
-    const params = { page, size, sortBy, sortDirection };
     let endpoint;
+    let params = { page, size, sortBy, sortDirection };
+    
     if (category && category !== 'all') {
       endpoint = `/products/category/${category}`;
     } else {
-      endpoint = '/products/search';
-      params.query = '';
+      endpoint = '/home';
     }
+    
     const response = await api.get(endpoint, { params });
     return {
-      content: response.data.content,
+      content: response.data.products,
       totalPages: response.data.totalPages,
       totalElements: response.data.totalElements,
-      size: response.data.size,
-      number: response.data.number
+      size: response.data.pageSize,
+      number: response.data.currentPage
     };
   } catch (error) {
     console.error('API Error:', error);
@@ -108,7 +109,13 @@ export const searchProducts = async (query, page = 0, size = 12, sortBy = 'title
     const params = { query, page, size, sortBy, sortDirection };
     if (category && category !== 'all') params.category = category;
     const response = await api.get('/products/search', { params });
-    return response.data;
+    return {
+      content: response.data.products,
+      totalPages: response.data.totalPages,
+      totalElements: response.data.totalElements,
+      size: response.data.pageSize,
+      number: response.data.currentPage
+    };
   } catch (error) {
     console.error('API Error:', error);
     throw new Error('Failed to search products');
@@ -122,11 +129,11 @@ export const getProductsByCategory = async (category, page = 0, size = 12, sortB
       params: { page, size, sortBy, sortDirection }
     });
     return {
-      content: response.data.content,
+      content: response.data.products,
       totalPages: response.data.totalPages,
       totalElements: response.data.totalElements,
-      size: response.data.size,
-      number: response.data.number
+      size: response.data.pageSize,
+      number: response.data.currentPage
     };
   } catch (error) {
     console.error('API Error:', error);
@@ -250,9 +257,8 @@ export const orderManagementAPI = {
   getPendingOrders: async (page = 0, size = 30, signal) => {
     try {
       console.log('🔄 Đang gọi API getPendingOrders...');
-      console.log('📍 URL:', `${api.defaults.baseURL}/product-manager/orders/pending?page=${page}&size=${size}`);
-      
-      const response = await api.get(`/product-manager/orders/pending?page=${page}&size=${size}`, { signal });
+ 
+      const response = await api.get('/product-manager/orders/pending');
       console.log('✅ Thành công getPendingOrders:', response.data);
       
       // Validate response data

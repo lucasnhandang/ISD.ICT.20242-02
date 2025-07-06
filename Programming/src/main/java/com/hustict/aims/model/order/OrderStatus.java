@@ -1,6 +1,7 @@
 package com.hustict.aims.model.order;
 
 public enum OrderStatus {
+    NEW,
     PENDING,
     APPROVED,
     REJECTED_PENDING,

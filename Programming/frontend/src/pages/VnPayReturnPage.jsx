@@ -17,7 +17,7 @@ import {
 } from '@mui/icons-material';
 import axios from 'axios';
 import Header from '../components/Header';
-import { confirmOrder } from '../services/api';
+import { confirmOrder, clearCart } from '../services/api';
 
 
 const VnPayReturnPage = () => {
@@ -106,6 +106,11 @@ const VnPayReturnPage = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (confirmOrderStatus.success && result?.responseCode === '00') {
+      clearCart();
+    }
+  }, [confirmOrderStatus.success, result]);
 
 
   const formatAmount = (amount) => {

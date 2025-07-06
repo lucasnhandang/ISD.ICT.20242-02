@@ -2,7 +2,7 @@ package com.hustict.aims.service.placeOrder;
 
 import com.hustict.aims.dto.payment.PaymentTransactionDTO;
 import com.hustict.aims.dto.payment.VnPayCreateRequestDTO;
-import com.hustict.aims.dto.payment.PlaceOrderRequestDTO;
+import com.hustict.aims.dto.payment.AfterPaymentDTO;
 import com.hustict.aims.model.order.Order;
 import com.hustict.aims.model.payment.PaymentTransaction;
 import com.hustict.aims.repository.OrderRepository;
@@ -181,9 +181,10 @@ public class VnPayPaymentSubsystem implements PaymentSubsystem {
             throw new IllegalArgumentException("ID không hợp lệ: " + idStr);
         }
 
-        PlaceOrderRequestDTO placeOrderRequestDTO = new PlaceOrderRequestDTO();
+        AfterPaymentDTO placeOrderRequestDTO = new AfterPaymentDTO();
         placeOrderRequestDTO.setPaymentTransaction(paymentTransaction);
         placeOrderRequestDTO.setOrderId(orderid);
+        placeOrderRequestDTO.setSucess(isSuccess);
 
         
         String placeOrderUrl = "http://localhost:8080/api/v1/place-order/handle-payment";
@@ -197,6 +198,17 @@ public class VnPayPaymentSubsystem implements PaymentSubsystem {
                 "&vnp_PayDate=" + vnpPayDate +
                 "&vnp_OrderInfo=" + vnpOrderInfo +
                 "&orderId=" + orderid + "&paymentSuccess=" + isSuccess;
+
+        System.out.println("=== [VNPAY] HANDLE RETURN & REDIRECT ===");
+        System.out.println("Transaction ID : " + paymentTransaction.getBankTransactionId());
+        System.out.println("Order Info     : " + paymentTransaction.getContent());
+        System.out.println("Amount         : " + paymentTransaction.getPaymentAmount());
+        System.out.println("Card Type      : " + paymentTransaction.getCardType());
+        System.out.println("Currency       : " + paymentTransaction.getCurrency());
+        System.out.println("System         : " + paymentTransaction.getSystem());
+        System.out.println("Order ID       : " + orderid);
+        System.out.println("Frontend URL   : " + frontendUrl);
+        System.out.println("=========================================");
         return frontendUrl;
     }
 }

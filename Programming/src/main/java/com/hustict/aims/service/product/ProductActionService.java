@@ -1,5 +1,6 @@
 package com.hustict.aims.service.product;
 
+import com.hustict.aims.dto.product.ProductModifyRequest;
 import com.hustict.aims.model.user.ActionType;
 import com.hustict.aims.model.user.ProductChecklog;
 import com.hustict.aims.repository.ProductChecklogRepository;
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class ProductActionService {
@@ -25,9 +25,9 @@ public class ProductActionService {
         this.repo = repo;
     }
 
-    public void validateUpdate(Long userId, Long productId, Map<String, Object> data) {
+    public void validateUpdate(Long userId, Long productId, ProductModifyRequest request) {
         for (ProductUpdateRule rule : updateRules) {
-            rule.validate(userId, productId, data);
+            rule.validate(userId, productId, request);
         }
     }
 
