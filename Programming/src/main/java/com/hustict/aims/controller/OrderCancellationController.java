@@ -2,7 +2,6 @@ package com.hustict.aims.controller;
 
 import com.hustict.aims.service.email.EmailSenderFactory;
 import com.hustict.aims.service.email.OrderInfoService;
-import com.hustict.aims.service.order.OrderService;
 import com.hustict.aims.service.order.OrderQueryService;
 import com.hustict.aims.service.order.OrderCancellationService;
 import com.hustict.aims.service.refund.PaymentSystem;
@@ -20,7 +19,6 @@ import jakarta.servlet.http.HttpSession;
 @CrossOrigin(origins = "*")
 public class OrderCancellationController {
 
-    private final OrderService orderService;
     private final OrderQueryService orderQueryService;
     private final OrderCancellationService orderCancellationService;
     private final PaymentSystem paymentSystem;
@@ -31,11 +29,9 @@ public class OrderCancellationController {
     @Autowired
     private OrderInfoService orderInfoService;
 
-    public OrderCancellationController(OrderService orderService, 
-                                     OrderQueryService orderQueryService,
+    public OrderCancellationController(OrderQueryService orderQueryService,
                                      OrderCancellationService orderCancellationService,
                                      PaymentSystem paymentSystem) {
-        this.orderService = orderService;
         this.orderQueryService = orderQueryService;
         this.orderCancellationService = orderCancellationService;
         this.paymentSystem = paymentSystem;
