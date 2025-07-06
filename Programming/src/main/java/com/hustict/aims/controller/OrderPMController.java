@@ -2,7 +2,8 @@ package com.hustict.aims.controller;
 
 import com.hustict.aims.service.email.EmailSenderFactory;
 import com.hustict.aims.service.email.OrderInfoService;
-import com.hustict.aims.service.order.OrderService;
+import com.hustict.aims.service.order.ApproveService;
+import com.hustict.aims.service.order.RejectService;
 import com.hustict.aims.service.order.OrderQueryService;
 import com.hustict.aims.service.order.OrderEmailService;
 import com.hustict.aims.service.order.OrderCancellationService;
@@ -25,7 +26,8 @@ import java.util.HashMap;
 @CrossOrigin(origins = "*")
 public class OrderPMController {
 
-    private final OrderService orderService;
+    private final ApproveService approveService;
+    private final RejectService rejectService;
     private final OrderQueryService orderQueryService;
     private final OrderEmailService orderEmailService;
     private final OrderCancellationService orderCancellationService;
@@ -35,13 +37,15 @@ public class OrderPMController {
     @Autowired
     private OrderInfoService orderInfoService;
 
-    public OrderPMController(OrderService orderService, 
+    public OrderPMController(ApproveService approveService,
+                           RejectService rejectService,
                            OrderQueryService orderQueryService,
                            OrderEmailService orderEmailService,
                            OrderCancellationService orderCancellationService,
                            EmailSenderFactory emailSenderFactory, 
                            RefundSelector refundStrategySelector) {
-        this.orderService = orderService;
+        this.approveService = approveService;
+        this.rejectService = rejectService;
         this.orderQueryService = orderQueryService;
         this.orderEmailService = orderEmailService;
         this.orderCancellationService = orderCancellationService;
@@ -71,14 +75,14 @@ public class OrderPMController {
 
     @PutMapping("/{id}/approve")
     public ResponseEntity<Void> approveOrder(@PathVariable Long id,HttpSession session) {
-        orderService.approveOrder(id);
+        approveService.approveOrder(id);
         orderEmailService.prepareOrderSessionForEmail("approveOrder", id, session);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}/reject")
     public ResponseEntity<Void> rejectOrder(@PathVariable Long id,HttpSession session) {
-        orderService.rejectOrder(id);
+        rejectService.rejectOrder(id);
         orderEmailService.prepareOrderSessionForEmail("rejectOrder", id, session);
     
         System.out.println("Refund order "+ id);
