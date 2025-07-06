@@ -3,6 +3,8 @@ package com.hustict.aims.controller;
 import com.hustict.aims.service.email.EmailSenderFactory;
 import com.hustict.aims.service.email.OrderInfoService;
 import com.hustict.aims.service.order.OrderService;
+import com.hustict.aims.service.order.OrderQueryService;
+import com.hustict.aims.service.order.OrderCancellationService;
 import com.hustict.aims.service.refund.PaymentSystem;
 import com.hustict.aims.service.refund.RefundSelector;
 import com.hustict.aims.dto.order.OrderDTO;
@@ -19,6 +21,8 @@ import jakarta.servlet.http.HttpSession;
 public class OrderCancellationController {
 
     private final OrderService orderService;
+    private final OrderQueryService orderQueryService;
+    private final OrderCancellationService orderCancellationService;
     private final PaymentSystem paymentSystem;
 
     @Autowired
@@ -28,15 +32,19 @@ public class OrderCancellationController {
     private OrderInfoService orderInfoService;
 
     public OrderCancellationController(OrderService orderService, 
+                                     OrderQueryService orderQueryService,
+                                     OrderCancellationService orderCancellationService,
                                      PaymentSystem paymentSystem) {
         this.orderService = orderService;
+        this.orderQueryService = orderQueryService;
+        this.orderCancellationService = orderCancellationService;
         this.paymentSystem = paymentSystem;
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<OrderInformationDTO> getOrderDetails(@PathVariable Long id) {
         try {
-            OrderInformationDTO orderDetails = orderService.getOrderDetails(id);
+            OrderInformationDTO orderDetails = orderQueryService.getOrderDetails(id);
             return ResponseEntity.ok(orderDetails);
         } catch (Exception e) {
             e.printStackTrace();
@@ -48,7 +56,7 @@ public class OrderCancellationController {
     public ResponseEntity<Void> cancelOrder(@PathVariable Long id, HttpSession session) {
         try {
             // Hủy đơn hàng
-            orderService.cancelOrder(id);
+            orderCancellationService.cancelOrder(id);
             
             // Xử lý hoàn tiền nếu cần
             String system = (String) session.getAttribute("system");
