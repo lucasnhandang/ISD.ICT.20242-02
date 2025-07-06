@@ -34,8 +34,6 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private EmailSenderFactory emailSenderFactory;
 
-
-
    
     @Override
     @Transactional(readOnly = true)

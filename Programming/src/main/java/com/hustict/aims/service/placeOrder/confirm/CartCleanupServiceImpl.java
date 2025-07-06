@@ -64,7 +64,7 @@ public class CartCleanupServiceImpl implements CartCleanupService {
         mergedCart.setCurrency("VND"); // hoặc lấy từ cart đầu tiên
 
         session.setAttribute("cart", mergedCart);
-
+        
         List<InvoiceDTO> updatedInvoiceList = invoiceList.stream()
             .filter(invoice -> invoice.isRushOrder() != isRushOrder)
             .collect(Collectors.toList());
