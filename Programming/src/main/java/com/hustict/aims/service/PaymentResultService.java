@@ -50,6 +50,7 @@ public class PaymentResultService {
         
         if (txnRef != null && responseCode != null) {
             boolean success = "00".equals(responseCode);
+        
             result.setSuccess(success);
             result.setTxnRef(txnRef);
             result.setResponseCode(responseCode);
@@ -60,6 +61,8 @@ public class PaymentResultService {
             result.setMessage("Thiếu thông tin giao dịch");
             result.setTimestamp(LocalDateTime.now());
         }
+          // ✅ In thông tin payment ra console
+       
         
         return result;
     }

@@ -23,6 +23,6 @@ public class PaymentHandlerServiceImpl implements PaymentHandlerService {
         PaymentTransactionDTO paymentTransaction = afterPaymentDTO.getPaymentTransaction();
         Long orderId = afterPaymentDTO.getOrderId();
         OrderDTO orderinfo = savePaymentTransaction.save(paymentTransaction, orderId);
-        emailSenderFactory.process("orderSuccess", orderinfo);
+        if (afterPaymentDTO.isSucess()) emailSenderFactory.process("orderSuccess", orderinfo);
     }
 }
