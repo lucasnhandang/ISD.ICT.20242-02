@@ -33,3 +33,4 @@ public class StandardShippingFee implements ShippingFeeCalculator {
         return (int) Math.round(shippingFee);
     }
 }
+

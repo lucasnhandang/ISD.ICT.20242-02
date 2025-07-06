@@ -17,6 +17,7 @@ import com.hustict.aims.dto.NormalOrderResult;
 import com.hustict.aims.dto.cart.CartRequestDTO;
 import com.hustict.aims.service.payment.SavePaymentTransaction;
 import com.hustict.aims.service.placeOrder.DeliveryFormValidator;
+import com.hustict.aims.service.placeOrder.NormalOrderHandlerService;
 import com.hustict.aims.service.placeOrder.confirm.ConfirmOrderService;
 import com.hustict.aims.service.placeOrder.normal.NormalOrderService;
 import com.hustict.aims.service.placeOrder.payment.PaymentHandlerService;
@@ -63,20 +64,21 @@ public class PlaceOrderController {
     @Autowired
     private NormalOrderService normalService;
 
-
     @Autowired
     private SessionManagementServiceImpl sessionManagementService;
 
     @Autowired
     private PaymentRequestValidateImpl paymentRequestValidate;
-
+    
+    @Autowired
+    private NormalOrderHandlerService normalOrderHandlerService;
 
     @Autowired
     private ConfirmOrderServiceImpl confirmOrderService;
    
    @PostMapping("/request")
     public ResponseEntity<String> requestToPlaceOrder(@RequestBody CartRequestDTO cart, HttpSession session) {
-        handleRequestService.requestToPlaceOrder(cart,session.getId()); // Tight coupling
+        handleRequestService.requestToPlaceOrder(cart,session.getId()); 
         sessionManagementService.saveCart(session, cart); 
         return ResponseEntity.ok("Order request successfully submitted");
     }
@@ -84,33 +86,37 @@ public class PlaceOrderController {
     @PostMapping("/submit-form")
     public ResponseEntity<String> submitDeliveryForm(@RequestBody DeliveryFormDTO form, HttpSession session) {
         sessionValidatorService.validateCartRequestedPresent(session);
+        
         deliveryFormValidator.validate(form, session.getId());
+        
         sessionManagementService.saveDeliveryForm(session, form);
         return ResponseEntity.ok("Delivery form successfully submitted");
     }
 
     @PostMapping("/normal-order")
     public ResponseEntity<Map<String, Object>> handleNormalOrder(HttpSession session, @RequestBody CartRequestDTO cart) {
-        // 1. Validate session
-        sessionValidatorService.validateDeliveryAndCartForCheckout(session);
-        // 2. Create invoice and save order
-        DeliveryFormDTO deliveryForm = (DeliveryFormDTO) sessionManagementService.getDeliveryForm(session);
-        NormalOrderResult results = normalService.processNormalOrder(cart, deliveryForm);
+        // // 1. Validate session
+        // sessionValidatorService.validateDeliveryAndCartForCheckout(session);
+        // // 2. Create invoice and save order
+        // DeliveryFormDTO deliveryForm = (DeliveryFormDTO) sessionManagementService.getDeliveryForm(session);
+        // NormalOrderResult results = normalService.processNormalOrder(cart, deliveryForm);
 
-        // 3. Manage session memory
-        InvoiceDTO invoice = results.getInvoice();
-        Long orderid = results.getOrderId();
-        sessionManagementService.addToCartList(session, cart);
-        sessionManagementService.addToInvoiceList(session, invoice);
+        // // 3. Manage session memory
+        // InvoiceDTO invoice = results.getInvoice();
+        // Long orderid = results.getOrderId();
+        // sessionManagementService.addToCartList(session, cart);
+        // sessionManagementService.addToInvoiceList(session, invoice);
 
-        // 4. Create Response 
-        Map<String, Object> response = new HashMap<>();
-        response.put("cart", cart);
-        response.put("invoice", invoice);
-        response.put("deliveryForm", deliveryForm);
-        response.put("orderid", orderid);
+        // // 4. Create Response 
+        // Map<String, Object> response = new HashMap<>();
+        // response.put("cart", cart);
+        // response.put("invoice", invoice);
+        // response.put("deliveryForm", deliveryForm);
+        // response.put("orderid", orderid);
 
-        return ResponseEntity.ok(response);
+        // return ResponseEntity.ok(response);
+        return normalOrderHandlerService.handleNormalOrder(session, cart);
+
     }
 
     @PostMapping("/handle-payment")
