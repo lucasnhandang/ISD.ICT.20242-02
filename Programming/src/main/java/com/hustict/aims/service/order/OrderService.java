@@ -5,11 +5,9 @@ import com.hustict.aims.dto.order.OrderInformationDTO;
 import java.util.List;
 
 public interface OrderService {
-    void approveOrder(Long orderId);
-    void rejectOrder(Long orderId);
     List<OrderInformationDTO> getPendingOrders(int page, int size);
     long getTotalPendingOrders();
-    void prepareOrderSessionForEmail(Long orderId, HttpSession session);
+    void prepareOrderSessionForEmail(String type,Long orderId, HttpSession session);
     void cancelOrder(Long orderId);
     OrderInformationDTO getOrderDetails(Long orderId);
 }

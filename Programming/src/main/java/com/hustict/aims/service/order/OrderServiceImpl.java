@@ -4,6 +4,9 @@ import com.hustict.aims.exception.OrderOperationException;
 import com.hustict.aims.model.order.Order;
 import com.hustict.aims.model.order.OrderStatus;
 import com.hustict.aims.repository.OrderRepository;
+import com.hustict.aims.service.email.EmailSenderFactory;
+import com.hustict.aims.service.email.OrderInfoService;
+import com.hustict.aims.dto.order.OrderDTO;
 import com.hustict.aims.dto.order.OrderInformationDTO;
 import com.hustict.aims.utils.mapper.OrderMapper;
 import com.hustict.aims.dto.deliveryForm.DeliveryFormDTO;
@@ -25,31 +28,15 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private OrderMapper orderMapper;
 
-    @Override
-    @Transactional
-    public void approveOrder(Long orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderOperationException("Order not found with id: " + orderId));
+    @Autowired
+    private OrderInfoService orderInfoService;
 
-        if (order.getOrderStatus() != OrderStatus.PENDING) {
-            throw new OrderOperationException("Only PENDING orders can be approved. Current status: " + order.getOrderStatus());
-        }
-        orderRepository.approveOrderById(orderId);
-    }
+    @Autowired
+    private EmailSenderFactory emailSenderFactory;
 
-    @Override
-    @Transactional
-    public void rejectOrder(Long orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderOperationException("Order not found with id: " + orderId));
 
-        if (order.getOrderStatus() != OrderStatus.PENDING) {
-            throw new OrderOperationException("Only PENDING orders can be rejected. Current status: " + order.getOrderStatus());
-        }
 
-        orderRepository.rejectOrderById(orderId);
-    }
-
+   
     @Override
     @Transactional(readOnly = true)
     public List<OrderInformationDTO> getPendingOrders(int page, int size) {
@@ -100,7 +87,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void prepareOrderSessionForEmail(Long orderId, HttpSession session) {
+    public void prepareOrderSessionForEmail(String type, Long orderId, HttpSession session) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderOperationException("Order not found with id: " + orderId));
         
@@ -139,5 +126,8 @@ public class OrderServiceImpl implements OrderService {
             paymentDTO.setCurrency(order.getInvoice().getPaymentTransaction().getCurrency());
             session.setAttribute("paymentTransaction", paymentDTO);
         }
+
+        OrderDTO orderDTO = orderInfoService.getOrderDTOByOrderId(orderId);
+        emailSenderFactory.process(type, orderDTO);
     }
 } 

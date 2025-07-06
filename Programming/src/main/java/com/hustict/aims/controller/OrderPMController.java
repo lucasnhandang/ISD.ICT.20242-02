@@ -2,10 +2,14 @@ package com.hustict.aims.controller;
 
 import com.hustict.aims.service.email.EmailSenderFactory;
 import com.hustict.aims.service.email.OrderInfoService;
+import com.hustict.aims.service.order.ApproveService;
+import com.hustict.aims.service.order.ApproveServiceImpl;
 import com.hustict.aims.service.order.OrderService;
+import com.hustict.aims.service.order.RejectServiceImpl;
 import com.hustict.aims.service.refund.RefundSelector;
 import com.hustict.aims.dto.order.OrderDTO;
 import com.hustict.aims.dto.order.OrderInformationDTO;
+import com.hustict.aims.repository.OrderRepository;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -25,6 +29,14 @@ public class OrderPMController {
     private final OrderService orderService;
     private final EmailSenderFactory emailSenderFactory;
     private final RefundSelector refundStrategySelector;
+    
+    @Autowired
+    private ApproveServiceImpl approveService;
+    
+    
+    @Autowired
+    private RejectServiceImpl rejectService;
+    
 
     @Autowired
     private OrderInfoService orderInfoService;
@@ -57,20 +69,16 @@ public class OrderPMController {
 
     @PutMapping("/{id}/approve")
     public ResponseEntity<Void> approveOrder(@PathVariable Long id,HttpSession session) {
-        orderService.approveOrder(id);
-        orderService.prepareOrderSessionForEmail(id, session);
-
-        OrderDTO order = orderInfoService.getOrderDTOByOrderId(id);
-        emailSenderFactory.process("approveOrder", order);
+        approveService.approveOrder(id);
+        orderService.prepareOrderSessionForEmail("approveOrder",id, session);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}/reject")
     public ResponseEntity<Void> rejectOrder(@PathVariable Long id,HttpSession session) {
-        orderService.rejectOrder(id);
-        orderService.prepareOrderSessionForEmail(id, session);
-        OrderDTO order = orderInfoService.getOrderDTOByOrderId(id);
-        emailSenderFactory.process("rejectOrder", order);
+        rejectService.rejectOrder(id);
+        orderService.prepareOrderSessionForEmail("rejectOrder",id, session);
+    
         System.out.println("Refund order "+ id);
         refundStrategySelector.refund(id);
         return ResponseEntity.ok().build();
