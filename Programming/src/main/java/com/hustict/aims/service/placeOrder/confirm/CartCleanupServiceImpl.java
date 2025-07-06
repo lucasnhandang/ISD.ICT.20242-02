@@ -1,5 +1,6 @@
 package com.hustict.aims.service.placeOrder.confirm;
 
+import com.hustict.aims.dto.cart.CartItemRequestDTO;
 import com.hustict.aims.dto.cart.CartRequestDTO;
 import com.hustict.aims.dto.invoice.InvoiceDTO;
 import com.hustict.aims.repository.OrderRepository;
@@ -39,16 +40,38 @@ public class CartCleanupServiceImpl implements CartCleanupService {
 
         session.setAttribute("cartRequested", updatedCart);
 
+        List<CartItemRequestDTO> mergedProductList = updatedCart.stream()
+            .filter(cart -> cart.getProductList() != null)
+            .flatMap(cart -> cart.getProductList().stream())
+            .collect(Collectors.toList());
+
+        CartRequestDTO mergedCart = new CartRequestDTO();
+        mergedCart.setProductList(mergedProductList);
+
+        // Tính tổng item
+        int totalItem = mergedProductList.stream()
+            .mapToInt(CartItemRequestDTO::getQuantity)
+            .sum();
+        mergedCart.setTotalItem(totalItem);
+
+        // Tính tổng giá
+        int totalPrice = mergedProductList.stream()
+            .mapToInt(item -> item.getQuantity() * item.getPrice())
+            .sum();
+        mergedCart.setTotalPrice(totalPrice);
+
+        // Tùy chọn: giữ currency/rushOrder/discount nếu muốn
+        mergedCart.setCurrency("VND"); // hoặc lấy từ cart đầu tiên
+
+        session.setAttribute("cart", mergedCart);
+
         List<InvoiceDTO> updatedInvoiceList = invoiceList.stream()
             .filter(invoice -> invoice.isRushOrder() != isRushOrder)
             .collect(Collectors.toList());
 
         session.setAttribute("invoiceList", updatedInvoiceList);
         
-        System.out.println("=======CLEANED UP CART LIST =======");
-        if (cartList != null) {
-            cartList.forEach(cart -> System.out.println(cart.toString()));
-        }
+      
 
         // In ra invoiceList
         System.out.println("=======CLEANED UP INVOICE LIST =======");
