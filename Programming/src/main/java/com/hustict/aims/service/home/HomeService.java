@@ -14,9 +14,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -72,10 +72,11 @@ public class HomeService {
     }
 
     private ProductListResponseDTO buildProductListResponse(Page<Product> productPage) {
-        List<ProductSummaryDTO> products = productPage.getContent()
-                .stream()
-                .map(mapper::toSummaryDTO)
-                .collect(Collectors.toList());
+        List<ProductSummaryDTO> products = new ArrayList<>();
+        for (Product p : productPage.getContent()) {
+            ProductSummaryDTO dto = mapper.toSummaryDTO(p);
+            products.add(dto);
+        }
 
         return new ProductListResponseDTO(
                 products,
