@@ -42,7 +42,11 @@ export const productService = {
   searchProducts: async (params) => {
     try {
       const response = await api.get('/products/search', { params });
-      return response.data;
+      const data = response.data;
+      return {
+        ...data,
+        content: data.products || data.content || [],
+      };
     } catch (error) {
       const message = error.response?.data?.message || error.message || 'Đã xảy ra lỗi khi tìm kiếm sản phẩm';
       throw new Error(message);

@@ -133,6 +133,7 @@ public class ReservationServiceImpl implements ReservationService {
 
             if (reservationItemMap.containsKey(productId)) {
                 ReservationItem reservationItem = reservationItemMap.get(productId);
+
                 System.out.println("(ProductId: " + productId + ")  quantity: " + reservationItem.getQuantity());
                 inventoryService.decreaseQuantity(productId, reservationItem.getQuantity());
                 System.out.println("Remove item with product id:: " + productId);
