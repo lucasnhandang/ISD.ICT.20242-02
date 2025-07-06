@@ -1,4 +1,4 @@
-package com.hustict.aims.service.placeOrder;
+package com.hustict.aims.service.placeOrder.normal;
 
 import com.hustict.aims.dto.cart.CartRequestDTO;
 import com.hustict.aims.dto.deliveryForm.DeliveryFormDTO;

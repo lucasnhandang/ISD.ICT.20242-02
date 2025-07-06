@@ -107,19 +107,19 @@ public class ReservationServiceImpl implements ReservationService {
             .findBySessionIdAndStatus(sessionId, Status.ACTIVE);
 
         if (reservations.size() > 1) {
-            throw new IllegalStateException("Có nhiều hơn một reservation ACTIVE cho session: " + sessionId);
+            throw new IllegalStateException("More than 1 reservation ACTIVE " + sessionId);
         }
 
         if (reservations.isEmpty()) {
-            throw new IllegalStateException("Không tìm thấy reservation ACTIVE cho session: " + sessionId);
+            throw new IllegalStateException("Cannot find reservation ACTIVE session: " + sessionId);
         }
 
         Reservation reservation = reservations.get(0);
 
         if (reservation.getStatus() == Status.CONFIRMED) {
-            throw new IllegalStateException("Reservation đã được xác nhận và không thể thay đổi.");
+            throw new IllegalStateException("Reservation has been confirmed");
         } else if (reservation.getStatus() == Status.RELEASED) {
-            throw new IllegalStateException("Reservation đã bị hủy và không thể thay đổi.");
+            throw new IllegalStateException("Reservation has been released");
         }
 
         List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderId);
@@ -130,11 +130,11 @@ public class ReservationServiceImpl implements ReservationService {
 
         for (OrderItem orderItem : orderItems) {
             Long productId = orderItem.getProduct().getId();
-            System.out.println("Đang xử lý OrderItem với productId: " + productId);
 
             if (reservationItemMap.containsKey(productId)) {
                 ReservationItem reservationItem = reservationItemMap.get(productId);
-                System.out.println("(ProductId: " + productId + ") với quantity: " + reservationItem.getQuantity());
+
+                System.out.println("(ProductId: " + productId + ")  quantity: " + reservationItem.getQuantity());
                 inventoryService.decreaseQuantity(productId, reservationItem.getQuantity());
                 System.out.println("Remove item with product id:: " + productId);
                 reservationItemRepository.delete(reservationItem);

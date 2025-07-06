@@ -16,9 +16,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class RefundStrategySelector {
+public class RefundSelector {
     @Autowired
     private final Map<String, RefundService> refundServiceMap;
+
     @Autowired
     private final OrderRepository orderRepository;
 
@@ -29,7 +30,7 @@ public class RefundStrategySelector {
     private final PaymentTransactionRepository transactionRepository;
 
     
-    public RefundStrategySelector(List<RefundService> refundServices,
+    public RefundSelector(List<RefundService> refundServices,
                                   OrderRepository orderRepository,
                                   InvoiceRepository invoiceRepository,
                                   PaymentTransactionRepository transactionRepository) {

@@ -1,4 +1,4 @@
-package com.hustict.aims.service.placeOrder;
+package com.hustict.aims.service.placeOrder.confirm;
 
 import com.hustict.aims.dto.cart.CartRequestDTO;
 import com.hustict.aims.dto.invoice.InvoiceDTO;
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class CartCleanupService {
+public class CartCleanupServiceImpl implements CartCleanupService {
     @Autowired
     OrderRepository orderRepository;
 

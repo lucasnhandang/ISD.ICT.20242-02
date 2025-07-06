@@ -1,16 +1,13 @@
-package com.hustict.aims.service.placeOrder;
+package com.hustict.aims.service.placeOrder.normal;
 
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import jakarta.servlet.http.HttpSession;
 
-import com.hustict.aims.dto.cart.CartItemRequestDTO;
 import com.hustict.aims.dto.cart.CartRequestDTO;
 import com.hustict.aims.dto.deliveryForm.DeliveryFormDTO;
 import com.hustict.aims.dto.invoice.InvoiceDTO;
-import com.hustict.aims.model.cart.Cart;
 import com.hustict.aims.model.order.Order;
 import com.hustict.aims.model.product.Product;
 
