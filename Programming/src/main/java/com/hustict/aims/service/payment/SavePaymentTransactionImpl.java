@@ -3,7 +3,7 @@ package com.hustict.aims.service.payment;
 import com.hustict.aims.model.invoice.Invoice;
 import com.hustict.aims.model.payment.PaymentTransaction;
 import com.hustict.aims.model.order.Order;
-
+import com.hustict.aims.model.order.OrderStatus;
 import com.hustict.aims.dto.order.OrderDTO;
 import com.hustict.aims.dto.payment.PaymentTransactionDTO;
 import com.hustict.aims.repository.PaymentTransactionRepository;
@@ -50,6 +50,10 @@ public class SavePaymentTransactionImpl implements SavePaymentTransaction {
         }
 
         Order order = orderOptional.get();
+
+        order.setOrderStatus(OrderStatus.PENDING);
+        orderRepository.save(order);  
+
 
         Long invoiceId = order.getInvoice().getId();
         if (invoiceId == null) {

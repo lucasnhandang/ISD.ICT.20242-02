@@ -7,6 +7,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.MediaType;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @SpringBootApplication
+@EnableScheduling
 public class Application {
 
     // Flag để đảm bảo chỉ start frontend 1 lần

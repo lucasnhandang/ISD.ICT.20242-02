@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class AfterPaymentDTO {
     private PaymentTransactionDTO paymentTransaction;
     private Long orderId;
+    private boolean sucess;
 }

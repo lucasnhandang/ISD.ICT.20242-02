@@ -33,6 +33,7 @@ const formatCurrency = (number) => {
 // Hàm chuyển đổi trạng thái đơn hàng sang tiếng Việt
 const getOrderStatusText = (status) => {
   const statusMap = {
+    'NEW': 'Chưa thanh toán',
     'PENDING': 'Chờ xử lý',
     'APPROVED': 'Đã duyệt',
     'REJECTED_PENDING': 'Đang chờ hoàn tiền (Từ chối)',

@@ -71,7 +71,7 @@ public class SaveTempOrderImpl implements SaveTempOrder {
 
         Order temp  = new Order();
         temp.setOrderDate(LocalDateTime.now()); 
-        temp.setOrderStatus(OrderStatus.PENDING); 
+        temp.setOrderStatus(OrderStatus.NEW); 
         temp.setIsRushOrder(cart.isRushOrder());
         temp.setCurrency(cart.getCurrency()); 
         temp.setDeliveryInfo(deliveryForm); 

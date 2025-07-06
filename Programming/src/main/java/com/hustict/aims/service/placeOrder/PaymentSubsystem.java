@@ -10,5 +10,4 @@ public interface PaymentSubsystem {
     String createPaymentUrl(VnPayCreateRequestDTO req, String clientIp, String returnUrl, String txnRef);
     boolean handlePaymentReturn(Map<String, String> params);
     String handleReturnAndBuildRedirect(HttpServletRequest request, HttpServletResponse response) throws IOException;
-    // Có thể mở rộng thêm các phương thức khác như refund, checkStatus...
 } 
